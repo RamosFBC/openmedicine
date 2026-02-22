@@ -19,3 +19,6 @@ dependencies = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/open_medicine"]
+
+[project.scripts]
+open-medicine-mcp = "open_medicine.mcp.server:main"
