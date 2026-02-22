@@ -2,6 +2,7 @@ import pytest
 from hypothesis import given, strategies as st
 from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
+from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
 
 @given(
     st.builds(
@@ -55,3 +56,26 @@ def test_chadsvasc_bounds(params):
     assert 0 <= result.value <= 9
     assert type(result.interpretation) == str
     assert len(result.interpretation) > 0
+
+@given(
+    st.builds(
+        CKDEPIParams,
+        age=st.integers(min_value=18, max_value=120),
+        is_female=st.booleans(),
+        serum_creatinine=st.floats(min_value=0.1, max_value=25.0)
+    )
+)
+def test_ckd_epi_bounds(params):
+    """
+    Ensure that the CKD-EPI formula never raises arbitrary mathematical 
+    exceptions across the full spread of reasonable clinical boundaries.
+    Since it produces a real ratio, valid range varies from ~0 to ~200.
+    """
+    result = calculate_ckd_epi(params)
+    assert result.value is not None
+    assert type(result.value) == float
+    assert result.value >= 0.0
+    assert type(result.interpretation) == str
+    assert len(result.interpretation) > 0
+    assert "eGFR" in result.interpretation
+
