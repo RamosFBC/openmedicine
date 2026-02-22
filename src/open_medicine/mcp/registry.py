@@ -9,6 +9,8 @@ from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_ga
 from open_medicine.mcp.calculators.rivaroxaban_dosing import calculate_rivaroxaban_dosing, RivaroxabanDosingParams
 from open_medicine.mcp.calculators.enoxaparin_dosing import calculate_enoxaparin_dosing, EnoxaparinDosingParams
 from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
+from open_medicine.mcp.calculators.hasbled import calculate_hasbled, HASBLEDParams
+from open_medicine.mcp.calculators.curb65 import calculate_curb65, CURB65Params
 
 class RegisteredTool:
     def __init__(self, description: str, pydantic_model: type[BaseModel], execute_function: Callable):
@@ -61,5 +63,15 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the Glasgow Coma Scale (GCS) score based on eye, verbal, and motor responses marking traumatic brain injury.",
         pydantic_model=GCSParams,
         execute_function=calculate_gcs
+    ),
+    "calculate_hasbled": RegisteredTool(
+        description="Calculates the HAS-BLED score for 1-year risk of major bleeding in patients with atrial fibrillation on anticoagulation.",
+        pydantic_model=HASBLEDParams,
+        execute_function=calculate_hasbled
+    ),
+    "calculate_curb65": RegisteredTool(
+        description="Calculates the CURB-65 score for community-acquired pneumonia severity and mortality risk stratification.",
+        pydantic_model=CURB65Params,
+        execute_function=calculate_curb65
     )
 }

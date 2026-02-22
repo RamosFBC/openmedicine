@@ -5,6 +5,8 @@ from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVA
 from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
 from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
 from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
+from open_medicine.mcp.calculators.hasbled import calculate_hasbled, HASBLEDParams
+from open_medicine.mcp.calculators.curb65 import calculate_curb65, CURB65Params
 
 @given(
     st.builds(
@@ -125,3 +127,51 @@ def test_gcs_bounds(params):
     assert len(result.interpretation) > 0
     assert "Classification:" in result.interpretation
 
+
+@given(
+    st.builds(
+        HASBLEDParams,
+        hypertension=st.booleans(),
+        abnormal_renal_function=st.booleans(),
+        abnormal_liver_function=st.booleans(),
+        stroke=st.booleans(),
+        bleeding=st.booleans(),
+        labile_inr=st.booleans(),
+        elderly=st.booleans(),
+        drugs=st.booleans(),
+        alcohol=st.booleans()
+    )
+)
+def test_hasbled_bounds(params):
+    """
+    Property-based test: HAS-BLED must always return 0-9 across all boolean permutations.
+    """
+    result = calculate_hasbled(params)
+    assert result.value is not None
+    assert 0 <= result.value <= 9
+    assert type(result.interpretation) == str
+    assert len(result.interpretation) > 0
+    assert "HAS-BLED" in result.interpretation
+
+
+@given(
+    st.builds(
+        CURB65Params,
+        confusion=st.booleans(),
+        bun=st.floats(min_value=0.0, max_value=150.0),
+        respiratory_rate=st.integers(min_value=8, max_value=60),
+        systolic_bp=st.integers(min_value=40, max_value=250),
+        diastolic_bp=st.integers(min_value=20, max_value=150),
+        age=st.integers(min_value=18, max_value=120)
+    )
+)
+def test_curb65_bounds(params):
+    """
+    Property-based test: CURB-65 must always return 0-5 across all valid clinical input combinations.
+    """
+    result = calculate_curb65(params)
+    assert result.value is not None
+    assert 0 <= result.value <= 5
+    assert type(result.interpretation) == str
+    assert len(result.interpretation) > 0
+    assert "CURB-65" in result.interpretation
