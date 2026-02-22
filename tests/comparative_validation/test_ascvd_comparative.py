@@ -6,13 +6,13 @@ from open_medicine.mcp.calculators.ascvd import calculate_ascvd, ASCVDParams
 def load_test_cases():
     data_file = os.path.join(os.path.dirname(__file__), "data", "ascvd_test_cases.json")
     if not os.path.exists(data_file):
-        pytest.skip(f"Cross-validation data file missing: {data_file}")
+        pytest.skip(f"Comparative validation data file missing: {data_file}")
     with open(data_file, "r") as f:
         return json.load(f)
 
-def test_ascvd_cross_validation():
+def test_ascvd_comparative_validation():
     """
-    Cross-validates our implemented ASCVD mathematical model against
+    Comparative validation of our implemented ASCVD mathematical model against
     200 randomly generated patient profiles produced by the established
     PyPI 'ascvd' package.
     """

@@ -171,5 +171,5 @@ Thumbs.db
 
 local_docs
 
-# Cross-validation generated data
-tests/cross_validation/data/
+# Comparative-validation generated data
+tests/comparative_validation/data/
