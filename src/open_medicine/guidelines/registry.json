@@ -1,0 +1,77 @@
+[
+    {
+        "id": "acc_aha_af_2023",
+        "title": "2023 ACC/AHA/ACCP/HRS Guideline for Diagnosis and Management of Atrial Fibrillation",
+        "doi": "10.1161/CIR.0000000000001193",
+        "year": 2023,
+        "organization": "ACC/AHA",
+        "topics": [
+            "atrial fibrillation",
+            "anticoagulation",
+            "stroke prevention",
+            "bleeding risk",
+            "CHA2DS2-VASc",
+            "HAS-BLED",
+            "rhythm control",
+            "rate control",
+            "oral anticoagulant",
+            "warfarin",
+            "DOAC"
+        ],
+        "sections": [
+            "anticoagulation",
+            "rate_control",
+            "rhythm_control"
+        ]
+    },
+    {
+        "id": "kdigo_ckd_2024",
+        "title": "KDIGO 2024 Clinical Practice Guideline for the Evaluation and Management of Chronic Kidney Disease",
+        "doi": "10.1016/j.kint.2023.10.018",
+        "year": 2024,
+        "organization": "KDIGO",
+        "topics": [
+            "chronic kidney disease",
+            "CKD",
+            "GFR",
+            "eGFR",
+            "albuminuria",
+            "kidney function",
+            "renal staging",
+            "nephrology referral",
+            "CKD-EPI",
+            "proteinuria",
+            "SGLT2 inhibitor",
+            "ACE inhibitor",
+            "ARB"
+        ],
+        "sections": [
+            "evaluation",
+            "staging",
+            "referral"
+        ]
+    },
+    {
+        "id": "bts_cap_2009",
+        "title": "BTS Guidelines for the Management of Community Acquired Pneumonia in Adults",
+        "doi": "10.1136/thx.2009.121434",
+        "year": 2009,
+        "organization": "BTS",
+        "topics": [
+            "community acquired pneumonia",
+            "CAP",
+            "pneumonia",
+            "CURB-65",
+            "antibiotic",
+            "severity assessment",
+            "hospital admission",
+            "ICU admission",
+            "respiratory infection"
+        ],
+        "sections": [
+            "severity_assessment",
+            "antibiotic_therapy",
+            "discharge"
+        ]
+    }
+]

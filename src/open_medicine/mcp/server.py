@@ -8,6 +8,7 @@ import mcp.server.stdio
 import mcp.types as types
 
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
+from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -15,7 +16,7 @@ server = Server("open-medicine")
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     """
-    List two meta-tools facilitating scalable execution across hundreds of clinical algorithms.
+    List meta-tools facilitating scalable execution across clinical algorithms and guideline retrieval.
     """
     return [
         types.Tool(
@@ -48,6 +49,38 @@ async def handle_list_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["calculator_id", "parameters"]
+            }
+        ),
+        types.Tool(
+            name="search_guidelines",
+            description="Searches the clinical guideline knowledge base by topic keywords. Returns matching guideline IDs, titles, DOIs, and available sections for retrieval.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Keywords to search for (e.g. 'atrial fibrillation anticoagulation', 'pneumonia severity', 'CKD staging')."
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        types.Tool(
+            name="retrieve_guideline",
+            description="Retrieves the full curated content of a specific clinical guideline section. Use search_guidelines first to discover available guideline IDs and sections.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "guideline_id": {
+                        "type": "string",
+                        "description": "The exact guideline ID returned from search_guidelines (e.g. 'acc_aha_af_2023')."
+                    },
+                    "section": {
+                        "type": "string",
+                        "description": "The section name to retrieve (e.g. 'anticoagulation', 'severity_assessment')."
+                    }
+                },
+                "required": ["guideline_id", "section"]
             }
         )
     ]
@@ -107,6 +140,36 @@ async def handle_call_tool(
                 types.TextContent(
                     type="text",
                     text=f"Error executing {calc_id}: {e}"
+                )
+            ]
+
+    elif name == "search_guidelines":
+        query = (arguments or {}).get("query", "")
+        results = search_guidelines(query)
+        import json
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps({"matches": results}, indent=2)
+            )
+        ]
+
+    elif name == "retrieve_guideline":
+        guideline_id = (arguments or {}).get("guideline_id", "")
+        section = (arguments or {}).get("section", "")
+        try:
+            result = retrieve_guideline(guideline_id, section)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except (ValueError, FileNotFoundError) as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error: {e}"
                 )
             ]
 
