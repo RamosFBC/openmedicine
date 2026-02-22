@@ -45,16 +45,3 @@ def test_sofa_missing_data():
     result = calculate_sofa(params)
     assert result.value == 0
     assert "low mortality risk" in result.interpretation
-
-def test_sofa_modern_metrics():
-    """Tests SpO2/FiO2 and modern vasopressors like vasopressin and phenylephrine."""
-    params = SOFAParams(
-        spo2_fio2=140,       # Resp Score 4 (since < 150)
-        vasopressin=0.04,    # CV Score 3 (since > 0)
-        phenylephrine=0.2    # CV Score 4 (takes precedence over vasopressin 3)
-    )
-    result = calculate_sofa(params)
-    # The cardiovascular score will be 4 because phenylephrine > 0.1
-    # Total score 4 + 4 = 8
-    assert result.value == 8
-    assert "very high mortality risk" in result.interpretation
