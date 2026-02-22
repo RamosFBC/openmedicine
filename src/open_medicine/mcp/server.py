@@ -9,6 +9,7 @@ import mcp.types as types
 
 from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
+from open_medicine.mcp.calculators.ascvd import calculate_ascvd, ASCVDParams
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -28,6 +29,11 @@ async def handle_list_tools() -> list[types.Tool]:
             name="calculate_chadsvasc",
             description="Calculates the CHA2DS2-VASc score for atrial fibrillation stroke risk. Missing values are assumed false/normal.",
             inputSchema=CHADSVAScParams.model_json_schema()
+        ),
+        types.Tool(
+            name="calculate_ascvd",
+            description="Calculates the 10-year ASCVD (Atherosclerotic Cardiovascular Disease) risk using the 2013 ACC/AHA Pooled Cohort Equations.",
+            inputSchema=ASCVDParams.model_json_schema()
         )
     ]
 
@@ -71,6 +77,24 @@ async def handle_call_tool(
                 types.TextContent(
                     type="text",
                     text=f"Error calculating CHA2DS2-VASc score: {e}"
+                )
+            ]
+            
+    elif name == "calculate_ascvd":
+        try:
+            params = ASCVDParams(**(arguments or {}))
+            result = calculate_ascvd(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
+             return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error calculating ASCVD score: {e}"
                 )
             ]
             
