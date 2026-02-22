@@ -88,8 +88,23 @@ def calculate_sofa(params: SOFAParams) -> ClinicalResult:
         description="The SOFA (Sepsis-related Organ Failure Assessment) score to describe organ dysfunction/failure (1996)."
     )
 
-    interpretation = "Higher scores are associated with an increased probability of mortality."
-    
+    if score <= 1:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a low mortality risk (< 10%). Organ function is generally preserved, but continuous monitoring is advised if underlying sepsis is suspected."
+    elif score <= 3:
+        interpretation = f"The patient has a SOFA score of {score}, indicating an increased mortality risk (~10%). There is evidence of mild organ dysfunction; early intervention and close observation are recommended."
+    elif score <= 5:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a significant mortality risk (~20%). Moderate single or multiple organ dysfunction is present, necessitating prompt therapeutic management and critical care observation."
+    elif score <= 7:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a high mortality risk (~30%). Severe organ dysfunction is evident, requiring aggressive critical care support to prevent further deterioration."
+    elif score <= 9:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a very high mortality risk (~40-50%). The patient is in critical condition with substantial multi-organ failure, demanding maximal intensive care interventions."
+    elif score <= 11:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a severe mortality risk (> 60%). The presence of profound multi-organ failure suggests a poor prognosis despite advanced life support."
+    elif score <= 14:
+        interpretation = f"The patient has a SOFA score of {score}, indicating an extreme mortality risk (> 80%). The patient is experiencing severe, highly critical multi-organ failure with a very high likelihood of mortality."
+    else:
+        interpretation = f"The patient has a SOFA score of {score}, indicating a near certain mortality risk (> 90%). The patient is in an extreme systemic collapse with near-complete failure of multiple organ systems."
+        
     return ClinicalResult(
         value=score,
         interpretation=interpretation,
