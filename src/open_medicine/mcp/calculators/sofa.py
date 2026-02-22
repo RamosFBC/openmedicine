@@ -3,16 +3,19 @@ from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
 class SOFAParams(BaseModel):
-    """Parameters to calculate the SOFA score."""
-    pao2_fio2: float = Field(..., description="PaO2/FiO2 ratio in mmHg")
-    platelets: float = Field(..., description="Platelets count in x10^3/mm^3")
-    bilirubin: float = Field(..., description="Bilirubin level in mg/dL")
+    """Parameters to calculate the SOFA score. Missing values are assumed normal."""
+    pao2_fio2: Optional[float] = Field(None, description="PaO2/FiO2 ratio in mmHg")
+    spo2_fio2: Optional[float] = Field(None, description="SpO2/FiO2 ratio (used if PaO2 is missing)")
+    platelets: Optional[float] = Field(None, description="Platelets count in x10^3/mm^3")
+    bilirubin: Optional[float] = Field(None, description="Bilirubin level in mg/dL")
     map_pressure: Optional[float] = Field(None, description="Mean arterial pressure in mmHg")
     dopamine: Optional[float] = Field(None, description="Dopamine dose in mcg/kg/min")
     epinephrine: Optional[float] = Field(None, description="Epinephrine dose in mcg/kg/min")
     norepinephrine: Optional[float] = Field(None, description="Norepinephrine dose in mcg/kg/min")
-    gcs: int = Field(..., description="Glasgow Coma Scale score (3-15)")
-    creatinine: float = Field(..., description="Creatinine level in mg/dL")
+    vasopressin: Optional[float] = Field(None, description="Vasopressin dose in U/min")
+    phenylephrine: Optional[float] = Field(None, description="Phenylephrine dose in mcg/kg/min")
+    gcs: Optional[int] = Field(None, description="Glasgow Coma Scale score (3-15)")
+    creatinine: Optional[float] = Field(None, description="Creatinine level in mg/dL")
     urine_output: Optional[float] = Field(None, description="Urine output in mL/day")
 
 def calculate_sofa(params: SOFAParams) -> ClinicalResult:
@@ -23,64 +26,92 @@ def calculate_sofa(params: SOFAParams) -> ClinicalResult:
     score = 0
     
     # Respiration
-    if params.pao2_fio2 < 100:
-        score += 4
-    elif params.pao2_fio2 < 200:
-        score += 3
-    elif params.pao2_fio2 < 300:
-        score += 2
-    elif params.pao2_fio2 < 400:
-        score += 1
-        
+    if params.pao2_fio2 is not None:
+        if params.pao2_fio2 < 100:
+            score += 4
+        elif params.pao2_fio2 < 200:
+            score += 3
+        elif params.pao2_fio2 < 300:
+            score += 2
+        elif params.pao2_fio2 < 400:
+            score += 1
+    elif params.spo2_fio2 is not None:
+        if params.spo2_fio2 < 150:
+            score += 4
+        elif params.spo2_fio2 < 235:
+            score += 3
+        elif params.spo2_fio2 < 315:
+            score += 2
+        elif params.spo2_fio2 < 400:
+            score += 1
+            
     # Coagulation
-    if params.platelets < 20:
-        score += 4
-    elif params.platelets < 50:
-        score += 3
-    elif params.platelets < 100:
-        score += 2
-    elif params.platelets < 150:
-        score += 1
-        
+    if params.platelets is not None:
+        if params.platelets < 20:
+            score += 4
+        elif params.platelets < 50:
+            score += 3
+        elif params.platelets < 100:
+            score += 2
+        elif params.platelets < 150:
+            score += 1
+            
     # Liver
-    if params.bilirubin >= 12.0:
-        score += 4
-    elif params.bilirubin >= 6.0:
-        score += 3
-    elif params.bilirubin >= 2.0:
-        score += 2
-    elif params.bilirubin >= 1.2:
-        score += 1
+    if params.bilirubin is not None:
+        if params.bilirubin >= 12.0:
+            score += 4
+        elif params.bilirubin >= 6.0:
+            score += 3
+        elif params.bilirubin >= 2.0:
+            score += 2
+        elif params.bilirubin >= 1.2:
+            score += 1
 
     # Cardiovascular
-    if (params.dopamine and params.dopamine > 15) or (params.epinephrine and params.epinephrine > 0.1) or (params.norepinephrine and params.norepinephrine > 0.1):
-        score += 4
-    elif (params.dopamine and params.dopamine > 5) or (params.epinephrine and params.epinephrine <= 0.1) or (params.norepinephrine and params.norepinephrine <= 0.1):
-        score += 3
+    vaso_score = 0
+    if (params.dopamine and params.dopamine > 15) or \
+       (params.epinephrine and params.epinephrine > 0.1) or \
+       (params.norepinephrine and params.norepinephrine > 0.1) or \
+       (params.phenylephrine and params.phenylephrine > 0.1):
+        vaso_score = 4
+    elif (params.dopamine and params.dopamine > 5) or \
+         (params.epinephrine and params.epinephrine <= 0.1) or \
+         (params.norepinephrine and params.norepinephrine <= 0.1) or \
+         (params.vasopressin and params.vasopressin > 0) or \
+         (params.phenylephrine and params.phenylephrine <= 0.1):
+        vaso_score = 3
     elif (params.dopamine and params.dopamine <= 5):
-        score += 2
-    elif params.map_pressure and params.map_pressure < 70:
-        score += 1
+        vaso_score = 2
+    elif params.map_pressure is not None and params.map_pressure < 70:
+        vaso_score = 1
+    score += vaso_score
 
     # Central nervous system
-    if params.gcs < 6:
-        score += 4
-    elif params.gcs <= 9:
-        score += 3
-    elif params.gcs <= 12:
-        score += 2
-    elif params.gcs <= 14:
-        score += 1
+    if params.gcs is not None:
+        if params.gcs < 6:
+            score += 4
+        elif params.gcs <= 9:
+            score += 3
+        elif params.gcs <= 12:
+            score += 2
+        elif params.gcs <= 14:
+            score += 1
 
     # Renal
-    if params.creatinine >= 5.0 or (params.urine_output is not None and params.urine_output < 200):
-        score += 4
-    elif params.creatinine >= 3.5 or (params.urine_output is not None and params.urine_output < 500):
-        score += 3
-    elif params.creatinine >= 2.0:
-        score += 2
-    elif params.creatinine >= 1.2:
-        score += 1
+    if params.creatinine is not None:
+        if params.creatinine >= 5.0 or (params.urine_output is not None and params.urine_output < 200):
+            score += 4
+        elif params.creatinine >= 3.5 or (params.urine_output is not None and params.urine_output < 500):
+            score += 3
+        elif params.creatinine >= 2.0:
+            score += 2
+        elif params.creatinine >= 1.2:
+            score += 1
+    elif params.urine_output is not None:
+        if params.urine_output < 200:
+            score += 4
+        elif params.urine_output < 500:
+            score += 3
 
     evidence = Evidence(
         source_doi="10.1007/BF01709751",
