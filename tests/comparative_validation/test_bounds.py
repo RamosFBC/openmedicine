@@ -3,6 +3,7 @@ from hypothesis import given, strategies as st
 from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
 from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
+from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
 
 @given(
     st.builds(
@@ -78,4 +79,27 @@ def test_ckd_epi_bounds(params):
     assert type(result.interpretation) == str
     assert len(result.interpretation) > 0
     assert "eGFR" in result.interpretation
+
+
+@given(
+    st.builds(
+        CockcroftGaultParams,
+        age=st.integers(min_value=18, max_value=120),
+        weight=st.floats(min_value=30.0, max_value=300.0),
+        is_female=st.booleans(),
+        serum_creatinine=st.floats(min_value=0.1, max_value=30.0)
+    )
+)
+def test_cockcroft_gault_bounds(params):
+    """
+    Ensure the Cockcroft-Gault equation parses gracefully across infinite permutations mapping
+    severe obesity, extreme low weights, and massive serum creatinine bounds without crashing.
+    """
+    result = calculate_cockcroft_gault(params)
+    assert result.value is not None
+    assert type(result.value) == float
+    assert result.value >= 0.0
+    assert type(result.interpretation) == str
+    assert len(result.interpretation) > 0
+    assert "mL/min" in result.interpretation
 

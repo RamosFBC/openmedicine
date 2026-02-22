@@ -11,6 +11,7 @@ from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
 from open_medicine.mcp.calculators.ascvd import calculate_ascvd, ASCVDParams
 from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
+from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -40,6 +41,11 @@ async def handle_list_tools() -> list[types.Tool]:
             name="calculate_ckd_epi",
             description="Calculates the estimated Glomerular Filtration Rate (eGFR) using the 2021 CKD-EPI creatinine equation (without race).",
             inputSchema=CKDEPIParams.model_json_schema()
+        ),
+        types.Tool(
+            name="calculate_cockcroft_gault",
+            description="Calculates the estimated Creatinine Clearance (CrCl) using the Cockcroft-Gault equation for renal medication dosage adjustments.",
+            inputSchema=CockcroftGaultParams.model_json_schema()
         )
     ]
 
@@ -119,6 +125,24 @@ async def handle_call_tool(
                 types.TextContent(
                     type="text",
                     text=f"Error calculating CKD-EPI: {e}"
+                )
+            ]
+            
+    elif name == "calculate_cockcroft_gault":
+        try:
+            params = CockcroftGaultParams(**(arguments or {}))
+            result = calculate_cockcroft_gault(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
+             return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error calculating Cockcroft-Gault CrCl: {e}"
                 )
             ]
             
