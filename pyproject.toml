@@ -17,6 +17,13 @@ dependencies = [
     "mcp>=1.0.0"
 ]
 
+[project.optional-dependencies]
+test = [
+    "pytest>=7.0.0",
+    "hypothesis>=6.0.0",
+    "ascvd>=0.5"
+]
+
 [tool.hatch.build.targets.wheel]
 packages = ["src/open_medicine"]
 
