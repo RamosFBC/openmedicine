@@ -22,48 +22,40 @@ server = Server("open-medicine")
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     """
-    List available tools provided by the Open Medicine MCP server.
+    List two meta-tools facilitating scalable execution across hundreds of clinical algorithms.
     """
     return [
         types.Tool(
-            name="calculate_sofa",
-            description="Calculates the Sequential Organ Failure Assessment (SOFA) score. Missing values are assumed normal.",
-            inputSchema=SOFAParams.model_json_schema()
+            name="search_clinical_calculators",
+            description="Searches the internal registry for available clinical calculators based on keywords. Returns the calculator ID and its required JSON Schema.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Keywords to match against clinical calculators (e.g. 'kidney function', 'stroke risk')."
+                    }
+                },
+                "required": ["query"]
+            }
         ),
         types.Tool(
-            name="calculate_chadsvasc",
-            description="Calculates the CHA2DS2-VASc score for atrial fibrillation stroke risk. Missing values are assumed false/normal.",
-            inputSchema=CHADSVAScParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_ascvd",
-            description="Calculates the 10-year ASCVD (Atherosclerotic Cardiovascular Disease) risk using the 2013 ACC/AHA Pooled Cohort Equations.",
-            inputSchema=ASCVDParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_ckd_epi",
-            description="Calculates the estimated Glomerular Filtration Rate (eGFR) using the 2021 CKD-EPI creatinine equation (without race).",
-            inputSchema=CKDEPIParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_cockcroft_gault",
-            description="Calculates the estimated Creatinine Clearance (CrCl) using the Cockcroft-Gault equation for renal medication dosage adjustments.",
-            inputSchema=CockcroftGaultParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_rivaroxaban_dosing",
-            description="Calculates the FDA-approved Rivaroxaban (Xarelto) dosage based on Creatinine Clearance (CrCl) and indication.",
-            inputSchema=RivaroxabanDosingParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_enoxaparin_dosing",
-            description="Calculates the FDA-approved Enoxaparin (Lovenox) dosage based on weight, Creatinine Clearance (CrCl), and indication.",
-            inputSchema=EnoxaparinDosingParams.model_json_schema()
-        ),
-        types.Tool(
-            name="calculate_gcs",
-            description="Calculates the Glasgow Coma Scale (GCS) score based on eye, verbal, and motor responses.",
-            inputSchema=GCSParams.model_json_schema()
+            name="execute_clinical_calculator",
+            description="Executes a specific clinical calculator using its ID and a validated JSON dictionary of parameters matching its schema.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "calculator_id": {
+                        "type": "string",
+                        "description": "The exact ID string of the calculator returned from the search_clinical_calculators tool."
+                    },
+                    "parameters": {
+                        "type": "object",
+                        "description": "A flat JSON payload containing the exact key-value pairs requested by the calculator's JSON schema."
+                    }
+                },
+                "required": ["calculator_id", "parameters"]
+            }
         )
     ]
 
@@ -74,28 +66,43 @@ async def handle_call_tool(
     """
     Handle tool execution requests.
     """
-    if name == "calculate_sofa":
-        try:
-            params = SOFAParams(**(arguments or {}))
-            result = calculate_sofa(params)
+    if name == "search_clinical_calculators":
+        query = (arguments or {}).get("query", "").lower()
+        results = []
+        for calc_id, tool_def in CALCULATOR_REGISTRY.items():
+            # A simple substring match against the ID and the description
+            if query in calc_id.lower() or query in tool_def.description.lower():
+                results.append({
+                    "calculator_id": calc_id,
+                    "description": tool_def.description,
+                    "required_schema": tool_def.schema
+                })
+        
+        import json
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps({"matches": results}, indent=2)
+            )
+        ]
+
+    elif name == "execute_clinical_calculator":
+        calc_id = (arguments or {}).get("calculator_id")
+        params_dict = (arguments or {}).get("parameters", {})
+        
+        if not calc_id or calc_id not in CALCULATOR_REGISTRY:
             return [
                 types.TextContent(
                     type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating SOFA score: {e}"
+                    text=f"Error: Unknown calculator_id '{calc_id}'. Please use search_clinical_calculators first."
                 )
             ]
             
-    elif name == "calculate_chadsvasc":
+        tool_def = CALCULATOR_REGISTRY[calc_id]
         try:
-            params = CHADSVAScParams(**(arguments or {}))
-            result = calculate_chadsvasc(params)
+            # Map the raw dict directly into the Pydantic boundary
+            model_instance = tool_def.pydantic_model(**params_dict)
+            result = tool_def.execute_function(model_instance)
             return [
                 types.TextContent(
                     type="text",
@@ -103,121 +110,13 @@ async def handle_call_tool(
                 )
             ]
         except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating CHA2DS2-VASc score: {e}"
-                )
-            ]
-            
-    elif name == "calculate_ascvd":
-        try:
-            params = ASCVDParams(**(arguments or {}))
-            result = calculate_ascvd(params)
             return [
                 types.TextContent(
                     type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating ASCVD score: {e}"
-                )
-            ]
-            
-    elif name == "calculate_ckd_epi":
-        try:
-            params = CKDEPIParams(**(arguments or {}))
-            result = calculate_ckd_epi(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating CKD-EPI: {e}"
-                )
-            ]
-            
-    elif name == "calculate_cockcroft_gault":
-        try:
-            params = CockcroftGaultParams(**(arguments or {}))
-            result = calculate_cockcroft_gault(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating Cockcroft-Gault CrCl: {e}"
-                )
-            ]
-            
-    elif name == "calculate_rivaroxaban_dosing":
-        try:
-            params = RivaroxabanDosingParams(**(arguments or {}))
-            result = calculate_rivaroxaban_dosing(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating Rivaroxaban dosing: {e}"
+                    text=f"Error executing {calc_id}: {e}"
                 )
             ]
 
-    elif name == "calculate_enoxaparin_dosing":
-        try:
-            params = EnoxaparinDosingParams(**(arguments or {}))
-            result = calculate_enoxaparin_dosing(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating Enoxaparin dosing: {e}"
-                )
-            ]
-            
-    elif name == "calculate_gcs":
-        try:
-            params = GCSParams(**(arguments or {}))
-            result = calculate_gcs(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-             return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error calculating Glasgow Coma Scale: {e}"
-                )
-            ]
-            
     else:
         raise ValueError(f"Unknown tool: {name}")
 
