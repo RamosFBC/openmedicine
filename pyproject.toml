@@ -5,17 +5,47 @@ build-backend = "hatchling.build"
 [project]
 name = "open-medicine"
 version = "0.1.0"
-description = "Evidence-Based Clinical Reasoning for AI Agents"
+description = "Evidence-Based Clinical Reasoning for AI Agents — deterministic calculators, clinical guidelines, and MCP tools backed by DOI-traceable evidence."
 readme = "README.md"
+license = "MIT"
 authors = [
     { name = "Felipe Ramos" }
 ]
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0.0",
-    "pandas>=2.0.0",
     "mcp>=1.0.0"
 ]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Healthcare Industry",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Typing :: Typed"
+]
+keywords = [
+    "clinical-decision-support",
+    "evidence-based-medicine",
+    "fhir",
+    "mcp",
+    "healthcare",
+    "calculators",
+    "guidelines",
+    "ai-agents"
+]
+
+[project.urls]
+Homepage = "https://github.com/RamosFBC/openmedicine"
+Repository = "https://github.com/RamosFBC/openmedicine"
+Issues = "https://github.com/RamosFBC/openmedicine/issues"
 
 [project.optional-dependencies]
 test = [
