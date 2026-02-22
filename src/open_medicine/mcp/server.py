@@ -14,6 +14,7 @@ from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParam
 from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
 from open_medicine.mcp.calculators.rivaroxaban_dosing import calculate_rivaroxaban_dosing, RivaroxabanDosingParams
 from open_medicine.mcp.calculators.enoxaparin_dosing import calculate_enoxaparin_dosing, EnoxaparinDosingParams
+from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -58,6 +59,11 @@ async def handle_list_tools() -> list[types.Tool]:
             name="calculate_enoxaparin_dosing",
             description="Calculates the FDA-approved Enoxaparin (Lovenox) dosage based on weight, Creatinine Clearance (CrCl), and indication.",
             inputSchema=EnoxaparinDosingParams.model_json_schema()
+        ),
+        types.Tool(
+            name="calculate_gcs",
+            description="Calculates the Glasgow Coma Scale (GCS) score based on eye, verbal, and motor responses.",
+            inputSchema=GCSParams.model_json_schema()
         )
     ]
 
@@ -191,6 +197,24 @@ async def handle_call_tool(
                 types.TextContent(
                     type="text",
                     text=f"Error calculating Enoxaparin dosing: {e}"
+                )
+            ]
+            
+    elif name == "calculate_gcs":
+        try:
+            params = GCSParams(**(arguments or {}))
+            result = calculate_gcs(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
+             return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error calculating Glasgow Coma Scale: {e}"
                 )
             ]
             

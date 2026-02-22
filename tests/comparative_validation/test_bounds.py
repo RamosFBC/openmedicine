@@ -4,6 +4,7 @@ from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
 from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
 from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
+from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
 
 @given(
     st.builds(
@@ -102,4 +103,25 @@ def test_cockcroft_gault_bounds(params):
     assert type(result.interpretation) == str
     assert len(result.interpretation) > 0
     assert "mL/min" in result.interpretation
+
+
+@given(
+    st.builds(
+        GCSParams,
+        eye_response=st.integers(min_value=1, max_value=4),
+        verbal_response=st.integers(min_value=1, max_value=5),
+        motor_response=st.integers(min_value=1, max_value=6)
+    )
+)
+def test_gcs_bounds(params):
+    """
+    Ensure the Glasgow Coma Scale behaves safely across all valid permutations of E, V, and M scores.
+    """
+    result = calculate_gcs(params)
+    assert result.value is not None
+    assert type(result.value) == float
+    assert 3.0 <= result.value <= 15.0
+    assert type(result.interpretation) == str
+    assert len(result.interpretation) > 0
+    assert "Classification:" in result.interpretation
 
