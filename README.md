@@ -8,7 +8,7 @@ Open Medicine is an open-source Python library designed to provide evidence-base
 - **Strictly Typed Foundation**: Uses Pydantic to ensure all inputs (patient data) and outputs (clinical results) are strictly typed.
 - **Model Context Protocol (MCP) Integration**: Built-in support for exposing clinical tools as external functions for AI agents via the standard MCP protocol.
 - **Evidence-Backed**: Every result provides the underlying source DOI and evidence level.
-- **FHIR Compliant**: Designed to integrate seamlessly with existing healthcare AI systems via Fast Healthcare Interoperability Resources (FHIR) standards.
+- **FHIR Compliant**: Designed to integrate seamlessly with existing healthcare AI systems via Fast Healthcare Interoperability Resources (FHIR) standards, utilizing official code systems like [LOINC FHIR](https://loinc.org/fhir/).
 
 ## Project Structure
 - `src/open_medicine/foundation/`: Core types and base classes (`Evidence`, `ClinicalResult`).
