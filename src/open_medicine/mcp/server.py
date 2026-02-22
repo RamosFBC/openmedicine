@@ -7,14 +7,7 @@ from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 
-from open_medicine.mcp.calculators.sofa import calculate_sofa, SOFAParams
-from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
-from open_medicine.mcp.calculators.ascvd import calculate_ascvd, ASCVDParams
-from open_medicine.mcp.calculators.ckd_epi import calculate_ckd_epi, CKDEPIParams
-from open_medicine.mcp.calculators.cockcroft_gault import calculate_cockcroft_gault, CockcroftGaultParams
-from open_medicine.mcp.calculators.rivaroxaban_dosing import calculate_rivaroxaban_dosing, RivaroxabanDosingParams
-from open_medicine.mcp.calculators.enoxaparin_dosing import calculate_enoxaparin_dosing, EnoxaparinDosingParams
-from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
+from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 
 # Initialize the MCP Server
 server = Server("open-medicine")
