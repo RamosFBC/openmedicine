@@ -40,6 +40,29 @@ from open_medicine.mcp.calculators.edoxaban_dosing import calculate_edoxaban_dos
 from open_medicine.mcp.calculators.heparin_dosing import calculate_heparin_dosing, HeparinDosingParams
 from open_medicine.mcp.calculators.warfarin_initiation import calculate_warfarin_initiation, WarfarinInitiationParams
 
+# Phase 2: Hepatology
+from open_medicine.mcp.calculators.meld_na import calculate_meld_na, MELDNaParams
+from open_medicine.mcp.calculators.child_pugh import calculate_child_pugh, ChildPughParams
+from open_medicine.mcp.calculators.fib4 import calculate_fib4, FIB4Params
+from open_medicine.mcp.calculators.nafld_fibrosis import calculate_nafld_fibrosis, NAFLDFibrosisParams
+
+# Phase 2: Lab Corrections
+from open_medicine.mcp.calculators.serum_osmolality import calculate_serum_osmolality, SerumOsmolalityParams
+from open_medicine.mcp.calculators.osmolar_gap import calculate_osmolar_gap, OsmolarGapParams
+from open_medicine.mcp.calculators.winters_formula import calculate_winters_formula, WintersFormulaParams
+from open_medicine.mcp.calculators.corrected_sodium import calculate_corrected_sodium, CorrectedSodiumParams
+from open_medicine.mcp.calculators.corrected_calcium import calculate_corrected_calcium, CorrectedCalciumParams
+from open_medicine.mcp.calculators.bmi import calculate_bmi, BMIParams
+
+# Phase 2: Pulmonary + VTE Risk
+from open_medicine.mcp.calculators.gold_copd import calculate_gold_copd, GOLDCOPDParams
+from open_medicine.mcp.calculators.caprini import calculate_caprini, CapriniParams
+from open_medicine.mcp.calculators.padua import calculate_padua, PaduaParams
+
+# Phase 2: Anthropometrics + Dosing
+from open_medicine.mcp.calculators.bsa_mosteller import calculate_bsa_mosteller, BSAMostellerParams
+from open_medicine.mcp.calculators.insulin_basal_dosing import calculate_insulin_basal_dosing, InsulinBasalDosingParams
+
 
 class RegisteredTool:
     def __init__(self, description: str, pydantic_model: type[BaseModel], execute_function: Callable):
@@ -199,5 +222,88 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Provides initial Warfarin dosing guidance based on patient risk factors and indication-specific INR targets.",
         pydantic_model=WarfarinInitiationParams,
         execute_function=calculate_warfarin_initiation
+    ),
+
+    # --- Phase 2: Hepatology ---
+    "calculate_meld_na": RegisteredTool(
+        description="Calculates the MELD-Na score for end-stage liver disease severity and transplant prioritization.",
+        pydantic_model=MELDNaParams,
+        execute_function=calculate_meld_na
+    ),
+    "calculate_child_pugh": RegisteredTool(
+        description="Calculates the Child-Pugh score for hepatic function classification (Class A/B/C) in cirrhosis.",
+        pydantic_model=ChildPughParams,
+        execute_function=calculate_child_pugh
+    ),
+    "calculate_fib4": RegisteredTool(
+        description="Calculates the FIB-4 index for non-invasive liver fibrosis staging.",
+        pydantic_model=FIB4Params,
+        execute_function=calculate_fib4
+    ),
+    "calculate_nafld_fibrosis": RegisteredTool(
+        description="Calculates the NAFLD Fibrosis Score (NFS) for advanced fibrosis probability in non-alcoholic fatty liver disease.",
+        pydantic_model=NAFLDFibrosisParams,
+        execute_function=calculate_nafld_fibrosis
+    ),
+
+    # --- Phase 2: Lab Corrections ---
+    "calculate_serum_osmolality": RegisteredTool(
+        description="Calculates the estimated serum osmolality from sodium, glucose, and BUN.",
+        pydantic_model=SerumOsmolalityParams,
+        execute_function=calculate_serum_osmolality
+    ),
+    "calculate_osmolar_gap": RegisteredTool(
+        description="Calculates the osmolar gap (measured minus calculated osmolality) to screen for toxic alcohol ingestion.",
+        pydantic_model=OsmolarGapParams,
+        execute_function=calculate_osmolar_gap
+    ),
+    "calculate_winters_formula": RegisteredTool(
+        description="Calculates expected pCO2 in metabolic acidosis using Winter's formula to detect mixed acid-base disorders.",
+        pydantic_model=WintersFormulaParams,
+        execute_function=calculate_winters_formula
+    ),
+    "calculate_corrected_sodium": RegisteredTool(
+        description="Calculates corrected sodium for hyperglycemia using Katz (and Hillier for glucose >400) formulas.",
+        pydantic_model=CorrectedSodiumParams,
+        execute_function=calculate_corrected_sodium
+    ),
+    "calculate_corrected_calcium": RegisteredTool(
+        description="Calculates albumin-corrected serum calcium level.",
+        pydantic_model=CorrectedCalciumParams,
+        execute_function=calculate_corrected_calcium
+    ),
+    "calculate_bmi": RegisteredTool(
+        description="Calculates Body Mass Index (BMI) with WHO classification (underweight through obesity class III).",
+        pydantic_model=BMIParams,
+        execute_function=calculate_bmi
+    ),
+
+    # --- Phase 2: Pulmonary + VTE Risk ---
+    "calculate_gold_copd": RegisteredTool(
+        description="Classifies COPD severity by GOLD 2024 spirometric grade and ABE group assignment.",
+        pydantic_model=GOLDCOPDParams,
+        execute_function=calculate_gold_copd
+    ),
+    "calculate_caprini": RegisteredTool(
+        description="Calculates the Caprini VTE risk assessment score for surgical patients to guide thromboprophylaxis.",
+        pydantic_model=CapriniParams,
+        execute_function=calculate_caprini
+    ),
+    "calculate_padua": RegisteredTool(
+        description="Calculates the Padua Prediction Score for VTE risk in medical inpatients.",
+        pydantic_model=PaduaParams,
+        execute_function=calculate_padua
+    ),
+
+    # --- Phase 2: Anthropometrics + Dosing ---
+    "calculate_bsa_mosteller": RegisteredTool(
+        description="Calculates Body Surface Area (BSA) using the Mosteller formula for drug dosing and physiologic calculations.",
+        pydantic_model=BSAMostellerParams,
+        execute_function=calculate_bsa_mosteller
+    ),
+    "calculate_insulin_basal_dosing": RegisteredTool(
+        description="Calculates basal insulin initiation dose and fasting glucose-based titration per ADA 2024 Standards of Care.",
+        pydantic_model=InsulinBasalDosingParams,
+        execute_function=calculate_insulin_basal_dosing
     ),
 }
