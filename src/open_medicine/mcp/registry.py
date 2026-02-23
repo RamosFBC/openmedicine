@@ -11,6 +11,7 @@ from open_medicine.mcp.calculators.enoxaparin_dosing import calculate_enoxaparin
 from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
 from open_medicine.mcp.calculators.hasbled import calculate_hasbled, HASBLEDParams
 from open_medicine.mcp.calculators.curb65 import calculate_curb65, CURB65Params
+from open_medicine.mcp.calculators.apixaban_dosing import calculate_apixaban_dosing, ApixabanDosingParams
 
 class RegisteredTool:
     def __init__(self, description: str, pydantic_model: type[BaseModel], execute_function: Callable):
@@ -73,5 +74,10 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the CURB-65 score for community-acquired pneumonia severity and mortality risk stratification.",
         pydantic_model=CURB65Params,
         execute_function=calculate_curb65
+    ),
+    "calculate_apixaban_dosing": RegisteredTool(
+        description="Calculates the FDA-approved Apixaban dosage for non-valvular atrial fibrillation based on patient age, weight, and serum creatinine.",
+        pydantic_model=ApixabanDosingParams,
+        execute_function=calculate_apixaban_dosing
     )
 }

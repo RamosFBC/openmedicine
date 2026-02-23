@@ -22,6 +22,18 @@ The CHA2DS2-VASc score is the recommended tool for assessing thromboembolic risk
 - Warfarin is recommended only when DOACs are contraindicated (e.g., moderate-to-severe mitral stenosis, mechanical heart valves).
 - When warfarin is used, target INR is 2.0–3.0 with time in therapeutic range (TTR) ≥ 70%.
 
+#### DOAC Dosing and Adjustments
+Standard dosing and criteria for dose reduction in non-valvular AF:
+
+- **Apixaban:** Standard dose is 5 mg BID. 
+  - *Dose Reduction:* Reduce to 2.5 mg BID if the patient has **at least two** of the following characteristics: Age ≥ 80 years, Body weight ≤ 60 kg, or Serum creatinine ≥ 1.5 mg/dL.
+- **Rivaroxaban:** Standard dose is 20 mg once daily with the evening meal. 
+  - *Dose Reduction:* Reduce to 15 mg once daily if CrCl ≤ 50 mL/min.
+- **Edoxaban:** Standard dose is 60 mg once daily. 
+  - *Dose Reduction:* Reduce to 30 mg once daily if CrCl 15–50 mL/min. (Note: Edoxaban is not recommended if CrCl > 95 mL/min).
+- **Dabigatran:** Standard dose is 150 mg BID. 
+  - *Dose Reduction:* Reduce to 75 mg BID if CrCl 15–30 mL/min.
+
 ## Bleeding Risk Assessment
 
 The 2023 guideline recommends that bleeding risk scores (including HAS-BLED, HEMORR2HAGES, and ATRIA) should NOT be used in isolation to determine eligibility for oral anticoagulation. These scores poorly differentiate between patients who will or will not experience bleeding events, and they share many risk factors with stroke risk scores.
