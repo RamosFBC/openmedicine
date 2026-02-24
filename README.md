@@ -17,8 +17,14 @@ By plugging the `open-medicine-mcp` server into your agent (via LangChain, AutoG
 
 ## Quick Start
 
-### 1. Give your Agent an MD (MCP Server)
-Expose the toolkit to any MCP-compatible agent:
+### 1. Install the Library
+Open Medicine requires Python >= 3.10. Install the library via pip. This will automatically add the `open-medicine-mcp` executable to your system PATH.
+```bash
+pip install open-medicine
+```
+
+### 2. Connect your MCP Agent
+Once installed, you can expose the toolkit to any MCP-compatible agent (like Claude Desktop, LangChain, or AutoGPT) using the official inspector:
 ```bash
 npx @modelcontextprotocol/inspector open-medicine-mcp
 ```
