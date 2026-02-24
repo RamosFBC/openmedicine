@@ -73,5 +73,87 @@
             "antibiotic_therapy",
             "discharge"
         ]
+    },
+    {
+        "id": "timi_ua_nstemi_2000",
+        "title": "The TIMI risk score for unstable angina/non-ST elevation MI: A method for prognostication and therapeutic decision making",
+        "doi": "10.1001/jama.284.7.835",
+        "year": 2000,
+        "organization": "TIMI Study Group",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "TIMI risk score",
+            "unstable angina",
+            "NSTEMI",
+            "acute coronary syndrome",
+            "ACS",
+            "myocardial infarction",
+            "chest pain",
+            "cardiac markers",
+            "ST deviation",
+            "CAD risk factors"
+        ],
+        "sections": [
+            "risk_assessment"
+        ],
+        "related_calculators": [
+            "calculate_timi_ua_nstemi"
+        ]
+    },
+    {
+        "id": "acc_aha_ascvd_2013",
+        "title": "2013 ACC/AHA Guideline on the Assessment of Cardiovascular Risk",
+        "doi": "10.1161/01.cir.0000437741.48606.98",
+        "year": 2013,
+        "organization": "ACC/AHA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "ascvd",
+            "cardiovascular risk",
+            "10-year risk",
+            "pooled cohort equations",
+            "cholesterol",
+            "statin",
+            "primary prevention",
+            "atherosclerotic cardiovascular disease"
+        ],
+        "sections": [
+            "risk_assessment",
+            "interpretation"
+        ],
+        "related_calculators": [
+            "calculate_ascvd"
+        ]
+    },
+    {
+        "id": "sepsis3_2016",
+        "title": "The Third International Consensus Definitions for Sepsis and Septic Shock (Sepsis-3)",
+        "doi": "10.1001/jama.2016.0287",
+        "year": 2016,
+        "organization": "SCCM/ESICM",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "sepsis",
+            "sepsis-3",
+            "septic shock",
+            "organ dysfunction",
+            "SOFA",
+            "qSOFA",
+            "infection",
+            "ICU",
+            "mortality risk",
+            "systemic inflammatory response"
+        ],
+        "sections": [
+            "sepsis_definition",
+            "qsofa_screening"
+        ],
+        "related_calculators": [
+            "calculate_sofa",
+            "calculate_qsofa"
+        ]
     }
 ]

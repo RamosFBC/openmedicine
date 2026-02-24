@@ -2,6 +2,8 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: sepsis3_2016 (sepsis_definition section)
+
 class SOFAParams(BaseModel):
     """Parameters to calculate the SOFA score. Missing values are assumed normal."""
     pao2_fio2: Optional[float] = Field(None, description="PaO2/FiO2 ratio in mmHg")

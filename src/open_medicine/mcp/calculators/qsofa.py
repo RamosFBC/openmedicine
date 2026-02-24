@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: sepsis3_2016 (qsofa_screening section)
 
 class QSOFAParams(BaseModel):
     """Parameters to calculate the qSOFA (Quick SOFA) score."""

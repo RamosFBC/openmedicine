@@ -3,6 +3,8 @@ from typing import Literal
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: acc_aha_ascvd_2013 (risk_assessment, interpretation sections)
+
 class ASCVDParams(BaseModel):
     """Parameters to calculate the ASCVD 10-year risk score."""
     is_male: bool = Field(..., description="Is the patient male?")

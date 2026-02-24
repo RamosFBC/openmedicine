@@ -34,12 +34,32 @@ class TestSearchGuidelines:
         results = search_guidelines("xyznonexistent")
         assert results == []
 
+    def test_search_timi_nstemi(self):
+        """Searching 'NSTEMI' should find the TIMI UA/NSTEMI guideline."""
+        results = search_guidelines("NSTEMI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "timi_ua_nstemi_2000" in ids
+
     def test_search_case_insensitive(self):
         """Search should be case-insensitive."""
         results_lower = search_guidelines("ckd")
         results_upper = search_guidelines("CKD")
         assert len(results_lower) == len(results_upper)
 
+    def test_search_ascvd(self):
+        """Searching 'ascvd' should find the ACC/AHA ASCVD guideline."""
+        results = search_guidelines("ascvd")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_ascvd_2013" in ids
+
+    def test_search_sepsis3(self):
+        """Searching 'sepsis-3' should find the Sepsis-3 guideline."""
+        results = search_guidelines("sepsis-3")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "sepsis3_2016" in ids
 
 class TestRetrieveGuideline:
     def test_retrieve_anticoagulation(self):
@@ -71,3 +91,38 @@ class TestRetrieveGuideline:
         """Requesting a non-existent section should raise ValueError."""
         with pytest.raises(ValueError, match="not found"):
             retrieve_guideline("acc_aha_af_2023", "nonexistent_section")
+
+    def test_retrieve_timi_nstemi_risk_assessment(self):
+        """Retrieve the risk assessment section of the TIMI UA/NSTEMI guideline."""
+        result = retrieve_guideline("timi_ua_nstemi_2000", "risk_assessment")
+        assert result.value == "timi_ua_nstemi_2000/risk_assessment"
+        assert "TIMI" in result.interpretation
+        assert result.evidence.source_doi == "10.1001/jama.284.7.835"
+
+    def test_retrieve_ascvd_risk_assessment(self):
+        """Retrieve the risk assessment section of the ASCVD guideline."""
+        result = retrieve_guideline("acc_aha_ascvd_2013", "risk_assessment")
+        assert result.value == "acc_aha_ascvd_2013/risk_assessment"
+        assert "Pooled Cohort Equations" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/01.cir.0000437741.48606.98"
+
+    def test_retrieve_ascvd_interpretation(self):
+        """Retrieve the interpretation section of the ASCVD guideline."""
+        result = retrieve_guideline("acc_aha_ascvd_2013", "interpretation")
+        assert result.value == "acc_aha_ascvd_2013/interpretation"
+        assert "7.5%" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/01.cir.0000437741.48606.98"
+
+    def test_retrieve_sepsis3_definition(self):
+        """Retrieve the sepsis definition section of the Sepsis-3 guideline."""
+        result = retrieve_guideline("sepsis3_2016", "sepsis_definition")
+        assert result.value == "sepsis3_2016/sepsis_definition"
+        assert "SOFA" in result.interpretation
+        assert result.evidence.source_doi == "10.1001/jama.2016.0287"
+
+    def test_retrieve_sepsis3_qsofa_screening(self):
+        """Retrieve the qSOFA screening section of the Sepsis-3 guideline."""
+        result = retrieve_guideline("sepsis3_2016", "qsofa_screening")
+        assert result.value == "sepsis3_2016/qsofa_screening"
+        assert "Glasgow Coma Scale" in result.interpretation
+        assert result.evidence.source_doi == "10.1001/jama.2016.0287"
