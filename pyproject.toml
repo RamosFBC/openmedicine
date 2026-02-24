@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "open-medicine"
-version = "0.2.0"
+version = "0.2.1"
 description = "Evidence-Based Clinical Reasoning for AI Agents — deterministic calculators, clinical guidelines, and MCP tools backed by DOI-traceable evidence."
 readme = "README.md"
 license = "MIT"
