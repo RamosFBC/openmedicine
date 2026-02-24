@@ -23,8 +23,8 @@ Open Medicine requires Python >= 3.10. Install the library via pip. This will au
 pip install open-medicine
 ```
 
-### 2. Connect to Claude Desktop (Recommended)
-The best developer experience for using MCP servers is connecting them to your Claude Desktop app. Add the following to your `claude_desktop_config.json`:
+### 2. Configure Your MCP Client
+Add the `open-medicine-mcp` server to your MCP client's configuration file (e.g., `claude_desktop_config.json` for Claude Desktop):
 
 ```json
 {
@@ -44,7 +44,7 @@ Alternatively, you can test the toolkit using the standard MCP testing tool:
 npx @modelcontextprotocol/inspector open-medicine-mcp
 ```
 
-### 2. Standalone Python Library
+### 4. Standalone Python Library
 ```bash
 pip install open-medicine
 ```
