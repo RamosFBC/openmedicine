@@ -31,7 +31,7 @@ from open_medicine.mcp.calculators.news2 import calculate_news2, NEWS2Params
 
 # Phase 1: Clinical Equations
 from open_medicine.mcp.calculators.corrected_qtc import calculate_corrected_qtc, CorrectedQTcParams
-from open_medicine.mcp.calculators.aa_gradient import calculate_aa_gradient, AAGradientParams
+from open_medicine.mcp.calculators.aa_gradient import calculate_aa_gradient, AaGradientParams
 from open_medicine.mcp.calculators.anion_gap import calculate_anion_gap, AnionGapParams
 
 # Phase 1: Anticoagulant Dosing
@@ -206,7 +206,7 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
     ),
     "calculate_aa_gradient": RegisteredTool(
         description="Calculates the Alveolar-arterial (A-a) oxygen gradient to evaluate causes of hypoxemia.",
-        pydantic_model=AAGradientParams,
+        pydantic_model=AaGradientParams,
         execute_function=calculate_aa_gradient
     ),
     "calculate_anion_gap": RegisteredTool(
