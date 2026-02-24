@@ -23,8 +23,23 @@ Open Medicine requires Python >= 3.10. Install the library via pip. This will au
 pip install open-medicine
 ```
 
-### 2. Connect your MCP Agent
-Once installed, you can expose the toolkit to any MCP-compatible agent (like Claude Desktop, LangChain, or AutoGPT) using the official inspector:
+### 2. Connect to Claude Desktop (Recommended)
+The best developer experience for using MCP servers is connecting them to your Claude Desktop app. Add the following to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "open-medicine": {
+      "command": "uvx",
+      "args": ["--from", "open-medicine", "open-medicine-mcp"]
+    }
+  }
+}
+```
+*(This uses `uvx` to automatically manage the virtual environment and fetch the latest version.)*
+
+### 3. Test with MCP Inspector
+Alternatively, you can test the toolkit using the standard MCP testing tool:
 ```bash
 npx @modelcontextprotocol/inspector open-medicine-mcp
 ```
