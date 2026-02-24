@@ -62,6 +62,19 @@ from open_medicine.mcp.calculators.padua import calculate_padua, PaduaParams
 # Phase 2: Anthropometrics + Dosing
 from open_medicine.mcp.calculators.bsa_mosteller import calculate_bsa_mosteller, BSAMostellerParams
 from open_medicine.mcp.calculators.insulin_basal_dosing import calculate_insulin_basal_dosing, InsulinBasalDosingParams
+# Phase 3: Neurology, Trauma & GI
+from open_medicine.mcp.calculators.abcd2 import calculate_abcd2, ABCD2Params
+from open_medicine.mcp.calculators.bisap import calculate_bisap, BISAPParams
+from open_medicine.mcp.calculators.canadian_cspine import calculate_canadian_cspine, CanadianCSpineParams
+from open_medicine.mcp.calculators.fisher_grade import calculate_fisher_grade, FisherGradeParams
+from open_medicine.mcp.calculators.glasgow_blatchford import calculate_glasgow_blatchford, GlasgowBlatchfordParams
+from open_medicine.mcp.calculators.hunt_hess import calculate_hunt_hess, HuntHessParams
+from open_medicine.mcp.calculators.nihss import calculate_nihss, NIHSSParams
+from open_medicine.mcp.calculators.parkland import calculate_parkland, ParklandParams
+from open_medicine.mcp.calculators.ransons import calculate_ransons, RansonsParams
+from open_medicine.mcp.calculators.rockall import calculate_rockall, RockallParams
+from open_medicine.mcp.calculators.rts import calculate_rts, RTSParams
+
 
 
 class RegisteredTool:
@@ -305,5 +318,61 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates basal insulin initiation dose and fasting glucose-based titration per ADA 2024 Standards of Care.",
         pydantic_model=InsulinBasalDosingParams,
         execute_function=calculate_insulin_basal_dosing
+    ),
+    # --- Phase 3: Neurology, Trauma & GI ---
+    "calculate_abcd2": RegisteredTool(
+        description="Calculates the ABCD2 Score for risk of stroke after TIA.",
+        pydantic_model=ABCD2Params,
+        execute_function=calculate_abcd2
+    ),
+    "calculate_bisap": RegisteredTool(
+        description="Calculates the BISAP (Bedside Index for Severity in Acute Pancreatitis) score.",
+        pydantic_model=BISAPParams,
+        execute_function=calculate_bisap
+    ),
+    "calculate_canadian_cspine": RegisteredTool(
+        description="Evaluates the Canadian C-Spine Rule for cervical spine clearance in alert, stable trauma patients.",
+        pydantic_model=CanadianCSpineParams,
+        execute_function=calculate_canadian_cspine
+    ),
+    "calculate_fisher_grade": RegisteredTool(
+        description="Calculates the Fisher Grade for CT classification of SAH and vasospasm risk.",
+        pydantic_model=FisherGradeParams,
+        execute_function=calculate_fisher_grade
+    ),
+    "calculate_glasgow_blatchford": RegisteredTool(
+        description="Calculates the Glasgow-Blatchford Bleeding Score (GBS) for risk stratification",
+        pydantic_model=GlasgowBlatchfordParams,
+        execute_function=calculate_glasgow_blatchford
+    ),
+    "calculate_hunt_hess": RegisteredTool(
+        description="Calculates the Hunt-Hess Scale for grading subarachnoid hemorrhage severity.",
+        pydantic_model=HuntHessParams,
+        execute_function=calculate_hunt_hess
+    ),
+    "calculate_nihss": RegisteredTool(
+        description="Calculates the NIH Stroke Scale (NIHSS) for quantifying neurological deficit in acute stroke.",
+        pydantic_model=NIHSSParams,
+        execute_function=calculate_nihss
+    ),
+    "calculate_parkland": RegisteredTool(
+        description="Calculates the Parkland Formula for fluid resuscitation in burn patients.",
+        pydantic_model=ParklandParams,
+        execute_function=calculate_parkland
+    ),
+    "calculate_ransons": RegisteredTool(
+        description="Calculates Ranson's Criteria for acute pancreatitis severity.",
+        pydantic_model=RansonsParams,
+        execute_function=calculate_ransons
+    ),
+    "calculate_rockall": RegisteredTool(
+        description="Calculates the Rockall Score for rebleeding and mortality risk after upper GI bleeding.",
+        pydantic_model=RockallParams,
+        execute_function=calculate_rockall
+    ),
+    "calculate_rts": RegisteredTool(
+        description="Calculates the Revised Trauma Score (RTS) for triage and outcome prediction in trauma.",
+        pydantic_model=RTSParams,
+        execute_function=calculate_rts
     ),
 }
