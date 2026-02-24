@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: aha_acc_chest_pain_2021 (risk_stratification, acute_management sections)
+
 
 class HEARTScoreParams(BaseModel):
     """Parameters to calculate the HEART Score for chest pain evaluation."""

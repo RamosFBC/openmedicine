@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: esc_acs_2023 (risk_stratification, antithrombotic_therapy, invasive_strategy sections)
+
 
 class GRACEScoreParams(BaseModel):
     """Parameters to calculate the GRACE 2.0 Score for ACS risk stratification."""

@@ -2,6 +2,7 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: rcp_news2_2017 (scoring_system, clinical_response sections)
 
 class SpO2Scale(str, Enum):
     SCALE_1 = "scale_1"

@@ -2,6 +2,8 @@ import math
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: aasld_cirrhosis_2023 (staging, complications sections)
+
 
 class MELDNaParams(BaseModel):
     """Parameters to calculate the MELD-Na Score."""

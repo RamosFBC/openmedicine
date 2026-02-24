@@ -2,6 +2,8 @@ from enum import Enum
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: aasld_cirrhosis_2023 (staging, complications sections)
+
 
 class AscitesGrade(str, Enum):
     NONE = "none"

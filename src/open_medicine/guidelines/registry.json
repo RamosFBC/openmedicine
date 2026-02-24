@@ -181,5 +181,268 @@
         "related_calculators": [
             "calculate_wells_pe"
         ]
+    },
+    {
+        "id": "gold_copd_2024",
+        "title": "Global Strategy for the Diagnosis, Management, and Prevention of Chronic Obstructive Lung Disease 2024 Report",
+        "doi": "10.1016/S2213-2600(23)00461-7",
+        "year": 2024,
+        "organization": "GOLD",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "copd",
+            "chronic obstructive pulmonary disease",
+            "gold",
+            "spirometry",
+            "exacerbation",
+            "bronchodilator",
+            "cat score",
+            "mmrc",
+            "abe assessment",
+            "laba",
+            "lama",
+            "ics"
+        ],
+        "sections": [
+            "spirometric_grading",
+            "abe_assessment",
+            "initial_pharmacotherapy"
+        ],
+        "related_calculators": [
+            "calculate_gold_copd"
+        ]
+    },
+    {
+        "id": "aha_acc_chest_pain_2021",
+        "title": "2021 AHA/ACC/ASE/CHEST/SAEM/SCCT/SCMR Guideline for the Evaluation and Diagnosis of Chest Pain",
+        "doi": "10.1161/CIR.0000000000001029",
+        "year": 2021,
+        "organization": "AHA/ACC",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "chest pain",
+            "acute chest pain",
+            "acute coronary syndrome",
+            "ACS",
+            "HEART score",
+            "troponin",
+            "high sensitivity troponin",
+            "myocardial infarction",
+            "NSTEMI",
+            "unstable angina",
+            "risk stratification",
+            "emergency department",
+            "cardiac biomarker",
+            "coronary artery disease"
+        ],
+        "sections": [
+            "risk_stratification",
+            "acute_management"
+        ],
+        "related_calculators": [
+            "calculate_heart_score"
+        ]
+    },
+    {
+        "id": "aha_asa_stroke_2019",
+        "title": "2019 AHA/ASA Guidelines for the Early Management of Patients With Acute Ischemic Stroke",
+        "doi": "10.1161/STR.0000000000000211",
+        "year": 2019,
+        "organization": "AHA/ASA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "stroke",
+            "acute ischemic stroke",
+            "ischemic stroke",
+            "NIHSS",
+            "thrombolysis",
+            "alteplase",
+            "tPA",
+            "thrombectomy",
+            "mechanical thrombectomy",
+            "large vessel occlusion",
+            "LVO",
+            "DAWN",
+            "DEFUSE",
+            "door-to-needle",
+            "cerebrovascular",
+            "neurology"
+        ],
+        "sections": [
+            "initial_assessment",
+            "thrombolysis",
+            "thrombectomy"
+        ],
+        "related_calculators": [
+            "calculate_nihss"
+        ]
+    },
+    {
+        "id": "aasld_cirrhosis_2023",
+        "title": "AASLD Practice Guidance on the Clinical Assessment and Management of Patients with Liver Cirrhosis",
+        "doi": "10.1097/HEP.0000000000000562",
+        "year": 2023,
+        "organization": "AASLD",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "cirrhosis",
+            "liver cirrhosis",
+            "liver disease",
+            "Child-Pugh",
+            "MELD",
+            "MELD-Na",
+            "ascites",
+            "variceal bleeding",
+            "hepatic encephalopathy",
+            "portal hypertension",
+            "liver transplant",
+            "SBP",
+            "spontaneous bacterial peritonitis",
+            "hepatology",
+            "decompensated cirrhosis",
+            "lactulose",
+            "rifaximin",
+            "carvedilol"
+        ],
+        "sections": [
+            "staging",
+            "complications"
+        ],
+        "related_calculators": [
+            "calculate_child_pugh",
+            "calculate_meld_na"
+        ]
+    },
+    {
+        "id": "esc_acs_2023",
+        "title": "2023 ESC Guidelines for the management of acute coronary syndromes",
+        "doi": "10.1093/eurheartj/ehad191",
+        "year": 2023,
+        "organization": "ESC",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "acute coronary syndrome",
+            "ACS",
+            "NSTEMI",
+            "NSTE-ACS",
+            "unstable angina",
+            "GRACE score",
+            "GRACE",
+            "myocardial infarction",
+            "troponin",
+            "antiplatelet",
+            "dual antiplatelet therapy",
+            "DAPT",
+            "ticagrelor",
+            "prasugrel",
+            "clopidogrel",
+            "aspirin",
+            "heparin",
+            "enoxaparin",
+            "fondaparinux",
+            "invasive strategy",
+            "coronary angiography",
+            "PCI",
+            "percutaneous coronary intervention",
+            "antithrombotic",
+            "P2Y12 inhibitor",
+            "chest pain",
+            "cardiac",
+            "cardiology"
+        ],
+        "sections": [
+            "risk_stratification",
+            "antithrombotic_therapy",
+            "invasive_strategy"
+        ],
+        "related_calculators": [
+            "calculate_grace_score"
+        ]
+    },
+    {
+        "id": "nice_ugib_2012",
+        "title": "Acute upper gastrointestinal bleeding in over 16s: management (NICE CG141)",
+        "doi": "10.1136/gut.2011.241976",
+        "year": 2012,
+        "organization": "NICE",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "upper gastrointestinal bleeding",
+            "UGIB",
+            "upper GI bleed",
+            "GI bleeding",
+            "gastrointestinal haemorrhage",
+            "Glasgow-Blatchford",
+            "Blatchford score",
+            "Rockall score",
+            "endoscopy",
+            "variceal bleeding",
+            "non-variceal bleeding",
+            "melena",
+            "hematemesis",
+            "haematemesis",
+            "peptic ulcer",
+            "terlipressin",
+            "band ligation",
+            "PPI",
+            "proton pump inhibitor",
+            "transfusion",
+            "resuscitation",
+            "TIPS"
+        ],
+        "sections": [
+            "risk_assessment",
+            "resuscitation",
+            "endoscopic_management"
+        ],
+        "related_calculators": [
+            "calculate_glasgow_blatchford",
+            "calculate_rockall"
+        ]
+    },
+    {
+        "id": "rcp_news2_2017",
+        "title": "National Early Warning Score (NEWS) 2: Standardising the assessment of acute-illness severity in the NHS",
+        "doi": "10.7861/clinmedicine.17-6-s68",
+        "year": 2017,
+        "organization": "RCP",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "NEWS2",
+            "NEWS",
+            "national early warning score",
+            "early warning score",
+            "acute illness",
+            "clinical deterioration",
+            "sepsis screening",
+            "vital signs",
+            "physiological parameters",
+            "SpO2",
+            "oxygen saturation",
+            "respiratory rate",
+            "blood pressure",
+            "heart rate",
+            "consciousness",
+            "temperature",
+            "ACVPU",
+            "escalation",
+            "clinical response",
+            "inpatient monitoring",
+            "ward assessment"
+        ],
+        "sections": [
+            "scoring_system",
+            "clinical_response"
+        ],
+        "related_calculators": [
+            "calculate_news2"
+        ]
     }
 ]

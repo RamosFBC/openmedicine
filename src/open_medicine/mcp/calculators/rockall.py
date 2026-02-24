@@ -3,6 +3,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: nice_ugib_2012 (risk_assessment, endoscopic_management sections)
 
 class RockallComorbidity(str, Enum):
     NONE = "none"

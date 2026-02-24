@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: aha_asa_stroke_2019 (initial_assessment, thrombolysis, thrombectomy sections)
+
 
 class NIHSSParams(BaseModel):
     """Parameters to calculate the NIH Stroke Scale (NIHSS)."""

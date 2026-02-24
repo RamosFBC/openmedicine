@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: nice_ugib_2012 (risk_assessment, resuscitation, endoscopic_management sections)
 
 class GlasgowBlatchfordParams(BaseModel):
     """Parameters to calculate the Glasgow-Blatchford Bleeding Score (GBS)."""

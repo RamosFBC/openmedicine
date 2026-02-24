@@ -4,33 +4,31 @@
 
 The total Wells Score is used to categorize the likelihood of pulmonary embolism (PE), utilizing either a traditional three-tier model or a simplified two-tier model.
 
-### Three-Tier Model
-
-Historically, the model stratified patients into three probability tiers:
+### Three-Tier Model (Historical)
 - **Low probability:** Score < 2.0
 - **Moderate probability:** Score 2.0 to 6.0
 - **High probability:** Score > 6.0
 
-### Two-Tier Model (Simplified)
-
+### Two-Tier Model (Simplified & Recommended)
 For clinical utility, particularly when paired with D-dimer testing, the two-tier model is widely recommended:
-
 - **PE Unlikely:** Score ≤ 4.0 points
 - **PE Likely:** Score > 4.0 points
 
-## Diagnostic Algorithm
+## Actionable Diagnostic Algorithm
 
 The categorization directs the subsequent diagnostic workup to safely and efficiently rule in or rule out PE.
 
 ### For "PE Unlikely" (Score ≤ 4.0)
-
-- **Action:** Consider high-sensitivity D-dimer testing.
-- **Negative D-dimer:** PE can be safely excluded. Further diagnostic imaging for PE is generally not indicated and workup may be stopped.
-- **Positive D-dimer:** Proceed to definitive diagnostic imaging, typically Computed Tomography Pulmonary Angiography (CTPA).
+- **Primary Action:** Obtain high-sensitivity D-dimer testing.
+- **Negative D-dimer:** PE can be safely excluded. Further diagnostic imaging for PE is NOT indicated. Stop PE workup.
+- **Positive D-dimer:** Proceed to definitive diagnostic imaging.
 
 ### For "PE Likely" (Score > 4.0)
+- **Primary Action:** Proceed directly to definitive diagnostic imaging.
+- **Contraindication for D-dimer:** D-dimer testing is **NOT recommended** because a negative result does not sufficiently reduce the probability to safely rule out PE.
 
-- **Action:** Proceed directly to definitive diagnostic imaging (e.g., CTPA).
-- D-dimer testing is **not recommended** for patients categorized as PE Likely, because a negative D-dimer result does not sufficiently reduce the probability of PE to safely rule it out.
+### Definitive Diagnostic Imaging Choice
+- **First-Line:** Computed Tomography Pulmonary Angiography (CTPA).
+- **Alternative (V/Q Scan):** Use Ventilation/Perfusion (V/Q) scan if CTPA is contraindicated (e.g., severe renal impairment eGFR < 30, severe iodine contrast allergy, or pregnancy where radiation to breast tissue is a concern and CXR is normal).
 
 > **OpenMedicine Calculator:** `calculate_wells_pe` — available via MCP for automated scoring and exact algorithm routing.
