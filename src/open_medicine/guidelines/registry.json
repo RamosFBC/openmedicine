@@ -155,5 +155,31 @@
             "calculate_sofa",
             "calculate_qsofa"
         ]
+    },
+    {
+        "id": "wells_pe_2000",
+        "title": "Derivation of a simple clinical model to categorize patients' probability of pulmonary embolism: increasing the models utility with the SimpliRED D-dimer",
+        "doi": "10.1055/s-0037-1613870",
+        "year": 2000,
+        "organization": "Wells PS et al.",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "pulmonary embolism",
+            "pe",
+            "wells score",
+            "wells criteria",
+            "d-dimer",
+            "pre-test probability",
+            "deep vein thrombosis",
+            "dvt"
+        ],
+        "sections": [
+            "pre_test_probability",
+            "diagnostic_algorithm"
+        ],
+        "related_calculators": [
+            "calculate_wells_pe"
+        ]
     }
 ]

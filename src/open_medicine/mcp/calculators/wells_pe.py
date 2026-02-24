@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: wells_pe_2000 (pre_test_probability, diagnostic_algorithm sections)
 
 class WellsPEParams(BaseModel):
     """Parameters to calculate the Wells score for pulmonary embolism probability."""

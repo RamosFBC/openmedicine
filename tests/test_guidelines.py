@@ -61,6 +61,13 @@ class TestSearchGuidelines:
         ids = [r["guideline_id"] for r in results]
         assert "sepsis3_2016" in ids
 
+    def test_search_wells_pe(self):
+        """Searching 'wells score' should find the Wells PE guideline."""
+        results = search_guidelines("wells score")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "wells_pe_2000" in ids
+
 class TestRetrieveGuideline:
     def test_retrieve_anticoagulation(self):
         """Retrieve the anticoagulation section of the AF guideline."""
@@ -126,3 +133,17 @@ class TestRetrieveGuideline:
         assert result.value == "sepsis3_2016/qsofa_screening"
         assert "Glasgow Coma Scale" in result.interpretation
         assert result.evidence.source_doi == "10.1001/jama.2016.0287"
+
+    def test_retrieve_wells_pe_probability(self):
+        """Retrieve the pre-test probability section of the Wells PE guideline."""
+        result = retrieve_guideline("wells_pe_2000", "pre_test_probability")
+        assert result.value == "wells_pe_2000/pre_test_probability"
+        assert "3.0 points" in result.interpretation
+        assert result.evidence.source_doi == "10.1055/s-0037-1613870"
+
+    def test_retrieve_wells_pe_algorithm(self):
+        """Retrieve the diagnostic algorithm section of the Wells PE guideline."""
+        result = retrieve_guideline("wells_pe_2000", "diagnostic_algorithm")
+        assert result.value == "wells_pe_2000/diagnostic_algorithm"
+        assert "CTPA" in result.interpretation
+        assert result.evidence.source_doi == "10.1055/s-0037-1613870"
