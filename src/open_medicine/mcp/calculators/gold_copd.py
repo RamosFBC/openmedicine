@@ -54,9 +54,9 @@ def calculate_gold_copd(params: GOLDCOPDParams) -> ClinicalResult:
         group_desc = "Group A: Low exacerbation risk with low symptom burden. Bronchodilator as needed."
 
     evidence = Evidence(
-        source_doi="GOLD 2024 Report",
+        source_doi="10.1164/rccm.202301-0106PP",
         level="Guideline",
-        description="Global Initiative for Chronic Obstructive Lung Disease (GOLD) 2024 Report: Global Strategy for the Diagnosis, Management, and Prevention of COPD."
+        description="Agustí A et al. Global Initiative for Chronic Obstructive Lung Disease 2023 Report: GOLD Executive Summary. Am J Respir Crit Care Med. 2023;207(7):819-837."
     )
 
     interpretation = (

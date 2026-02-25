@@ -47,9 +47,9 @@ def calculate_rivaroxaban_dosing(params: RivaroxabanDosingParams) -> ClinicalRes
     interpretation = f"With a CrCl of {crcl} mL/min for indication '{ind.value}', the recommended Rivaroxaban (Xarelto) dosage is: {dose_str}"
 
     evidence = Evidence(
-        source_doi="FDA Package Insert",
-        level="Clinical Guidelines",
-        description="Rivaroxaban prescribing information detailing renal dosage modifications."
+        source_doi="10.1056/NEJMoa1009638",
+        level="Randomized Controlled Trial",
+        description="Patel MR et al. Rivaroxaban versus warfarin in nonvalvular atrial fibrillation (ROCKET AF). N Engl J Med. 2011;365(10):883-891."
     )
 
     return ClinicalResult(

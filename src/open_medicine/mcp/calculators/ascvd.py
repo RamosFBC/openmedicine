@@ -128,9 +128,9 @@ def calculate_ascvd(params: ASCVDParams) -> ClinicalResult:
         interpretation = f"The patient has an estimated 10-year ASCVD risk of {risk_percentage}%, which is considered High Risk. Statin therapy is definitely recommended."
 
     evidence = Evidence(
-        source_doi="10.1016/j.ajpc.2021.100335",
-        level="Guideline / Algorithm",
-        description="Atherosclerotic cardiovascular disease risk assessment: An American Society for Preventive Cardiology clinical practice statement (2013 ACC/AHA Pooled Cohort Equations)"
+        source_doi="10.1161/01.cir.0000437741.48606.98",
+        level="Guideline",
+        description="Goff DC et al. 2013 ACC/AHA Guideline on the Assessment of Cardiovascular Risk. Circulation. 2014;129(25 Suppl 2):S49-S73."
     )
 
     return ClinicalResult(

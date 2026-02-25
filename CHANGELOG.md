@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-02-24
+
+### Fixed
+- Corrected DOI references across 16 calculators to cite original derivation papers instead of secondary sources, validation studies, or guidelines that merely reference them.
+  - **Wrong DOIs (secondary sources):** CHA₂DS₂-VASc, Apixaban Dosing, Wells DVT, Canadian C-Spine, ASCVD, Parkland, Serum Osmolality, Osmolar Gap, NEWS2.
+  - **Invalid DOI formats:** Fisher Grade, Hunt-Hess, BMI (were citation strings), Enoxaparin Dosing, Rivaroxaban Dosing, GOLD COPD (were free text).
+  - **Incorrect DOI (wrong paper):** Ranson's Criteria (DOI resolved to unrelated Annals of Surgery paper; original 1974 paper has no DOI, now uses PMID:4834279).
+- Updated 7 test files to match corrected DOI values.
+
 ## [0.2.1] - 2026-02-24
 
 ### Fixed

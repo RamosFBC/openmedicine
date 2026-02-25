@@ -13,7 +13,7 @@ def calculate_serum_osmolality(params: SerumOsmolalityParams) -> ClinicalResult:
     """
     Calculates serum osmolality.
     Formula: Osm = 2×Na + Glucose/18 + BUN/2.8
-    Reference: Purssell RA et al. Ann Emerg Med 2001.
+    Reference: Dorwart WV, Chalmers L. Clin Chem. 1975;21(2):190-194.
     """
     osm = 2 * params.sodium + params.glucose / 18.0 + params.bun / 2.8
     osm_rounded = round(osm, 1)
@@ -27,9 +27,9 @@ def calculate_serum_osmolality(params: SerumOsmolalityParams) -> ClinicalResult:
         parts.append("Low (<275 mOsm/kg). Consider hyponatremia or overhydration.")
 
     evidence = Evidence(
-        source_doi="10.1067/mem.2001.119455",
+        source_doi="10.1093/clinchem/21.2.190",
         level="Validation Study",
-        description="Purssell RA et al. Derivation and validation of a formula to calculate the contribution of ethanol to the osmolal gap. Ann Emerg Med 2001."
+        description="Dorwart WV, Chalmers L. Comparison of methods for calculating serum osmolality from chemical concentrations, and the prognostic value of such calculations. Clin Chem. 1975;21(2):190-194."
     )
 
     return ClinicalResult(

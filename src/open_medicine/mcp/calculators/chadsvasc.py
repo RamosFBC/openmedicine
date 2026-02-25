@@ -50,9 +50,9 @@ def calculate_chadsvasc(params: CHADSVAScParams) -> ClinicalResult:
         score += 1
 
     evidence = Evidence(
-        source_doi="10.1161/CIR.0000000000001193",
-        level="Guideline",
-        description="2023 ACC/AHA/ACCP/HRS Guideline for the Diagnosis and Management of Atrial Fibrillation. Recommends OAC based on CHA2DS2-VASc score risk groups."
+        source_doi="10.1378/chest.09-1584",
+        level="Derivation Study",
+        description="Lip GYH et al. Refining clinical risk stratification for predicting stroke and thromboembolism in atrial fibrillation. Chest. 2010;137(2):263-272."
     )
 
     if params.female_sex:

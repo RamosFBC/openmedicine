@@ -226,7 +226,7 @@ def test_news2_supplemental_o2_adds_2():
 
 def test_news2_evidence():
     result = calculate_news2(_normal_params())
-    assert result.evidence.source_doi == "10.7861/clinmedicine.17-6-s68"
+    assert result.evidence.source_doi == "10.7861/clinmedicine.19-3-260"
     assert result.evidence.level == "Guideline"
 
 

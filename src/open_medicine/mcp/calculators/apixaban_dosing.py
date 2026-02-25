@@ -41,9 +41,9 @@ def calculate_apixaban_dosing(params: ApixabanDosingParams) -> ClinicalResult:
     )
 
     evidence = Evidence(
-        source_doi="10.1161/CIR.0000000000001193",
-        level="Clinical Practice Guideline",
-        description="2023 ACC/AHA/ACCP/HRS Guideline & FDA Package Insert. Reduce apixaban dose to 2.5 mg BID if >=2 criteria met: Age>=80, Wt<=60kg, SCr>=1.5 mg/dL."
+        source_doi="10.1056/NEJMoa1107039",
+        level="Randomized Controlled Trial",
+        description="Granger CB et al. Apixaban versus warfarin in patients with atrial fibrillation (ARISTOTLE). N Engl J Med. 2011;365(11):981-992."
     )
 
     return ClinicalResult(

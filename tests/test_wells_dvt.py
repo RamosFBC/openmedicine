@@ -79,7 +79,7 @@ def test_wells_dvt_alternative_diagnosis_subtraction():
 def test_wells_dvt_evidence_doi():
     params = WellsDVTParams()
     res = calculate_wells_dvt(params)
-    assert res.evidence.source_doi == "10.1056/NEJMoa023153"
+    assert res.evidence.source_doi == "10.1016/S0140-6736(97)08140-3"
 
 
 def test_wells_dvt_fhir_code():

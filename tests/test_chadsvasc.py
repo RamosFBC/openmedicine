@@ -102,4 +102,4 @@ def test_chadsvasc_max_score():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 9
-    assert result.evidence.source_doi == "10.1161/CIR.0000000000001193"
+    assert result.evidence.source_doi == "10.1378/chest.09-1584"

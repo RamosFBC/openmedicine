@@ -23,9 +23,9 @@ def calculate_hunt_hess(params: HuntHessParams) -> ClinicalResult:
     desc, mortality = descriptions[params.grade]
 
     evidence = Evidence(
-        source_doi="Hunt WE, Hess RM. J Neurosurg 1968;28:14-20",
+        source_doi="10.3171/jns.1968.28.1.0014",
         level="Derivation & Validation Study",
-        description="Surgical risk as related to time of intervention in the repair of intracranial aneurysms (Hunt & Hess, 1968)"
+        description="Hunt WE, Hess RM. Surgical risk as related to time of intervention in the repair of intracranial aneurysms. J Neurosurg. 1968;28(1):14-20."
     )
 
     interpretation = (

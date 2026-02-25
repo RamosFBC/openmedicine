@@ -13,7 +13,7 @@ class OsmolarGapParams(BaseModel):
 def calculate_osmolar_gap(params: OsmolarGapParams) -> ClinicalResult:
     """
     Calculates the osmolar gap (measured - calculated osmolality).
-    Reference: Purssell RA et al. Ann Emerg Med 2001.
+    Reference: Smithline N, Gardner KD. JAMA. 1976;236(14):1594-1597.
     """
     calculated_osm = 2 * params.sodium + params.glucose / 18.0 + params.bun / 2.8
     osm_gap = params.measured_osmolality - calculated_osm
@@ -28,9 +28,9 @@ def calculate_osmolar_gap(params: OsmolarGapParams) -> ClinicalResult:
         parts.append("Negative osmolar gap. Consider lab error or hypoproteinemia.")
 
     evidence = Evidence(
-        source_doi="10.1067/mem.2001.119455",
-        level="Validation Study",
-        description="Purssell RA et al. Derivation and validation of a formula to calculate the contribution of ethanol to the osmolal gap. Ann Emerg Med 2001."
+        source_doi="10.1001/jama.1976.03270150050029",
+        level="Derivation Study",
+        description="Smithline N, Gardner KD. Gaps -- anionic and osmolal. JAMA. 1976;236(14):1594-1597."
     )
 
     return ClinicalResult(

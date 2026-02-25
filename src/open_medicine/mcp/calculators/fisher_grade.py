@@ -22,9 +22,9 @@ def calculate_fisher_grade(params: FisherGradeParams) -> ClinicalResult:
     ct_finding, risk = descriptions[params.grade]
 
     evidence = Evidence(
-        source_doi="Fisher CM et al. Neurosurgery 1980;6:1-9",
+        source_doi="10.1227/00006123-198001000-00001",
         level="Derivation & Validation Study",
-        description="Relation of cerebral vasospasm to subarachnoid hemorrhage visualized by CT scanning (Fisher et al., 1980)"
+        description="Fisher CM et al. Relation of cerebral vasospasm to subarachnoid hemorrhage visualized by computerized tomographic scanning. Neurosurgery. 1980;6(1):1-9."
     )
 
     interpretation = (

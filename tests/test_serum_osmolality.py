@@ -29,7 +29,7 @@ def test_low_osmolality():
 
 def test_evidence_doi():
     result = calculate_serum_osmolality(SerumOsmolalityParams(sodium=140, glucose=90, bun=14))
-    assert result.evidence.source_doi == "10.1067/mem.2001.119455"
+    assert result.evidence.source_doi == "10.1093/clinchem/21.2.190"
 
 
 def test_fhir_code():

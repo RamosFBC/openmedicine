@@ -12,7 +12,7 @@ def calculate_parkland(params: ParklandParams) -> ClinicalResult:
     """
     Calculates the Parkland Formula for fluid resuscitation in burn patients.
     Total 24h fluid (mL) = 4 × weight (kg) × %TBSA burned.
-    Reference: Baxter CR. Surg Clin North Am 1978;58:1313-1322.
+    Reference: Baxter CR, Shires T. Ann N Y Acad Sci. 1968;150(3):874-894.
     """
     total_24h = 4.0 * params.weight_kg * params.tbsa_percent
     first_8h = total_24h / 2.0
@@ -28,9 +28,9 @@ def calculate_parkland(params: ParklandParams) -> ClinicalResult:
     )
 
     evidence = Evidence(
-        source_doi="10.1016/S0039-6109(16)41607-7",
-        level="Derivation & Validation Study",
-        description="Fluid volume and electrolyte changes of the early postburn period (Baxter CR. Surg Clin North Am 1978)"
+        source_doi="10.1111/j.1749-6632.1968.tb14738.x",
+        level="Derivation Study",
+        description="Baxter CR, Shires T. Physiological response to crystalloid resuscitation of severe burns. Ann N Y Acad Sci. 1968;150(3):874-894."
     )
 
     return ClinicalResult(

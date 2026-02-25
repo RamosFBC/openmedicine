@@ -19,7 +19,7 @@ class WellsDVTParams(BaseModel):
 def calculate_wells_dvt(params: WellsDVTParams) -> ClinicalResult:
     """
     Calculates the Wells score for deep vein thrombosis (DVT) probability.
-    Reference: Wells PS et al. N Engl J Med. 2003;349(13):1227-1235.
+    Reference: Wells PS et al. Lancet. 1997;350(9094):1795-1798.
     """
     score = sum([
         params.active_cancer,
@@ -37,9 +37,9 @@ def calculate_wells_dvt(params: WellsDVTParams) -> ClinicalResult:
         score -= 2
 
     evidence = Evidence(
-        source_doi="10.1056/NEJMoa023153",
-        level="Validation Study",
-        description="Evaluation of D-dimer in the diagnosis of suspected deep-vein thrombosis. Wells PS et al. N Engl J Med. 2003."
+        source_doi="10.1016/S0140-6736(97)08140-3",
+        level="Derivation Study",
+        description="Wells PS et al. Value of assessment of pretest probability of deep-vein thrombosis in clinical management. Lancet. 1997;350(9094):1795-1798."
     )
 
     if score <= 0:

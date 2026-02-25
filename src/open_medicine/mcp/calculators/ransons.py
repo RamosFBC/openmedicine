@@ -71,9 +71,9 @@ def calculate_ransons(params: RansonsParams) -> ClinicalResult:
             score += 1
 
     evidence = Evidence(
-        source_doi="10.1097/00000658-197401000-00001",
+        source_doi="PMID:4834279",
         level="Derivation & Validation Study",
-        description="Prognostic signs and the role of operative management in acute pancreatitis."
+        description="Ranson JH et al. Prognostic signs and the role of operative management in acute pancreatitis. Surg Gynecol Obstet. 1974;139(1):69-81."
     )
 
     if has_48h:

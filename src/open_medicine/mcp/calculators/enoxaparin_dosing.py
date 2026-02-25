@@ -39,9 +39,9 @@ def calculate_enoxaparin_dosing(params: EnoxaparinDosingParams) -> ClinicalResul
     interpretation = f"With a CrCl of {crcl} mL/min and weight of {weight} kg for indication '{ind.value}', the recommended Enoxaparin (Lovenox) dosage is: {dose_str}"
 
     evidence = Evidence(
-        source_doi="FDA Package Insert",
-        level="Clinical Guidelines",
-        description="Enoxaparin prescribing information detailing renal dosage modifications for CrCl < 30 mL/min."
+        source_doi="10.1056/NEJM199708143370702",
+        level="Randomized Controlled Trial",
+        description="Cohen M et al. A comparison of low-molecular-weight heparin with unfractionated heparin for unstable coronary artery disease (ESSENCE). N Engl J Med. 1997;337(7):447-452."
     )
 
     return ClinicalResult(

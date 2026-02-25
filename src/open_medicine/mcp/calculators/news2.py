@@ -164,9 +164,9 @@ def calculate_news2(params: NEWS2Params) -> ClinicalResult:
     max_single = max(individual_scores)
 
     evidence = Evidence(
-        source_doi="10.7861/clinmedicine.17-6-s68",
+        source_doi="10.7861/clinmedicine.19-3-260",
         level="Guideline",
-        description="National Early Warning Score (NEWS) 2. Royal College of Physicians, 2017."
+        description="Smith GB et al. The National Early Warning Score 2 (NEWS2). Clin Med. 2019;19(3):260."
     )
 
     if total_score >= 7:

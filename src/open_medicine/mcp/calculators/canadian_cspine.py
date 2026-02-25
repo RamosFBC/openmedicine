@@ -18,12 +18,12 @@ class CanadianCSpineParams(BaseModel):
 def calculate_canadian_cspine(params: CanadianCSpineParams) -> ClinicalResult:
     """
     Evaluates the Canadian C-Spine Rule for cervical spine clearance in alert, stable trauma patients.
-    Reference: Stiell IG et al. NEJM 2003;349:2510-2518.
+    Reference: Stiell IG et al. JAMA. 2001;286(15):1841-1848.
     """
     evidence = Evidence(
-        source_doi="10.1056/NEJMoa025972",
+        source_doi="10.1001/jama.286.15.1841",
         level="Derivation & Validation Study",
-        description="The Canadian C-Spine Rule for Radiography in Alert and Stable Trauma Patients (Stiell IG et al. NEJM 2003)"
+        description="Stiell IG et al. The Canadian C-Spine Rule for Radiography in Alert and Stable Trauma Patients. JAMA. 2001;286(15):1841-1848."
     )
 
     # Step 1: Any high-risk factor mandating imaging?

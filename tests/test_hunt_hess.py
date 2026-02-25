@@ -28,8 +28,7 @@ def test_hunt_hess_maximum():
 
 def test_hunt_hess_evidence():
     result = calculate_hunt_hess(HuntHessParams(grade=1))
-    assert "Hunt" in result.evidence.source_doi
-    assert "1968" in result.evidence.source_doi
+    assert result.evidence.source_doi == "10.3171/jns.1968.28.1.0014"
 
 
 def test_hunt_hess_fhir():

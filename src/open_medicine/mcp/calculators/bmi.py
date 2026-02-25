@@ -19,7 +19,7 @@ def calculate_bmi(params: BMIParams) -> ClinicalResult:
         return ClinicalResult(
             value=None,
             interpretation="Invalid height. Height must be greater than 0.",
-            evidence=Evidence(source_doi="39156-5", level="Guideline", description="WHO BMI classification."),
+            evidence=Evidence(source_doi="10.1016/S0140-6736(03)15268-3", level="Guideline", description="WHO Expert Consultation. Appropriate body-mass index for Asian populations and its implications for policy and intervention strategies. Lancet. 2004;363(9403):157-163."),
             fhir_code="39156-5",
             fhir_system="http://loinc.org",
             fhir_display="Body mass index (BMI) [Ratio]"
@@ -44,9 +44,9 @@ def calculate_bmi(params: BMIParams) -> ClinicalResult:
     interpretation = f"BMI is {bmi_rounded} kg/m². WHO category: {category}."
 
     evidence = Evidence(
-        source_doi="WHO",
+        source_doi="10.1016/S0140-6736(03)15268-3",
         level="Guideline",
-        description="WHO BMI classification. LOINC 39156-5."
+        description="WHO Expert Consultation. Appropriate body-mass index for Asian populations and its implications for policy and intervention strategies. Lancet. 2004;363(9403):157-163."
     )
 
     return ClinicalResult(

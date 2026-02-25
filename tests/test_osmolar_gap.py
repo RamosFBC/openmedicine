@@ -28,7 +28,7 @@ def test_negative_gap():
 
 def test_evidence_doi():
     result = calculate_osmolar_gap(OsmolarGapParams(measured_osmolality=295, sodium=140, glucose=90, bun=14))
-    assert result.evidence.source_doi == "10.1067/mem.2001.119455"
+    assert result.evidence.source_doi == "10.1001/jama.1976.03270150050029"
 
 
 def test_fhir_code():

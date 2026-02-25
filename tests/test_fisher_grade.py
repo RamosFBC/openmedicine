@@ -27,8 +27,7 @@ def test_fisher_maximum():
 
 def test_fisher_evidence():
     result = calculate_fisher_grade(FisherGradeParams(grade=1))
-    assert "Fisher" in result.evidence.source_doi
-    assert "1980" in result.evidence.source_doi
+    assert result.evidence.source_doi == "10.1227/00006123-198001000-00001"
 
 
 def test_fisher_fhir():
