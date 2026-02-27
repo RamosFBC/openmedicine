@@ -363,3 +363,195 @@ class TestRetrieveGuidelineNewBatch:
         assert result.value == "rcp_news2_2017/clinical_response"
         assert "response" in result.interpretation.lower() or "escalation" in result.interpretation.lower()
         assert result.evidence.source_doi == "10.7861/clinmedicine.17-6-s68"
+
+
+class TestSearchGuidelinesHF2022:
+    """Search tests for the AHA/ACC/HFSA Heart Failure 2022 guideline."""
+
+    def test_search_heart_failure(self):
+        """Searching 'heart failure' should find the AHA/ACC/HFSA HF 2022 guideline."""
+        results = search_guidelines("heart failure")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_acc_hf_2022" in ids
+
+    def test_search_hfref(self):
+        """Searching 'HFrEF' should find the AHA/ACC/HFSA HF 2022 guideline."""
+        results = search_guidelines("HFrEF")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_acc_hf_2022" in ids
+
+    def test_search_sglt2_hf(self):
+        """Searching 'dapagliflozin' should find the AHA/ACC/HFSA HF 2022 guideline."""
+        results = search_guidelines("dapagliflozin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_acc_hf_2022" in ids
+
+    def test_search_arni(self):
+        """Searching 'ARNi' should find the AHA/ACC/HFSA HF 2022 guideline."""
+        results = search_guidelines("ARNi")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_acc_hf_2022" in ids
+
+    def test_search_crt(self):
+        """Searching 'cardiac resynchronization therapy' should find the HF 2022 guideline."""
+        results = search_guidelines("cardiac resynchronization therapy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_acc_hf_2022" in ids
+
+
+class TestRetrieveGuidelineHF2022:
+    """Retrieve tests for every section of the AHA/ACC/HFSA HF 2022 guideline."""
+
+    def test_retrieve_hf_classification(self):
+        """Retrieve the classification section of the HF 2022 guideline."""
+        result = retrieve_guideline("aha_acc_hf_2022", "classification")
+        assert result.value == "aha_acc_hf_2022/classification"
+        assert "HFrEF" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000001063"
+
+    def test_retrieve_hf_pharmacotherapy(self):
+        """Retrieve the pharmacotherapy section of the HF 2022 guideline."""
+        result = retrieve_guideline("aha_acc_hf_2022", "pharmacotherapy")
+        assert result.value == "aha_acc_hf_2022/pharmacotherapy"
+        assert "sacubitril" in result.interpretation.lower() or "ARNI" in result.interpretation or "ARNi" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000001063"
+
+    def test_retrieve_hf_device_therapy(self):
+        """Retrieve the device therapy section of the HF 2022 guideline."""
+        result = retrieve_guideline("aha_acc_hf_2022", "device_therapy")
+        assert result.value == "aha_acc_hf_2022/device_therapy"
+        assert "ICD" in result.interpretation or "CRT" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000001063"
+
+
+class TestSearchGuidelinesADADiabetes2024:
+    """Search tests for the ADA Standards of Care in Diabetes 2024 guideline."""
+
+    def test_search_diabetes(self):
+        """Searching 'diabetes' should find the ADA Diabetes 2024 guideline."""
+        results = search_guidelines("diabetes")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ada_diabetes_2024" in ids
+
+    def test_search_metformin(self):
+        """Searching 'metformin' should find the ADA Diabetes 2024 guideline."""
+        results = search_guidelines("metformin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ada_diabetes_2024" in ids
+
+    def test_search_hba1c(self):
+        """Searching 'HbA1c' should find the ADA Diabetes 2024 guideline."""
+        results = search_guidelines("HbA1c")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ada_diabetes_2024" in ids
+
+    def test_search_semaglutide(self):
+        """Searching 'semaglutide' should find the ADA Diabetes 2024 guideline."""
+        results = search_guidelines("semaglutide")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ada_diabetes_2024" in ids
+
+    def test_search_insulin(self):
+        """Searching 'basal insulin' should find the ADA Diabetes 2024 guideline."""
+        results = search_guidelines("basal insulin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ada_diabetes_2024" in ids
+
+
+class TestRetrieveGuidelineADADiabetes2024:
+    """Retrieve tests for every section of the ADA Diabetes 2024 guideline."""
+
+    def test_retrieve_glycemic_targets(self):
+        """Retrieve the glycemic targets section of the ADA Diabetes 2024 guideline."""
+        result = retrieve_guideline("ada_diabetes_2024", "glycemic_targets")
+        assert result.value == "ada_diabetes_2024/glycemic_targets"
+        assert "A1C" in result.interpretation or "7%" in result.interpretation
+        assert result.evidence.source_doi == "10.2337/dc24-S009"
+
+    def test_retrieve_pharmacotherapy(self):
+        """Retrieve the pharmacotherapy section of the ADA Diabetes 2024 guideline."""
+        result = retrieve_guideline("ada_diabetes_2024", "pharmacotherapy")
+        assert result.value == "ada_diabetes_2024/pharmacotherapy"
+        assert "metformin" in result.interpretation.lower() or "Metformin" in result.interpretation
+        assert result.evidence.source_doi == "10.2337/dc24-S009"
+
+    def test_retrieve_cardiovascular_risk(self):
+        """Retrieve the cardiovascular risk section of the ADA Diabetes 2024 guideline."""
+        result = retrieve_guideline("ada_diabetes_2024", "cardiovascular_risk")
+        assert result.value == "ada_diabetes_2024/cardiovascular_risk"
+        assert "ASCVD" in result.interpretation or "statin" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.2337/dc24-S009"
+
+
+class TestSearchGuidelinesASHVTE2020:
+    """Search tests for the ASH VTE Treatment 2020 guideline."""
+
+    def test_search_vte(self):
+        """Searching 'venous thromboembolism' should find the ASH VTE 2020 guideline."""
+        results = search_guidelines("venous thromboembolism")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ash_vte_2020" in ids
+
+    def test_search_dvt(self):
+        """Searching 'DVT' should find the ASH VTE 2020 guideline."""
+        results = search_guidelines("DVT")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ash_vte_2020" in ids
+
+    def test_search_pulmonary_embolism(self):
+        """Searching 'pulmonary embolism' should find the ASH VTE 2020 guideline."""
+        results = search_guidelines("pulmonary embolism")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ash_vte_2020" in ids
+
+    def test_search_doac(self):
+        """Searching 'DOAC' should find the ASH VTE 2020 guideline."""
+        results = search_guidelines("DOAC")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ash_vte_2020" in ids
+
+    def test_search_apixaban(self):
+        """Searching 'apixaban' should find the ASH VTE 2020 guideline."""
+        results = search_guidelines("apixaban")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "ash_vte_2020" in ids
+
+
+class TestRetrieveGuidelineASHVTE2020:
+    """Retrieve tests for every section of the ASH VTE 2020 guideline."""
+
+    def test_retrieve_anticoagulation_therapy(self):
+        """Retrieve the anticoagulation therapy section of the ASH VTE 2020 guideline."""
+        result = retrieve_guideline("ash_vte_2020", "anticoagulation_therapy")
+        assert result.value == "ash_vte_2020/anticoagulation_therapy"
+        assert "DOAC" in result.interpretation or "apixaban" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1182/bloodadvances.2020001830"
+
+    def test_retrieve_treatment_duration(self):
+        """Retrieve the treatment duration section of the ASH VTE 2020 guideline."""
+        result = retrieve_guideline("ash_vte_2020", "treatment_duration")
+        assert result.value == "ash_vte_2020/treatment_duration"
+        assert "3" in result.interpretation  # 3-6 months
+        assert result.evidence.source_doi == "10.1182/bloodadvances.2020001830"
+
+    def test_retrieve_advanced_management(self):
+        """Retrieve the advanced management section of the ASH VTE 2020 guideline."""
+        result = retrieve_guideline("ash_vte_2020", "advanced_management")
+        assert result.value == "ash_vte_2020/advanced_management"
+        assert "thrombol" in result.interpretation.lower() or "IVC" in result.interpretation
+        assert result.evidence.source_doi == "10.1182/bloodadvances.2020001830"
