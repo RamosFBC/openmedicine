@@ -639,5 +639,186 @@
             "calculate_warfarin_initiation",
             "calculate_heparin_dosing"
         ]
+    },
+    {
+        "id": "acg_acute_pancreatitis_2024",
+        "title": "American College of Gastroenterology Guidelines: Management of Acute Pancreatitis",
+        "doi": "10.14309/ajg.0000000000002645",
+        "year": 2024,
+        "organization": "ACG",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "acute pancreatitis",
+            "pancreatitis",
+            "pancreatic necrosis",
+            "necrotizing pancreatitis",
+            "gallstone pancreatitis",
+            "biliary pancreatitis",
+            "BISAP",
+            "Ranson",
+            "Ranson's criteria",
+            "revised Atlanta classification",
+            "organ failure",
+            "modified Marshall score",
+            "fluid resuscitation",
+            "lactated Ringer",
+            "WATERFALL trial",
+            "ERCP",
+            "cholangitis",
+            "cholecystectomy",
+            "post-ERCP pancreatitis",
+            "rectal indomethacin",
+            "infected necrosis",
+            "walled-off necrosis",
+            "step-up approach",
+            "necrosectomy",
+            "percutaneous drainage",
+            "enteral nutrition",
+            "pancreatic pseudocyst",
+            "lipase",
+            "amylase",
+            "hypertriglyceridemia",
+            "idiopathic pancreatitis",
+            "gastroenterology"
+        ],
+        "sections": [
+            "severity_assessment",
+            "initial_management",
+            "biliary_management",
+            "necrotizing_pancreatitis"
+        ],
+        "related_calculators": [
+            "calculate_bisap",
+            "calculate_ransons"
+        ]
+    },
+    {
+        "id": "aha_asa_sah_2023",
+        "title": "2023 AHA/ASA Guidelines for the Management of Patients With Aneurysmal Subarachnoid Hemorrhage",
+        "doi": "10.1161/STR.0000000000000436",
+        "year": 2023,
+        "organization": "AHA/ASA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "subarachnoid hemorrhage",
+            "SAH",
+            "aneurysmal subarachnoid hemorrhage",
+            "aSAH",
+            "Hunt and Hess",
+            "Hunt-Hess",
+            "Fisher grade",
+            "modified Fisher",
+            "GCS",
+            "Glasgow Coma Scale",
+            "WFNS",
+            "cerebral vasospasm",
+            "delayed cerebral ischemia",
+            "DCI",
+            "nimodipine",
+            "aneurysm coiling",
+            "aneurysm clipping",
+            "endovascular coiling",
+            "surgical clipping",
+            "rebleeding",
+            "hydrocephalus",
+            "EVD",
+            "external ventricular drain",
+            "transcranial Doppler",
+            "neurosurgery",
+            "neurocritical care"
+        ],
+        "sections": [
+            "initial_assessment",
+            "aneurysm_treatment",
+            "medical_management",
+            "delayed_cerebral_ischemia"
+        ],
+        "related_calculators": [
+            "calculate_fisher_grade",
+            "calculate_hunt_hess",
+            "calculate_gcs"
+        ]
+    },
+    {
+        "id": "aasld_nafld_2023",
+        "title": "AASLD Practice Guidance on the Clinical Assessment and Management of Nonalcoholic Fatty Liver Disease",
+        "doi": "10.1097/HEP.0000000000000323",
+        "year": 2023,
+        "organization": "AASLD",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "NAFLD",
+            "nonalcoholic fatty liver disease",
+            "MASLD",
+            "metabolic dysfunction-associated steatotic liver disease",
+            "NASH",
+            "nonalcoholic steatohepatitis",
+            "fatty liver",
+            "hepatic steatosis",
+            "FIB-4",
+            "NAFLD fibrosis score",
+            "NFS",
+            "liver fibrosis",
+            "VCTE",
+            "FibroScan",
+            "transient elastography",
+            "vitamin E",
+            "pioglitazone",
+            "semaglutide",
+            "GLP-1 receptor agonist",
+            "bariatric surgery",
+            "metabolic syndrome",
+            "obesity",
+            "hepatology"
+        ],
+        "sections": [
+            "screening_and_diagnosis",
+            "fibrosis_assessment",
+            "lifestyle_and_pharmacotherapy",
+            "monitoring_and_referral"
+        ],
+        "related_calculators": [
+            "calculate_fib4",
+            "calculate_nafld_fibrosis"
+        ]
+    },
+    {
+        "id": "aha_asa_tia_2009",
+        "title": "Definition and Evaluation of Transient Ischemic Attack: A Scientific Statement From the AHA/ASA",
+        "doi": "10.1161/STROKEAHA.108.192218",
+        "year": 2009,
+        "organization": "AHA/ASA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "transient ischemic attack",
+            "TIA",
+            "ABCD2",
+            "ABCD2 score",
+            "stroke risk",
+            "stroke prevention",
+            "carotid stenosis",
+            "carotid endarterectomy",
+            "CEA",
+            "antiplatelet therapy",
+            "aspirin",
+            "clopidogrel",
+            "dual antiplatelet",
+            "DAPT",
+            "secondary stroke prevention",
+            "neurology",
+            "cerebrovascular"
+        ],
+        "sections": [
+            "definition_and_risk_stratification",
+            "diagnostic_evaluation",
+            "early_management"
+        ],
+        "related_calculators": [
+            "calculate_abcd2"
+        ]
     }
 ]

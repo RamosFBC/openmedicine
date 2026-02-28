@@ -169,6 +169,9 @@ cython_debug/
 ehthumbs.db
 Thumbs.db
 
+CLAUDE.md
+.claude
+
 local_docs
 
 # Comparative-validation generated data

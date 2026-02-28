@@ -555,3 +555,290 @@ class TestRetrieveGuidelineASHVTE2020:
         assert result.value == "ash_vte_2020/advanced_management"
         assert "thrombol" in result.interpretation.lower() or "IVC" in result.interpretation
         assert result.evidence.source_doi == "10.1182/bloodadvances.2020001830"
+
+
+class TestSearchGuidelinesACGPancreatitis2024:
+    """Search tests for the ACG Acute Pancreatitis 2024 guideline."""
+
+    def test_search_acute_pancreatitis(self):
+        """Searching 'acute pancreatitis' should find the ACG guideline."""
+        results = search_guidelines("acute pancreatitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+    def test_search_bisap(self):
+        """Searching 'BISAP' should find the ACG pancreatitis guideline."""
+        results = search_guidelines("BISAP")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+    def test_search_necrotizing_pancreatitis(self):
+        """Searching 'necrotizing pancreatitis' should find the ACG guideline."""
+        results = search_guidelines("necrotizing pancreatitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+    def test_search_ercp(self):
+        """Searching 'ERCP' should find the ACG pancreatitis guideline."""
+        results = search_guidelines("ERCP")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+    def test_search_cholecystectomy(self):
+        """Searching 'cholecystectomy' should find the ACG pancreatitis guideline."""
+        results = search_guidelines("cholecystectomy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+    def test_search_gallstone_pancreatitis(self):
+        """Searching 'gallstone pancreatitis' should find the ACG guideline."""
+        results = search_guidelines("gallstone pancreatitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acg_acute_pancreatitis_2024" in ids
+
+
+class TestRetrieveGuidelineACGPancreatitis2024:
+    """Retrieve tests for every section of the ACG Acute Pancreatitis 2024 guideline."""
+
+    def test_retrieve_severity_assessment(self):
+        """Retrieve the severity assessment section of the ACG pancreatitis guideline."""
+        result = retrieve_guideline("acg_acute_pancreatitis_2024", "severity_assessment")
+        assert result.value == "acg_acute_pancreatitis_2024/severity_assessment"
+        assert "Revised Atlanta" in result.interpretation
+        assert "BISAP" in result.interpretation
+        assert "lipase" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.14309/ajg.0000000000002645"
+
+    def test_retrieve_initial_management(self):
+        """Retrieve the initial management section of the ACG pancreatitis guideline."""
+        result = retrieve_guideline("acg_acute_pancreatitis_2024", "initial_management")
+        assert result.value == "acg_acute_pancreatitis_2024/initial_management"
+        assert "lactated Ringer" in result.interpretation
+        assert "1.5 mL/kg/hr" in result.interpretation
+        assert "enteral" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.14309/ajg.0000000000002645"
+
+    def test_retrieve_biliary_management(self):
+        """Retrieve the biliary management section of the ACG pancreatitis guideline."""
+        result = retrieve_guideline("acg_acute_pancreatitis_2024", "biliary_management")
+        assert result.value == "acg_acute_pancreatitis_2024/biliary_management"
+        assert "ERCP" in result.interpretation
+        assert "cholangitis" in result.interpretation.lower()
+        assert "cholecystectomy" in result.interpretation.lower()
+        assert "indomethacin" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.14309/ajg.0000000000002645"
+
+    def test_retrieve_necrotizing_pancreatitis(self):
+        """Retrieve the necrotizing pancreatitis section of the ACG pancreatitis guideline."""
+        result = retrieve_guideline("acg_acute_pancreatitis_2024", "necrotizing_pancreatitis")
+        assert result.value == "acg_acute_pancreatitis_2024/necrotizing_pancreatitis"
+        assert "step-up" in result.interpretation.lower()
+        assert "4 weeks" in result.interpretation
+        assert "FNA" in result.interpretation
+        assert "carbapenem" in result.interpretation.lower() or "imipenem" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.14309/ajg.0000000000002645"
+
+
+class TestSearchGuidelinesSAH2023:
+    """Search tests for the AHA/ASA SAH 2023 guideline."""
+
+    def test_search_subarachnoid_hemorrhage(self):
+        """Searching 'subarachnoid hemorrhage' should find the AHA/ASA SAH guideline."""
+        results = search_guidelines("subarachnoid hemorrhage")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_sah_2023" in ids
+
+    def test_search_hunt_hess(self):
+        """Searching 'Hunt and Hess' should find the AHA/ASA SAH guideline."""
+        results = search_guidelines("Hunt and Hess")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_sah_2023" in ids
+
+    def test_search_fisher_grade(self):
+        """Searching 'Fisher grade' should find the AHA/ASA SAH guideline."""
+        results = search_guidelines("Fisher grade")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_sah_2023" in ids
+
+    def test_search_nimodipine(self):
+        """Searching 'nimodipine' should find the AHA/ASA SAH guideline."""
+        results = search_guidelines("nimodipine")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_sah_2023" in ids
+
+    def test_search_dci(self):
+        """Searching 'delayed cerebral ischemia' should find the AHA/ASA SAH guideline."""
+        results = search_guidelines("delayed cerebral ischemia")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_sah_2023" in ids
+
+
+class TestRetrieveGuidelineSAH2023:
+    """Retrieve tests for every section of the AHA/ASA SAH 2023 guideline."""
+
+    def test_retrieve_initial_assessment(self):
+        """Retrieve the initial assessment section of the SAH guideline."""
+        result = retrieve_guideline("aha_asa_sah_2023", "initial_assessment")
+        assert result.value == "aha_asa_sah_2023/initial_assessment"
+        assert "Hunt and Hess" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/STR.0000000000000436"
+
+    def test_retrieve_aneurysm_treatment(self):
+        """Retrieve the aneurysm treatment section of the SAH guideline."""
+        result = retrieve_guideline("aha_asa_sah_2023", "aneurysm_treatment")
+        assert result.value == "aha_asa_sah_2023/aneurysm_treatment"
+        assert "coiling" in result.interpretation.lower() or "clipping" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1161/STR.0000000000000436"
+
+    def test_retrieve_medical_management(self):
+        """Retrieve the medical management section of the SAH guideline."""
+        result = retrieve_guideline("aha_asa_sah_2023", "medical_management")
+        assert result.value == "aha_asa_sah_2023/medical_management"
+        assert "nimodipine" in result.interpretation.lower() or "Nimodipine" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/STR.0000000000000436"
+
+    def test_retrieve_delayed_cerebral_ischemia(self):
+        """Retrieve the DCI section of the SAH guideline."""
+        result = retrieve_guideline("aha_asa_sah_2023", "delayed_cerebral_ischemia")
+        assert result.value == "aha_asa_sah_2023/delayed_cerebral_ischemia"
+        assert "DCI" in result.interpretation or "vasospasm" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1161/STR.0000000000000436"
+
+
+class TestSearchGuidelinesNAFLD2023:
+    """Search tests for the AASLD NAFLD 2023 guideline."""
+
+    def test_search_nafld(self):
+        """Searching 'NAFLD' should find the AASLD NAFLD guideline."""
+        results = search_guidelines("NAFLD")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aasld_nafld_2023" in ids
+
+    def test_search_fatty_liver(self):
+        """Searching 'fatty liver' should find the AASLD NAFLD guideline."""
+        results = search_guidelines("fatty liver")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aasld_nafld_2023" in ids
+
+    def test_search_fib4(self):
+        """Searching 'FIB-4' should find the AASLD NAFLD guideline."""
+        results = search_guidelines("FIB-4")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aasld_nafld_2023" in ids
+
+    def test_search_fibroscan(self):
+        """Searching 'FibroScan' should find the AASLD NAFLD guideline."""
+        results = search_guidelines("FibroScan")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aasld_nafld_2023" in ids
+
+    def test_search_nash(self):
+        """Searching 'NASH' should find the AASLD NAFLD guideline."""
+        results = search_guidelines("NASH")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aasld_nafld_2023" in ids
+
+
+class TestRetrieveGuidelineNAFLD2023:
+    """Retrieve tests for every section of the AASLD NAFLD 2023 guideline."""
+
+    def test_retrieve_screening_and_diagnosis(self):
+        """Retrieve the screening and diagnosis section of the NAFLD guideline."""
+        result = retrieve_guideline("aasld_nafld_2023", "screening_and_diagnosis")
+        assert result.value == "aasld_nafld_2023/screening_and_diagnosis"
+        assert "steatosis" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1097/HEP.0000000000000323"
+
+    def test_retrieve_fibrosis_assessment(self):
+        """Retrieve the fibrosis assessment section of the NAFLD guideline."""
+        result = retrieve_guideline("aasld_nafld_2023", "fibrosis_assessment")
+        assert result.value == "aasld_nafld_2023/fibrosis_assessment"
+        assert "FIB-4" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/HEP.0000000000000323"
+
+    def test_retrieve_lifestyle_and_pharmacotherapy(self):
+        """Retrieve the lifestyle and pharmacotherapy section of the NAFLD guideline."""
+        result = retrieve_guideline("aasld_nafld_2023", "lifestyle_and_pharmacotherapy")
+        assert result.value == "aasld_nafld_2023/lifestyle_and_pharmacotherapy"
+        assert "weight loss" in result.interpretation.lower() or "Weight Loss" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/HEP.0000000000000323"
+
+    def test_retrieve_monitoring_and_referral(self):
+        """Retrieve the monitoring and referral section of the NAFLD guideline."""
+        result = retrieve_guideline("aasld_nafld_2023", "monitoring_and_referral")
+        assert result.value == "aasld_nafld_2023/monitoring_and_referral"
+        assert "hepatology" in result.interpretation.lower() or "referral" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1097/HEP.0000000000000323"
+
+
+class TestSearchGuidelinesTIA2009:
+    """Search tests for the AHA/ASA TIA 2009 guideline."""
+
+    def test_search_tia(self):
+        """Searching 'transient ischemic attack' should find the AHA/ASA TIA guideline."""
+        results = search_guidelines("transient ischemic attack")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_tia_2009" in ids
+
+    def test_search_abcd2(self):
+        """Searching 'ABCD2' should find the AHA/ASA TIA guideline."""
+        results = search_guidelines("ABCD2")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_tia_2009" in ids
+
+    def test_search_carotid_stenosis(self):
+        """Searching 'carotid stenosis' should find the AHA/ASA TIA guideline."""
+        results = search_guidelines("carotid stenosis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_tia_2009" in ids
+
+    def test_search_carotid_endarterectomy(self):
+        """Searching 'carotid endarterectomy' should find the AHA/ASA TIA guideline."""
+        results = search_guidelines("carotid endarterectomy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_asa_tia_2009" in ids
+
+
+class TestRetrieveGuidelineTIA2009:
+    """Retrieve tests for every section of the AHA/ASA TIA 2009 guideline."""
+
+    def test_retrieve_definition_and_risk_stratification(self):
+        """Retrieve the definition and risk stratification section of the TIA guideline."""
+        result = retrieve_guideline("aha_asa_tia_2009", "definition_and_risk_stratification")
+        assert result.value == "aha_asa_tia_2009/definition_and_risk_stratification"
+        assert "ABCD2" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/STROKEAHA.108.192218"
+
+    def test_retrieve_diagnostic_evaluation(self):
+        """Retrieve the diagnostic evaluation section of the TIA guideline."""
+        result = retrieve_guideline("aha_asa_tia_2009", "diagnostic_evaluation")
+        assert result.value == "aha_asa_tia_2009/diagnostic_evaluation"
+        assert "MRI" in result.interpretation or "DWI" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/STROKEAHA.108.192218"
+
+    def test_retrieve_early_management(self):
+        """Retrieve the early management section of the TIA guideline."""
+        result = retrieve_guideline("aha_asa_tia_2009", "early_management")
+        assert result.value == "aha_asa_tia_2009/early_management"
+        assert "aspirin" in result.interpretation.lower() or "Aspirin" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/STROKEAHA.108.192218"
