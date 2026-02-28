@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.0] - 2026-02-28
+
+### Added
+- **8 New Clinical Guideline Modules:**
+  - **AHA/ACC/HFSA Heart Failure 2022** — classification, pharmacotherapy (GDMT including SGLT2i, ARNI), device therapy (ICD, CRT).
+  - **ADA Standards of Care in Diabetes 2024** — glycemic targets, pharmacotherapy (metformin, GLP-1 RA, SGLT2i), cardiovascular risk management.
+  - **ASH VTE 2020** — anticoagulation therapy (DOACs, LMWH, warfarin), treatment duration, advanced management. Links 11 calculators.
+  - **ACG Acute Pancreatitis 2024** — severity assessment (BISAP, Ranson's), initial management, biliary management, necrotizing pancreatitis.
+  - **AHA/ASA Subarachnoid Hemorrhage 2023** — initial assessment (Hunt-Hess, Fisher), aneurysm treatment, medical management, delayed cerebral ischemia.
+  - **AASLD NAFLD/MASLD 2023** — screening and diagnosis, fibrosis assessment (FIB-4, NAFLD Fibrosis Score), lifestyle and pharmacotherapy, monitoring and referral.
+  - **AHA/ASA TIA 2009** — definition and risk stratification (ABCD2), diagnostic evaluation, early management.
+  - **ACCF/AHA STEMI 2013** — reperfusion therapy (PCI vs fibrinolysis), antithrombotic therapy, routine medical therapy, complications (Killip classification, cardiogenic shock).
+- **Calculator cross-references** — linked `timi_stemi` calculator to the new STEMI guideline.
+- **72 new guideline tests** covering search and retrieval for all 8 new guidelines.
+
 ## [0.2.2] - 2026-02-24
 
 ### Fixed
