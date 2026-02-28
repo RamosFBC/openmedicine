@@ -820,5 +820,71 @@
         "related_calculators": [
             "calculate_abcd2"
         ]
+    },
+    {
+        "id": "acc_aha_stemi_2013",
+        "title": "2013 ACCF/AHA Guideline for the Management of ST-Elevation Myocardial Infarction",
+        "doi": "10.1161/CIR.0b013e3182742cf6",
+        "year": 2013,
+        "organization": "ACCF/AHA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "STEMI",
+            "ST-elevation myocardial infarction",
+            "myocardial infarction",
+            "acute myocardial infarction",
+            "AMI",
+            "heart attack",
+            "acute coronary syndrome",
+            "ACS",
+            "primary PCI",
+            "percutaneous coronary intervention",
+            "fibrinolytic therapy",
+            "thrombolysis",
+            "reperfusion",
+            "door-to-balloon",
+            "tenecteplase",
+            "alteplase",
+            "reteplase",
+            "aspirin",
+            "clopidogrel",
+            "prasugrel",
+            "ticagrelor",
+            "dual antiplatelet therapy",
+            "DAPT",
+            "heparin",
+            "UFH",
+            "enoxaparin",
+            "bivalirudin",
+            "beta-blocker",
+            "metoprolol",
+            "ACE inhibitor",
+            "ARB",
+            "aldosterone antagonist",
+            "eplerenone",
+            "statin",
+            "cardiogenic shock",
+            "Killip class",
+            "TIMI risk score",
+            "TIMI STEMI",
+            "mechanical complications",
+            "ventricular septal defect",
+            "free wall rupture",
+            "ventricular fibrillation",
+            "ventricular tachycardia",
+            "cardiac rehabilitation",
+            "secondary prevention",
+            "cardiology"
+        ],
+        "sections": [
+            "reperfusion_therapy",
+            "antithrombotic_therapy",
+            "routine_medical_therapy",
+            "complications"
+        ],
+        "related_calculators": [
+            "calculate_timi_stemi"
+        ]
     }
 ]

@@ -842,3 +842,98 @@ class TestRetrieveGuidelineTIA2009:
         assert result.value == "aha_asa_tia_2009/early_management"
         assert "aspirin" in result.interpretation.lower() or "Aspirin" in result.interpretation
         assert result.evidence.source_doi == "10.1161/STROKEAHA.108.192218"
+
+
+class TestSearchGuidelinesSTEMI2013:
+    """Search tests for the ACCF/AHA STEMI 2013 guideline."""
+
+    def test_search_stemi(self):
+        """Searching 'STEMI' should find the ACCF/AHA STEMI 2013 guideline."""
+        results = search_guidelines("STEMI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_myocardial_infarction(self):
+        """Searching 'myocardial infarction' should find the STEMI 2013 guideline."""
+        results = search_guidelines("myocardial infarction")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_primary_pci(self):
+        """Searching 'primary PCI' should find the STEMI 2013 guideline."""
+        results = search_guidelines("primary PCI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_fibrinolytic(self):
+        """Searching 'fibrinolytic therapy' should find the STEMI 2013 guideline."""
+        results = search_guidelines("fibrinolytic therapy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_tenecteplase(self):
+        """Searching 'tenecteplase' should find the STEMI 2013 guideline."""
+        results = search_guidelines("tenecteplase")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_timi_stemi(self):
+        """Searching 'TIMI STEMI' should find the STEMI 2013 guideline."""
+        results = search_guidelines("TIMI STEMI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_cardiogenic_shock(self):
+        """Searching 'cardiogenic shock' should find the STEMI 2013 guideline."""
+        results = search_guidelines("cardiogenic shock")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+    def test_search_killip_class(self):
+        """Searching 'Killip class' should find the STEMI 2013 guideline."""
+        results = search_guidelines("Killip class")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_stemi_2013" in ids
+
+
+class TestRetrieveGuidelineSTEMI2013:
+    """Retrieve tests for every section of the ACCF/AHA STEMI 2013 guideline."""
+
+    def test_retrieve_reperfusion_therapy(self):
+        """Retrieve the reperfusion therapy section of the STEMI 2013 guideline."""
+        result = retrieve_guideline("acc_aha_stemi_2013", "reperfusion_therapy")
+        assert result.value == "acc_aha_stemi_2013/reperfusion_therapy"
+        assert "90 minutes" in result.interpretation
+        assert "tenecteplase" in result.interpretation.lower() or "Tenecteplase" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0b013e3182742cf6"
+
+    def test_retrieve_antithrombotic_therapy(self):
+        """Retrieve the antithrombotic therapy section of the STEMI 2013 guideline."""
+        result = retrieve_guideline("acc_aha_stemi_2013", "antithrombotic_therapy")
+        assert result.value == "acc_aha_stemi_2013/antithrombotic_therapy"
+        assert "Aspirin" in result.interpretation
+        assert "clopidogrel" in result.interpretation.lower() or "Clopidogrel" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0b013e3182742cf6"
+
+    def test_retrieve_routine_medical_therapy(self):
+        """Retrieve the routine medical therapy section of the STEMI 2013 guideline."""
+        result = retrieve_guideline("acc_aha_stemi_2013", "routine_medical_therapy")
+        assert result.value == "acc_aha_stemi_2013/routine_medical_therapy"
+        assert "beta-blocker" in result.interpretation.lower() or "Beta-Blocker" in result.interpretation or "metoprolol" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1161/CIR.0b013e3182742cf6"
+
+    def test_retrieve_complications(self):
+        """Retrieve the complications section of the STEMI 2013 guideline."""
+        result = retrieve_guideline("acc_aha_stemi_2013", "complications")
+        assert result.value == "acc_aha_stemi_2013/complications"
+        assert "Killip" in result.interpretation
+        assert "cardiogenic shock" in result.interpretation.lower() or "Cardiogenic" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0b013e3182742cf6"

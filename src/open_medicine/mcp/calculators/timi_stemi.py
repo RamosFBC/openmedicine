@@ -1,6 +1,8 @@
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
+# Related guidelines: acc_aha_stemi_2013 (reperfusion_therapy, complications sections)
+
 
 class TIMISTEMIParams(BaseModel):
     """Parameters to calculate the TIMI Risk Score for STEMI."""
