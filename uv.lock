@@ -367,7 +367,7 @@ wheels = [
 
 [[package]]
 name = "open-medicine"
-version = "0.2.2"
+version = "0.3.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },

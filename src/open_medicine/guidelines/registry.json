@@ -886,5 +886,60 @@
         "related_calculators": [
             "calculate_timi_stemi"
         ]
+    },
+    {
+        "id": "acc_aha_hypertension_2017",
+        "title": "2017 ACC/AHA/AAPA/ABC/ACPM/AGS/APhA/ASH/ASPC/NMA/PCNA Guideline for the Prevention, Detection, Evaluation, and Management of High Blood Pressure in Adults",
+        "doi": "10.1161/HYP.0000000000000065",
+        "year": 2017,
+        "organization": "ACC/AHA",
+        "supersedes": null,
+        "superseded_by": null,
+        "topics": [
+            "hypertension",
+            "high blood pressure",
+            "blood pressure",
+            "BP classification",
+            "elevated blood pressure",
+            "stage 1 hypertension",
+            "stage 2 hypertension",
+            "antihypertensive",
+            "thiazide",
+            "chlorthalidone",
+            "ACE inhibitor",
+            "ARB",
+            "calcium channel blocker",
+            "amlodipine",
+            "lisinopril",
+            "losartan",
+            "DASH diet",
+            "sodium restriction",
+            "resistant hypertension",
+            "hypertensive emergency",
+            "hypertensive crisis",
+            "hypertensive urgency",
+            "ASCVD risk",
+            "BP target",
+            "BP measurement",
+            "ambulatory blood pressure monitoring",
+            "ABPM",
+            "home blood pressure monitoring",
+            "white coat hypertension",
+            "masked hypertension",
+            "secondary hypertension",
+            "primary aldosteronism",
+            "spironolactone",
+            "nicardipine",
+            "labetalol",
+            "cardiovascular risk",
+            "cardiology"
+        ],
+        "sections": [
+            "classification_and_measurement",
+            "nonpharmacologic_interventions",
+            "pharmacotherapy",
+            "resistant_hypertension_and_crises"
+        ],
+        "related_calculators": []
     }
 ]

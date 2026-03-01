@@ -937,3 +937,99 @@ class TestRetrieveGuidelineSTEMI2013:
         assert "Killip" in result.interpretation
         assert "cardiogenic shock" in result.interpretation.lower() or "Cardiogenic" in result.interpretation
         assert result.evidence.source_doi == "10.1161/CIR.0b013e3182742cf6"
+
+
+class TestSearchGuidelinesHypertension2017:
+    """Search tests for the ACC/AHA Hypertension 2017 guideline."""
+
+    def test_search_hypertension(self):
+        """Searching 'hypertension' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("hypertension")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_blood_pressure(self):
+        """Searching 'blood pressure' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("blood pressure")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_antihypertensive(self):
+        """Searching 'antihypertensive' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("antihypertensive")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_chlorthalidone(self):
+        """Searching 'chlorthalidone' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("chlorthalidone")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_dash_diet(self):
+        """Searching 'DASH diet' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("DASH diet")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_resistant_hypertension(self):
+        """Searching 'resistant hypertension' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("resistant hypertension")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_hypertensive_emergency(self):
+        """Searching 'hypertensive emergency' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("hypertensive emergency")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+    def test_search_abpm(self):
+        """Searching 'ABPM' should find the ACC/AHA Hypertension 2017 guideline."""
+        results = search_guidelines("ABPM")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acc_aha_hypertension_2017" in ids
+
+
+class TestRetrieveGuidelineHypertension2017:
+    """Retrieve tests for every section of the ACC/AHA Hypertension 2017 guideline."""
+
+    def test_retrieve_classification_and_measurement(self):
+        """Retrieve the classification and measurement section of the Hypertension 2017 guideline."""
+        result = retrieve_guideline("acc_aha_hypertension_2017", "classification_and_measurement")
+        assert result.value == "acc_aha_hypertension_2017/classification_and_measurement"
+        assert "Stage 1" in result.interpretation
+        assert "130" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/HYP.0000000000000065"
+
+    def test_retrieve_nonpharmacologic_interventions(self):
+        """Retrieve the nonpharmacologic interventions section of the Hypertension 2017 guideline."""
+        result = retrieve_guideline("acc_aha_hypertension_2017", "nonpharmacologic_interventions")
+        assert result.value == "acc_aha_hypertension_2017/nonpharmacologic_interventions"
+        assert "DASH" in result.interpretation
+        assert "sodium" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1161/HYP.0000000000000065"
+
+    def test_retrieve_pharmacotherapy(self):
+        """Retrieve the pharmacotherapy section of the Hypertension 2017 guideline."""
+        result = retrieve_guideline("acc_aha_hypertension_2017", "pharmacotherapy")
+        assert result.value == "acc_aha_hypertension_2017/pharmacotherapy"
+        assert "Chlorthalidone" in result.interpretation or "chlorthalidone" in result.interpretation.lower()
+        assert "ACE" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/HYP.0000000000000065"
+
+    def test_retrieve_resistant_hypertension_and_crises(self):
+        """Retrieve the resistant hypertension and crises section of the Hypertension 2017 guideline."""
+        result = retrieve_guideline("acc_aha_hypertension_2017", "resistant_hypertension_and_crises")
+        assert result.value == "acc_aha_hypertension_2017/resistant_hypertension_and_crises"
+        assert "180/120" in result.interpretation
+        assert "Spironolactone" in result.interpretation or "spironolactone" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1161/HYP.0000000000000065"
