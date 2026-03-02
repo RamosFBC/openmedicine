@@ -4,6 +4,7 @@ from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
 # Related guidelines: acc_aha_ascvd_2013 (risk_assessment, interpretation sections)
+# Related guidelines: acc_aha_cholesterol_2018 (risk_assessment, statin_therapy sections)
 
 class ASCVDParams(BaseModel):
     """Parameters to calculate the ASCVD 10-year risk score."""

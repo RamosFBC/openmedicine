@@ -1,3 +1,4 @@
+# Related guidelines: kdigo_ckd_2024 (evaluation section), kdigo_aki_2012 (definition_and_staging section)
 import math
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence

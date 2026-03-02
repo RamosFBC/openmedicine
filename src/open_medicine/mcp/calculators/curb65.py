@@ -1,3 +1,4 @@
+# Related guidelines: bts_cap_2009 (severity_assessment section), ats_idsa_cap_2019 (severity_assessment section)
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 

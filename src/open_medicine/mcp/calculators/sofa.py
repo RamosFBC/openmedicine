@@ -2,7 +2,7 @@ from typing import Optional
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
-# Related guidelines: sepsis3_2016 (sepsis_definition section)
+# Related guidelines: sepsis3_2016 (sepsis_definition section), ssc_sepsis_2021 (screening_and_early_management, hemodynamics_and_vasopressors sections)
 
 class SOFAParams(BaseModel):
     """Parameters to calculate the SOFA score. Missing values are assumed normal."""

@@ -1,3 +1,6 @@
+# Related guidelines: btf_tbi_2016 (icp_monitoring_and_thresholds, surgical_and_medical_management sections)
+# Related guidelines: aha_asa_ich_2022 (surgical_and_icu_management section)
+# Related guidelines: aha_asa_sah_2023 (initial_assessment section)
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 

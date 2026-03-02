@@ -1,3 +1,4 @@
+# Related guidelines: kdigo_aki_2012 (definition_and_staging section)
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 
