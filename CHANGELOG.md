@@ -5,6 +5,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.0] - 2026-03-02
+
+### Added
+- **15 New Clinical Calculators (Phases 3-4):**
+  - **Primary Care/ED:** Ottawa Ankle Rules, Centor/McIsaac Score.
+  - **Psychiatry/Screening:** PHQ-9 (Depression), GAD-7 (Anxiety), AUDIT-C (Alcohol).
+  - **Critical Care:** APACHE II.
+  - **Hematology:** 4Ts HIT Score, ISTH DIC Score.
+  - **Cardiology:** Framingham Risk Score.
+  - **Fluids:** Maintenance IV Fluids (4-2-1 rule).
+  - **Obstetrics:** Bishop Score.
+  - **Rheumatology:** DAS28 (ESR/CRP variants).
+  - **Endocrinology:** FRAX Fracture Risk Assessment.
+- **13 New Clinical Guideline Modules:**
+  - **ACC/AHA Cholesterol 2018** — statin therapy, nonstatin therapy, risk assessment, secondary prevention.
+  - **SSC Sepsis 2021** — screening/early management, antimicrobial therapy, hemodynamics/vasopressors, ventilation/supportive care.
+  - **ADA DKA/HHS 2024** — diagnosis, fluid resuscitation, insulin/electrolytes, resolution/transition.
+  - **KDIGO AKI 2012** — definition/staging, prevention/management, RRT, contrast-induced AKI.
+  - **GINA Asthma 2024** — diagnosis/assessment, pharmacotherapy, exacerbation management, severe asthma/biologics.
+  - **AHA/ASA ICH 2022** — emergency diagnosis, BP management, hemostatic therapy, surgical/ICU management.
+  - **BTF TBI 2016** — ICP monitoring, cerebral perfusion/hyperosmolar therapy, surgical/medical management, ventilation/supportive care.
+  - **ATS/IDSA CAP 2019** — severity assessment, empiric antibiotics, microbiological testing, special populations.
+  - **ACR RA 2021** — initial DMARD therapy, biologic/targeted DMARDs, treat-to-target, glucocorticoids/special populations.
+  - **Endocrine Osteoporosis 2020** — risk assessment/diagnosis, pharmacotherapy, anabolic agents/sequencing, monitoring/drug holidays.
+  - **APA MDD 2023** — pharmacotherapy, psychotherapy, treatment monitoring, special populations.
+  - **APA AUD 2018** — assessment/screening, FDA-approved medications, off-label medications, psychosocial/combined treatment.
+  - **ACC/AHA Perioperative 2014** — stepwise cardiac assessment, risk assessment, beta-blocker management, medication management.
+- **Guideline cross-references** added to 9 existing calculators (anion_gap, ascvd, ckd_epi, cockcroft_gault, corrected_sodium, curb65, gcs, qsofa, sofa).
+- **Property-based bounds tests** (Hypothesis) for all new Phase 3-4 calculators.
+- **Comparative validation tests** for DAS28 and Maintenance IV Fluids.
+- **Project totals:** 67 calculators, 36 guideline modules, 1189 tests.
+
+### Fixed
+- DAS28-ESR calculator now floors score at 0 (negative values from sub-physiologic ESR inputs are not clinically meaningful).
+- Corrected DAS28-CRP comparative test vector (4.95 → 4.83 per formula).
+
 ## [0.3.1] - 2026-03-01
 
 ### Added
