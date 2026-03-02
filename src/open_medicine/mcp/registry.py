@@ -74,6 +74,35 @@ from open_medicine.mcp.calculators.parkland import calculate_parkland, ParklandP
 from open_medicine.mcp.calculators.ransons import calculate_ransons, RansonsParams
 from open_medicine.mcp.calculators.rockall import calculate_rockall, RockallParams
 from open_medicine.mcp.calculators.rts import calculate_rts, RTSParams
+from open_medicine.mcp.calculators.centor_mcisaac import calculate_centor_mcisaac, CentorMcIsaacParams
+from open_medicine.mcp.calculators.ottawa_ankle import calculate_ottawa_ankle, OttawaAnkleParams
+
+# Psychiatry / Mental Health Screening
+from open_medicine.mcp.calculators.gad7 import calculate_gad7, GAD7Params
+from open_medicine.mcp.calculators.phq9 import calculate_phq9, PHQ9Params
+from open_medicine.mcp.calculators.audit_c import calculate_audit_c, AUDITCParams
+
+# ICU Severity Scoring
+from open_medicine.mcp.calculators.apache2 import calculate_apache2, APACHE2Params
+
+# Hematology / Coagulation
+from open_medicine.mcp.calculators.isth_dic import calculate_isth_dic, ISTHDICParams
+from open_medicine.mcp.calculators.four_ts_hit import calculate_4ts_hit, FourTsHITParams
+
+# Cardiovascular Risk
+from open_medicine.mcp.calculators.framingham import calculate_framingham, FraminghamParams
+
+# Fluid Management
+from open_medicine.mcp.calculators.maintenance_iv_fluids import calculate_maintenance_iv_fluids, MaintenanceIVFluidsParams
+
+# Obstetrics
+from open_medicine.mcp.calculators.bishop import calculate_bishop, BishopParams
+
+# Bone / Osteoporosis
+from open_medicine.mcp.calculators.frax import calculate_frax, FRAXParams
+
+# Rheumatology
+from open_medicine.mcp.calculators.das28 import calculate_das28, DAS28Params
 
 
 
@@ -374,5 +403,90 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the Revised Trauma Score (RTS) for triage and outcome prediction in trauma.",
         pydantic_model=RTSParams,
         execute_function=calculate_rts
+    ),
+
+    # --- Emergency / Trauma Decision Rules ---
+    "calculate_ottawa_ankle": RegisteredTool(
+        description="Evaluates the Ottawa Ankle Rules to determine the need for ankle and/or midfoot radiography after an acute ankle or midfoot injury.",
+        pydantic_model=OttawaAnkleParams,
+        execute_function=calculate_ottawa_ankle
+    ),
+
+    # --- Infectious Disease ---
+    "calculate_centor_mcisaac": RegisteredTool(
+        description="Calculates the Modified Centor (McIsaac) Score to estimate the probability of group A streptococcal (GAS) pharyngitis and guide testing/treatment decisions.",
+        pydantic_model=CentorMcIsaacParams,
+        execute_function=calculate_centor_mcisaac
+    ),
+
+    # --- Psychiatry / Mental Health Screening ---
+    "calculate_gad7": RegisteredTool(
+        description="Calculates the GAD-7 (Generalized Anxiety Disorder 7-item) score for anxiety screening and severity assessment.",
+        pydantic_model=GAD7Params,
+        execute_function=calculate_gad7
+    ),
+    "calculate_phq9": RegisteredTool(
+        description="Calculates the PHQ-9 (Patient Health Questionnaire-9) score for depression screening and severity assessment.",
+        pydantic_model=PHQ9Params,
+        execute_function=calculate_phq9
+    ),
+    "calculate_audit_c": RegisteredTool(
+        description="Calculates the AUDIT-C (Alcohol Use Disorders Identification Test - Consumption) score for alcohol screening with sex-specific thresholds.",
+        pydantic_model=AUDITCParams,
+        execute_function=calculate_audit_c
+    ),
+
+    # --- ICU Severity Scoring ---
+    "calculate_apache2": RegisteredTool(
+        description="Calculates the APACHE II (Acute Physiology and Chronic Health Evaluation II) score for ICU mortality risk estimation based on 12 physiologic variables, age, and chronic health status.",
+        pydantic_model=APACHE2Params,
+        execute_function=calculate_apache2
+    ),
+
+    # --- Hematology / Coagulation ---
+    "calculate_isth_dic": RegisteredTool(
+        description="Calculates the ISTH Overt DIC Score for diagnosis of disseminated intravascular coagulation based on platelet count, fibrin-related markers, PT prolongation, and fibrinogen level.",
+        pydantic_model=ISTHDICParams,
+        execute_function=calculate_isth_dic
+    ),
+    "calculate_4ts_hit": RegisteredTool(
+        description="Calculates the 4Ts score for pretest probability of Heparin-Induced Thrombocytopenia (HIT) based on Thrombocytopenia, Timing, Thrombosis, and oTher causes.",
+        pydantic_model=FourTsHITParams,
+        execute_function=calculate_4ts_hit
+    ),
+
+    # --- Cardiovascular Risk ---
+    "calculate_framingham": RegisteredTool(
+        description="Calculates the Framingham Risk Score for 10-year general cardiovascular disease (CVD) risk using the 2008 D'Agostino et al. model.",
+        pydantic_model=FraminghamParams,
+        execute_function=calculate_framingham
+    ),
+
+    # --- Fluid Management ---
+    "calculate_maintenance_iv_fluids": RegisteredTool(
+        description="Calculates maintenance IV fluid rate using the Holliday-Segar method (4-2-1 rule) based on patient weight, providing hourly and daily fluid requirements.",
+        pydantic_model=MaintenanceIVFluidsParams,
+        execute_function=calculate_maintenance_iv_fluids
+    ),
+
+    # --- Obstetrics ---
+    "calculate_bishop": RegisteredTool(
+        description="Calculates the Bishop Score for pre-induction cervical favorability assessment based on dilation, effacement, station, consistency, and position.",
+        pydantic_model=BishopParams,
+        execute_function=calculate_bishop
+    ),
+
+    # --- Bone / Osteoporosis ---
+    "calculate_frax": RegisteredTool(
+        description="Calculates the estimated FRAX 10-year probability of major osteoporotic fracture and hip fracture for US Caucasian population based on clinical risk factors with optional femoral neck BMD T-score.",
+        pydantic_model=FRAXParams,
+        execute_function=calculate_frax
+    ),
+
+    # --- Rheumatology ---
+    "calculate_das28": RegisteredTool(
+        description="Calculates the DAS28 (Disease Activity Score 28) for rheumatoid arthritis disease activity assessment, supporting both ESR and CRP variants.",
+        pydantic_model=DAS28Params,
+        execute_function=calculate_das28
     ),
 }
