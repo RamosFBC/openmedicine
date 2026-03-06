@@ -12,7 +12,7 @@ Clinical judgment should always supplement the PSI score, particularly regarding
 
 > **OpenMedicine Calculator:** `calculate_curb65` — available via MCP for automated scoring.
 
-> **OpenMedicine Calculator:** `calculate_psi_port` — available via MCP for automated scoring (future calculator).
+> **OpenMedicine Calculator:** `calculate_psi_port` — available via MCP for automated scoring.
 
 ### Limitations of Severity Scores
 

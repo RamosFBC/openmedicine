@@ -27,7 +27,7 @@ Recommended screening instruments:
 | **CAGE** | 4 | >= 2 | Quick bedside screen |
 | **DAST** (Drug Abuse Screening Test) | 10 or 28 | Varies | Polysubstance use screening |
 
-> **OpenMedicine Calculator:** `calculate_audit_c` -- available via MCP for automated scoring.
+> **OpenMedicine Calculators:** `calculate_audit_c` and `calculate_cage` -- available via MCP for automated scoring.
 
 ### Statement 3: Use of Physiological Biomarkers (2C)
 

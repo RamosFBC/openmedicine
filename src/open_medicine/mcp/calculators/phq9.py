@@ -1,4 +1,5 @@
 # Related guidelines: apa_mdd_2023 (depression screening and treatment)
+# Related guidelines: acog_perinatal_depression_2018 (screening section)
 
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence

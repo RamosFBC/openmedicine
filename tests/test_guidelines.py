@@ -2468,3 +2468,960 @@ class TestRetrieveGuidelinePerioperative2014:
         assert "aspirin" in result.interpretation.lower() or "Aspirin" in result.interpretation
         assert "P2Y12" in result.interpretation
         assert result.evidence.source_doi == "10.1016/j.jacc.2014.07.944"
+
+
+class TestSearchGuidelinesPerinatalDepression2018:
+    """Search tests for the ACOG Perinatal Depression 2018 guideline."""
+
+    def test_search_perinatal_depression(self):
+        """Searching 'perinatal depression' should find the ACOG guideline."""
+        results = search_guidelines("perinatal depression")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_postpartum_depression(self):
+        """Searching 'postpartum depression' should find the ACOG guideline."""
+        results = search_guidelines("postpartum depression")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_epds(self):
+        """Searching 'EPDS' should find the ACOG perinatal depression guideline."""
+        results = search_guidelines("EPDS")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_maternal_mental_health(self):
+        """Searching 'maternal mental health' should find the ACOG guideline."""
+        results = search_guidelines("maternal mental health")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_ssri_pregnancy(self):
+        """Searching 'SSRI pregnancy' should find the ACOG guideline."""
+        results = search_guidelines("SSRI pregnancy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_prenatal_depression(self):
+        """Searching 'prenatal depression' should find the ACOG guideline."""
+        results = search_guidelines("prenatal depression")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+    def test_search_sertraline_pregnancy(self):
+        """Searching 'sertraline pregnancy' should find the ACOG guideline."""
+        results = search_guidelines("sertraline pregnancy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acog_perinatal_depression_2018" in ids
+
+
+class TestRetrieveGuidelinePerinatalDepression2018:
+    """Retrieve tests for every section of the ACOG Perinatal Depression 2018 guideline."""
+
+    def test_retrieve_screening(self):
+        """Retrieve the screening section of the perinatal depression guideline."""
+        result = retrieve_guideline("acog_perinatal_depression_2018", "screening")
+        assert result.value == "acog_perinatal_depression_2018/screening"
+        assert "EPDS" in result.interpretation
+        assert "PHQ-9" in result.interpretation
+        assert "validated" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1097/AOG.0000000000002927"
+
+    def test_retrieve_risk_factors_and_assessment(self):
+        """Retrieve the risk factors and assessment section of the perinatal depression guideline."""
+        result = retrieve_guideline("acog_perinatal_depression_2018", "risk_factors_and_assessment")
+        assert result.value == "acog_perinatal_depression_2018/risk_factors_and_assessment"
+        assert "1 in 7" in result.interpretation
+        assert "risk factor" in result.interpretation.lower()
+        assert "personal history" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1097/AOG.0000000000002927"
+
+    def test_retrieve_clinical_response(self):
+        """Retrieve the clinical response section of the perinatal depression guideline."""
+        result = retrieve_guideline("acog_perinatal_depression_2018", "clinical_response")
+        assert result.value == "acog_perinatal_depression_2018/clinical_response"
+        assert "sertraline" in result.interpretation.lower() or "Sertraline" in result.interpretation
+        assert "CBT" in result.interpretation or "Cognitive Behavioral Therapy" in result.interpretation
+        assert "referral" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1097/AOG.0000000000002927"
+
+    def test_retrieve_screening_contains_calculator_refs(self):
+        """The screening section should reference the EPDS and PHQ-9 calculators."""
+        result = retrieve_guideline("acog_perinatal_depression_2018", "screening")
+        assert "calculate_epds" in result.interpretation
+        assert "calculate_phq9" in result.interpretation
+
+    def test_retrieve_clinical_response_treatment_details(self):
+        """The clinical response section should contain pharmacotherapy and psychotherapy details."""
+        result = retrieve_guideline("acog_perinatal_depression_2018", "clinical_response")
+        assert "SSRI" in result.interpretation
+        assert "psychotherapy" in result.interpretation.lower() or "Psychotherapy" in result.interpretation
+        assert "breastfeeding" in result.interpretation.lower()
+
+
+class TestSearchGuidelinesABABurn2016:
+    """Search tests for the ABA Burn Care Guidelines 2016."""
+
+    def test_search_burn(self):
+        """Searching 'burn' should find the ABA burn guideline."""
+        results = search_guidelines("burn")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_tbsa(self):
+        """Searching 'TBSA' should find the ABA burn guideline."""
+        results = search_guidelines("TBSA")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_parkland_formula(self):
+        """Searching 'Parkland formula' should find the ABA burn guideline."""
+        results = search_guidelines("Parkland formula")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_fluid_resuscitation_burn(self):
+        """Searching 'fluid resuscitation' should find the ABA burn guideline."""
+        results = search_guidelines("fluid resuscitation")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_escharotomy(self):
+        """Searching 'escharotomy' should find the ABA burn guideline."""
+        results = search_guidelines("escharotomy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_inhalation_injury(self):
+        """Searching 'inhalation injury' should find the ABA burn guideline."""
+        results = search_guidelines("inhalation injury")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_silver_sulfadiazine(self):
+        """Searching 'silver sulfadiazine' should find the ABA burn guideline."""
+        results = search_guidelines("silver sulfadiazine")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_carbon_monoxide(self):
+        """Searching 'carbon monoxide' should find the ABA burn guideline."""
+        results = search_guidelines("carbon monoxide")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_burn_center_referral(self):
+        """Searching 'burn center referral' should find the ABA burn guideline."""
+        results = search_guidelines("burn center referral")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_skin_graft(self):
+        """Searching 'skin graft' should find the ABA burn guideline."""
+        results = search_guidelines("skin graft")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_hydroxocobalamin(self):
+        """Searching 'hydroxocobalamin' should find the ABA burn guideline."""
+        results = search_guidelines("hydroxocobalamin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+    def test_search_thermal_injury(self):
+        """Searching 'thermal injury' should find the ABA burn guideline."""
+        results = search_guidelines("thermal injury")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aba_burn_2016" in ids
+
+
+class TestRetrieveGuidelineABABurn2016:
+    """Retrieve tests for the ABA Burn Care Guidelines 2016."""
+
+    def test_retrieve_burn_assessment(self):
+        """Retrieve the burn assessment section of the ABA burn guideline."""
+        result = retrieve_guideline("aba_burn_2016", "burn_assessment")
+        assert result.value == "aba_burn_2016/burn_assessment"
+        assert "Rule of Nines" in result.interpretation
+        assert "TBSA" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/BCR.0000000000000283"
+
+    def test_retrieve_burn_assessment_depth(self):
+        """The burn assessment section should contain burn depth classification."""
+        result = retrieve_guideline("aba_burn_2016", "burn_assessment")
+        assert "partial-thickness" in result.interpretation.lower() or "Partial-Thickness" in result.interpretation
+        assert "full-thickness" in result.interpretation.lower() or "Full-Thickness" in result.interpretation
+
+    def test_retrieve_burn_assessment_referral(self):
+        """The burn assessment section should contain burn center referral criteria."""
+        result = retrieve_guideline("aba_burn_2016", "burn_assessment")
+        assert "referral" in result.interpretation.lower() or "Referral" in result.interpretation
+        assert "10%" in result.interpretation
+
+    def test_retrieve_burn_assessment_calculator_refs(self):
+        """The burn assessment section should reference the TBSA and Parkland calculators."""
+        result = retrieve_guideline("aba_burn_2016", "burn_assessment")
+        assert "calculate_tbsa" in result.interpretation
+        assert "calculate_parkland" in result.interpretation
+
+    def test_retrieve_fluid_resuscitation(self):
+        """Retrieve the fluid resuscitation section of the ABA burn guideline."""
+        result = retrieve_guideline("aba_burn_2016", "fluid_resuscitation")
+        assert result.value == "aba_burn_2016/fluid_resuscitation"
+        assert "Parkland" in result.interpretation
+        assert "Lactated Ringer" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/BCR.0000000000000283"
+
+    def test_retrieve_fluid_resuscitation_formula(self):
+        """The fluid resuscitation section should contain the Parkland formula details."""
+        result = retrieve_guideline("aba_burn_2016", "fluid_resuscitation")
+        assert "4 mL" in result.interpretation or "4 ml" in result.interpretation
+        assert "urine output" in result.interpretation.lower()
+
+    def test_retrieve_fluid_resuscitation_colloid(self):
+        """The fluid resuscitation section should discuss colloid administration."""
+        result = retrieve_guideline("aba_burn_2016", "fluid_resuscitation")
+        assert "albumin" in result.interpretation.lower() or "Albumin" in result.interpretation
+        assert "colloid" in result.interpretation.lower() or "Colloid" in result.interpretation
+
+    def test_retrieve_wound_management(self):
+        """Retrieve the wound management section of the ABA burn guideline."""
+        result = retrieve_guideline("aba_burn_2016", "wound_management")
+        assert result.value == "aba_burn_2016/wound_management"
+        assert "silver sulfadiazine" in result.interpretation.lower() or "Silver Sulfadiazine" in result.interpretation or "Silver sulfadiazine" in result.interpretation
+        assert "escharotomy" in result.interpretation.lower() or "Escharotomy" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/BCR.0000000000000283"
+
+    def test_retrieve_wound_management_excision(self):
+        """The wound management section should cover early excision and grafting."""
+        result = retrieve_guideline("aba_burn_2016", "wound_management")
+        assert "excision" in result.interpretation.lower()
+        assert "graft" in result.interpretation.lower()
+
+    def test_retrieve_wound_management_infection(self):
+        """The wound management section should address infection prevention."""
+        result = retrieve_guideline("aba_burn_2016", "wound_management")
+        assert "tetanus" in result.interpretation.lower() or "Tetanus" in result.interpretation
+        assert "prophylactic antibiotics" in result.interpretation.lower() or "prophylactic" in result.interpretation.lower()
+
+    def test_retrieve_inhalation_injury(self):
+        """Retrieve the inhalation injury section of the ABA burn guideline."""
+        result = retrieve_guideline("aba_burn_2016", "inhalation_injury")
+        assert result.value == "aba_burn_2016/inhalation_injury"
+        assert "carbon monoxide" in result.interpretation.lower() or "Carbon Monoxide" in result.interpretation
+        assert "bronchoscopy" in result.interpretation.lower() or "Bronchoscopy" in result.interpretation
+        assert result.evidence.source_doi == "10.1097/BCR.0000000000000283"
+
+    def test_retrieve_inhalation_injury_cyanide(self):
+        """The inhalation injury section should address cyanide poisoning treatment."""
+        result = retrieve_guideline("aba_burn_2016", "inhalation_injury")
+        assert "cyanide" in result.interpretation.lower() or "Cyanide" in result.interpretation
+        assert "hydroxocobalamin" in result.interpretation.lower() or "Hydroxocobalamin" in result.interpretation
+
+    def test_retrieve_inhalation_injury_airway(self):
+        """The inhalation injury section should address airway management."""
+        result = retrieve_guideline("aba_burn_2016", "inhalation_injury")
+        assert "intubation" in result.interpretation.lower() or "Intubation" in result.interpretation
+        assert "100%" in result.interpretation
+
+
+# ---------------------------------------------------------------------------
+# AHA/AAP NRP 2020 — Neonatal Resuscitation
+# ---------------------------------------------------------------------------
+
+
+class TestSearchGuidelinesNRP2020:
+    def test_search_neonatal_resuscitation(self):
+        """Searching 'neonatal resuscitation' should find the AHA/AAP NRP 2020 guideline."""
+        results = search_guidelines("neonatal resuscitation")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_nrp(self):
+        """Searching 'NRP' should find the AHA/AAP NRP 2020 guideline."""
+        results = search_guidelines("NRP")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_apgar(self):
+        """Searching 'Apgar' should find the AHA/AAP NRP 2020 guideline."""
+        results = search_guidelines("Apgar")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_newborn(self):
+        """Searching 'newborn' should find the AHA/AAP NRP 2020 guideline."""
+        results = search_guidelines("newborn")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_ppv(self):
+        """Searching 'positive pressure ventilation' should find the NRP guideline."""
+        results = search_guidelines("positive pressure ventilation")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_hie(self):
+        """Searching 'hypoxic-ischemic encephalopathy' should find the NRP guideline."""
+        results = search_guidelines("hypoxic-ischemic encephalopathy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_meconium(self):
+        """Searching 'meconium' should find the NRP guideline."""
+        results = search_guidelines("meconium")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_therapeutic_hypothermia(self):
+        """Searching 'therapeutic hypothermia' should find the NRP guideline."""
+        results = search_guidelines("therapeutic hypothermia")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_delayed_cord_clamping(self):
+        """Searching 'delayed cord clamping' should find the NRP guideline."""
+        results = search_guidelines("delayed cord clamping")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_aap_nrp_2020" in ids
+
+    def test_search_has_sections(self):
+        """Search result should include the expected sections."""
+        results = search_guidelines("neonatal resuscitation")
+        match = [r for r in results if r["guideline_id"] == "aha_aap_nrp_2020"][0]
+        assert "available_sections" in match
+        assert "initial_assessment" in match["available_sections"]
+        assert "respiratory_support" in match["available_sections"]
+        assert "chest_compressions_and_medications" in match["available_sections"]
+        assert "post_resuscitation_care" in match["available_sections"]
+
+
+class TestRetrieveGuidelineNRP2020:
+    def test_retrieve_initial_assessment(self):
+        """Retrieve the initial assessment section of the NRP 2020 guideline."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "initial_assessment")
+        assert result.value == "aha_aap_nrp_2020/initial_assessment"
+        assert "heart rate" in result.interpretation.lower() or "Heart Rate" in result.interpretation
+        assert result.evidence.source_doi == "10.1542/peds.2020-038505E"
+
+    def test_retrieve_initial_assessment_content(self):
+        """The initial assessment section should contain key clinical details."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "initial_assessment")
+        assert "meconium" in result.interpretation.lower() or "Meconium" in result.interpretation
+        assert "cord" in result.interpretation.lower()
+        assert "calculate_apgar" in result.interpretation
+
+    def test_retrieve_respiratory_support(self):
+        """Retrieve the respiratory support section of the NRP 2020 guideline."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "respiratory_support")
+        assert result.value == "aha_aap_nrp_2020/respiratory_support"
+        assert "PPV" in result.interpretation
+        assert result.evidence.source_doi == "10.1542/peds.2020-038505E"
+
+    def test_retrieve_respiratory_support_content(self):
+        """The respiratory support section should contain oxygen and ventilation details."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "respiratory_support")
+        assert "MR SOPA" in result.interpretation
+        assert "21%" in result.interpretation
+        assert "SpO2" in result.interpretation
+
+    def test_retrieve_chest_compressions_and_medications(self):
+        """Retrieve the chest compressions and medications section of the NRP 2020 guideline."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "chest_compressions_and_medications")
+        assert result.value == "aha_aap_nrp_2020/chest_compressions_and_medications"
+        assert "epinephrine" in result.interpretation.lower() or "Epinephrine" in result.interpretation
+        assert result.evidence.source_doi == "10.1542/peds.2020-038505E"
+
+    def test_retrieve_chest_compressions_content(self):
+        """The chest compressions section should contain dosing and technique details."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "chest_compressions_and_medications")
+        assert "3:1" in result.interpretation
+        assert "0.01" in result.interpretation
+        assert "10 mL/kg" in result.interpretation
+
+    def test_retrieve_post_resuscitation_care(self):
+        """Retrieve the post-resuscitation care section of the NRP 2020 guideline."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "post_resuscitation_care")
+        assert result.value == "aha_aap_nrp_2020/post_resuscitation_care"
+        assert "hypothermia" in result.interpretation.lower() or "Hypothermia" in result.interpretation
+        assert result.evidence.source_doi == "10.1542/peds.2020-038505E"
+
+    def test_retrieve_post_resuscitation_content(self):
+        """The post-resuscitation section should contain temperature and HIE details."""
+        result = retrieve_guideline("aha_aap_nrp_2020", "post_resuscitation_care")
+        assert "36.5" in result.interpretation
+        assert "33.5" in result.interpretation
+        assert "72 hours" in result.interpretation
+        assert "Apgar" in result.interpretation
+
+
+class TestSearchGuidelinesACRGout2020:
+    """Search tests for the ACR Gout 2020 guideline."""
+
+    def test_search_gout(self):
+        """Searching 'gout' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("gout")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_allopurinol(self):
+        """Searching 'allopurinol' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("allopurinol")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_hyperuricemia(self):
+        """Searching 'hyperuricemia' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("hyperuricemia")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_urate_lowering_therapy(self):
+        """Searching 'urate-lowering therapy' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("urate-lowering therapy")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_colchicine(self):
+        """Searching 'colchicine' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("colchicine")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_febuxostat(self):
+        """Searching 'febuxostat' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("febuxostat")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_pegloticase(self):
+        """Searching 'pegloticase' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("pegloticase")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_tophi(self):
+        """Searching 'tophi' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("tophi")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_hla_b5801(self):
+        """Searching 'HLA-B*5801' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("HLA-B*5801")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_refractory_gout(self):
+        """Searching 'refractory gout' should find the ACR Gout 2020 guideline."""
+        results = search_guidelines("refractory gout")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "acr_gout_2020" in ids
+
+    def test_search_structure(self):
+        """Verify the search result structure for the ACR Gout 2020 guideline."""
+        results = search_guidelines("gout")
+        match = [r for r in results if r["guideline_id"] == "acr_gout_2020"][0]
+        assert "doi" in match
+        assert "available_sections" in match
+        assert "urate_lowering_therapy" in match["available_sections"]
+        assert "flare_management" in match["available_sections"]
+        assert "lifestyle_and_concurrent_medications" in match["available_sections"]
+        assert "special_populations_and_refractory_gout" in match["available_sections"]
+
+
+class TestRetrieveGuidelineACRGout2020:
+    """Retrieve tests for every section of the ACR Gout 2020 guideline."""
+
+    def test_retrieve_urate_lowering_therapy(self):
+        """Retrieve the urate-lowering therapy section of the ACR Gout 2020 guideline."""
+        result = retrieve_guideline("acr_gout_2020", "urate_lowering_therapy")
+        assert result.value == "acr_gout_2020/urate_lowering_therapy"
+        assert "allopurinol" in result.interpretation.lower() or "Allopurinol" in result.interpretation
+        assert result.evidence.source_doi == "10.1002/art.41247"
+
+    def test_retrieve_ult_content(self):
+        """The ULT section should contain treat-to-target and dosing details."""
+        result = retrieve_guideline("acr_gout_2020", "urate_lowering_therapy")
+        assert "6 mg/dL" in result.interpretation
+        assert "100 mg" in result.interpretation
+        assert "800 mg" in result.interpretation
+        assert "HLA-B*5801" in result.interpretation
+
+    def test_retrieve_flare_management(self):
+        """Retrieve the flare management section of the ACR Gout 2020 guideline."""
+        result = retrieve_guideline("acr_gout_2020", "flare_management")
+        assert result.value == "acr_gout_2020/flare_management"
+        assert "colchicine" in result.interpretation.lower() or "Colchicine" in result.interpretation
+        assert result.evidence.source_doi == "10.1002/art.41247"
+
+    def test_retrieve_flare_content(self):
+        """The flare management section should contain dosing and prophylaxis details."""
+        result = retrieve_guideline("acr_gout_2020", "flare_management")
+        assert "1.2 mg" in result.interpretation
+        assert "0.6 mg" in result.interpretation
+        assert "3-6 months" in result.interpretation
+
+    def test_retrieve_lifestyle_and_concurrent_medications(self):
+        """Retrieve the lifestyle and concurrent medications section."""
+        result = retrieve_guideline("acr_gout_2020", "lifestyle_and_concurrent_medications")
+        assert result.value == "acr_gout_2020/lifestyle_and_concurrent_medications"
+        assert "losartan" in result.interpretation.lower() or "Losartan" in result.interpretation
+        assert result.evidence.source_doi == "10.1002/art.41247"
+
+    def test_retrieve_lifestyle_content(self):
+        """The lifestyle section should contain diet and medication management details."""
+        result = retrieve_guideline("acr_gout_2020", "lifestyle_and_concurrent_medications")
+        assert "hydrochlorothiazide" in result.interpretation.lower() or "Hydrochlorothiazide" in result.interpretation
+        assert "aspirin" in result.interpretation.lower() or "Aspirin" in result.interpretation
+        assert "alcohol" in result.interpretation.lower()
+
+    def test_retrieve_special_populations_and_refractory_gout(self):
+        """Retrieve the special populations and refractory gout section."""
+        result = retrieve_guideline("acr_gout_2020", "special_populations_and_refractory_gout")
+        assert result.value == "acr_gout_2020/special_populations_and_refractory_gout"
+        assert "pegloticase" in result.interpretation.lower() or "Pegloticase" in result.interpretation
+        assert result.evidence.source_doi == "10.1002/art.41247"
+
+    def test_retrieve_special_populations_content(self):
+        """The special populations section should contain CKD, CVD, and pegloticase details."""
+        result = retrieve_guideline("acr_gout_2020", "special_populations_and_refractory_gout")
+        assert "CKD" in result.interpretation
+        assert "CARES" in result.interpretation
+        assert "8 mg" in result.interpretation
+        assert "IL-1" in result.interpretation
+
+
+class TestSearchGuidelinesIDSAMeningitis2017:
+    """Search tests for the IDSA Healthcare-Associated Ventriculitis and Meningitis 2017 guideline."""
+
+    def test_search_ventriculitis(self):
+        """Searching 'ventriculitis' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("ventriculitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_healthcare_associated_meningitis(self):
+        """Searching 'healthcare-associated meningitis' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("healthcare-associated meningitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_csf_shunt_infection(self):
+        """Searching 'CSF shunt infection' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("CSF shunt infection")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_evd(self):
+        """Searching 'external ventricular drain' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("external ventricular drain")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_intraventricular_antibiotics(self):
+        """Searching 'intraventricular antibiotics' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("intraventricular antibiotics")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_nosocomial_meningitis(self):
+        """Searching 'nosocomial meningitis' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("nosocomial meningitis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_colistimethate(self):
+        """Searching 'colistimethate' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("colistimethate")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_shunt_reimplantation(self):
+        """Searching 'shunt reimplantation' should find the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("shunt reimplantation")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_meningitis_2017" in ids
+
+    def test_search_structure(self):
+        """Verify the search result structure for the IDSA meningitis 2017 guideline."""
+        results = search_guidelines("ventriculitis")
+        match = [r for r in results if r["guideline_id"] == "idsa_meningitis_2017"][0]
+        assert "doi" in match
+        assert "available_sections" in match
+        assert "diagnosis" in match["available_sections"]
+        assert "empiric_and_targeted_therapy" in match["available_sections"]
+        assert "device_management" in match["available_sections"]
+        assert "prevention" in match["available_sections"]
+
+
+class TestRetrieveGuidelineIDSAMeningitis2017:
+    """Retrieve tests for every section of the IDSA Meningitis 2017 guideline."""
+
+    def test_retrieve_diagnosis(self):
+        """Retrieve the diagnosis section of the IDSA meningitis 2017 guideline."""
+        result = retrieve_guideline("idsa_meningitis_2017", "diagnosis")
+        assert result.value == "idsa_meningitis_2017/diagnosis"
+        assert "CSF" in result.interpretation
+        assert "culture" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1093/cid/cix034"
+
+    def test_retrieve_diagnosis_content(self):
+        """The diagnosis section should contain CSF analysis details and diagnostic classification."""
+        result = retrieve_guideline("idsa_meningitis_2017", "diagnosis")
+        assert "10 days" in result.interpretation
+        assert "Gram stain" in result.interpretation or "Gram Stain" in result.interpretation
+        assert "lactate" in result.interpretation.lower()
+        assert "4 mmol/L" in result.interpretation
+        assert "MRI" in result.interpretation
+
+    def test_retrieve_empiric_and_targeted_therapy(self):
+        """Retrieve the empiric and targeted therapy section."""
+        result = retrieve_guideline("idsa_meningitis_2017", "empiric_and_targeted_therapy")
+        assert result.value == "idsa_meningitis_2017/empiric_and_targeted_therapy"
+        assert "vancomycin" in result.interpretation.lower() or "Vancomycin" in result.interpretation
+        assert result.evidence.source_doi == "10.1093/cid/cix034"
+
+    def test_retrieve_empiric_therapy_content(self):
+        """The empiric therapy section should contain specific dosing and organism-specific recommendations."""
+        result = retrieve_guideline("idsa_meningitis_2017", "empiric_and_targeted_therapy")
+        assert "15-20 mcg/mL" in result.interpretation
+        assert "cefepime" in result.interpretation.lower() or "Cefepime" in result.interpretation
+        assert "meropenem" in result.interpretation.lower() or "Meropenem" in result.interpretation
+        assert "nafcillin" in result.interpretation.lower() or "Nafcillin" in result.interpretation
+        assert "Penicillin G" in result.interpretation
+        assert "intraventricular" in result.interpretation.lower()
+
+    def test_retrieve_device_management(self):
+        """Retrieve the device management section."""
+        result = retrieve_guideline("idsa_meningitis_2017", "device_management")
+        assert result.value == "idsa_meningitis_2017/device_management"
+        assert "shunt" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1093/cid/cix034"
+
+    def test_retrieve_device_management_content(self):
+        """The device management section should contain reimplantation timing details."""
+        result = retrieve_guideline("idsa_meningitis_2017", "device_management")
+        assert "day 3" in result.interpretation.lower() or "Day 3" in result.interpretation
+        assert "day 10" in result.interpretation.lower() or "Day 10" in result.interpretation
+        assert "48 hours" in result.interpretation
+
+    def test_retrieve_prevention(self):
+        """Retrieve the prevention section."""
+        result = retrieve_guideline("idsa_meningitis_2017", "prevention")
+        assert result.value == "idsa_meningitis_2017/prevention"
+        assert "prophylaxis" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1093/cid/cix034"
+
+    def test_retrieve_prevention_content(self):
+        """The prevention section should contain device and prophylaxis details."""
+        result = retrieve_guideline("idsa_meningitis_2017", "prevention")
+        assert "antimicrobial-impregnated" in result.interpretation.lower() or "Antimicrobial-Impregnated" in result.interpretation
+        assert "rifampin" in result.interpretation.lower() or "Rifampin" in result.interpretation
+        assert "pneumococcal" in result.interpretation.lower() or "Pneumococcal" in result.interpretation
+        assert "7 days" in result.interpretation
+
+
+class TestSearchGuidelinesAHAEndocarditis2015:
+    def test_search_infective_endocarditis(self):
+        """Searching 'infective endocarditis' should find the AHA endocarditis guideline."""
+        results = search_guidelines("infective endocarditis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+    def test_search_duke_criteria(self):
+        """Searching 'Duke criteria' should find the AHA endocarditis guideline."""
+        results = search_guidelines("Duke criteria")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+    def test_search_vegetation(self):
+        """Searching 'vegetation' should find the AHA endocarditis guideline."""
+        results = search_guidelines("vegetation")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+    def test_search_prosthetic_valve_endocarditis(self):
+        """Searching 'prosthetic valve endocarditis' should find the AHA guideline."""
+        results = search_guidelines("prosthetic valve endocarditis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+    def test_search_nafcillin(self):
+        """Searching 'nafcillin' should find the AHA endocarditis guideline."""
+        results = search_guidelines("nafcillin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+    def test_search_hacek(self):
+        """Searching 'HACEK' should find the AHA endocarditis guideline."""
+        results = search_guidelines("HACEK")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "aha_endocarditis_2015" in ids
+
+
+class TestRetrieveGuidelineAHAEndocarditis2015:
+    def test_retrieve_diagnosis(self):
+        """Retrieve the diagnosis section of the AHA endocarditis guideline."""
+        result = retrieve_guideline("aha_endocarditis_2015", "diagnosis")
+        assert result.value == "aha_endocarditis_2015/diagnosis"
+        assert "Duke" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000000296"
+
+    def test_retrieve_diagnosis_content(self):
+        """The diagnosis section should contain Modified Duke Criteria, blood culture, and echocardiography details."""
+        result = retrieve_guideline("aha_endocarditis_2015", "diagnosis")
+        assert "Modified Duke Criteria" in result.interpretation
+        assert "blood culture" in result.interpretation.lower() or "Blood Culture" in result.interpretation
+        assert "TEE" in result.interpretation
+        assert "TTE" in result.interpretation
+        assert "38.0" in result.interpretation
+
+    def test_retrieve_antimicrobial_therapy(self):
+        """Retrieve the antimicrobial therapy section of the AHA endocarditis guideline."""
+        result = retrieve_guideline("aha_endocarditis_2015", "antimicrobial_therapy")
+        assert result.value == "aha_endocarditis_2015/antimicrobial_therapy"
+        assert "vancomycin" in result.interpretation.lower() or "Vancomycin" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000000296"
+
+    def test_retrieve_antimicrobial_therapy_content(self):
+        """The antimicrobial therapy section should contain organism-specific regimens."""
+        result = retrieve_guideline("aha_endocarditis_2015", "antimicrobial_therapy")
+        assert "nafcillin" in result.interpretation.lower() or "Nafcillin" in result.interpretation
+        assert "6 weeks" in result.interpretation
+        assert "Penicillin G" in result.interpretation
+        assert "gentamicin" in result.interpretation.lower() or "Gentamicin" in result.interpretation
+        assert "ceftriaxone" in result.interpretation.lower() or "Ceftriaxone" in result.interpretation
+
+    def test_retrieve_surgical_management(self):
+        """Retrieve the surgical management section of the AHA endocarditis guideline."""
+        result = retrieve_guideline("aha_endocarditis_2015", "surgical_management")
+        assert result.value == "aha_endocarditis_2015/surgical_management"
+        assert "surgery" in result.interpretation.lower() or "Surgery" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000000296"
+
+    def test_retrieve_surgical_management_content(self):
+        """The surgical management section should contain indications and timing."""
+        result = retrieve_guideline("aha_endocarditis_2015", "surgical_management")
+        assert "heart failure" in result.interpretation.lower() or "Heart Failure" in result.interpretation
+        assert "5-7 days" in result.interpretation
+        assert "abscess" in result.interpretation.lower() or "Abscess" in result.interpretation
+        assert "Class I" in result.interpretation
+
+    def test_retrieve_complications(self):
+        """Retrieve the complications section of the AHA endocarditis guideline."""
+        result = retrieve_guideline("aha_endocarditis_2015", "complications")
+        assert result.value == "aha_endocarditis_2015/complications"
+        assert "emboli" in result.interpretation.lower() or "Emboli" in result.interpretation
+        assert result.evidence.source_doi == "10.1161/CIR.0000000000000296"
+
+    def test_retrieve_complications_content(self):
+        """The complications section should contain cardiac, embolic, and neurological complication details."""
+        result = retrieve_guideline("aha_endocarditis_2015", "complications")
+        assert "stroke" in result.interpretation.lower() or "Stroke" in result.interpretation
+        assert "mycotic aneurysm" in result.interpretation.lower() or "Mycotic" in result.interpretation
+        assert "paravalvular" in result.interpretation.lower() or "Paravalvular" in result.interpretation
+        assert "10 mm" in result.interpretation
+
+
+class TestSearchGuidelinesIDSAUTI2022:
+    """Search tests for the IDSA Complicated UTI 2022 guideline."""
+
+    def test_search_complicated_uti(self):
+        """Searching 'complicated UTI' should find the IDSA UTI guideline."""
+        results = search_guidelines("complicated UTI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_pyelonephritis(self):
+        """Searching 'pyelonephritis' should find the IDSA UTI guideline."""
+        results = search_guidelines("pyelonephritis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_cuti(self):
+        """Searching 'cUTI' should find the IDSA UTI guideline."""
+        results = search_guidelines("cUTI")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_urosepsis(self):
+        """Searching 'urosepsis' should find the IDSA UTI guideline."""
+        results = search_guidelines("urosepsis")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_levofloxacin(self):
+        """Searching 'levofloxacin' should find the IDSA UTI guideline."""
+        results = search_guidelines("levofloxacin")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_ceftriaxone(self):
+        """Searching 'ceftriaxone' should find the IDSA UTI guideline."""
+        results = search_guidelines("ceftriaxone")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_iv_to_oral(self):
+        """Searching 'IV to oral switch' should find the IDSA UTI guideline."""
+        results = search_guidelines("IV to oral switch")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_trimethoprim(self):
+        """Searching 'trimethoprim-sulfamethoxazole' should find the IDSA UTI guideline."""
+        results = search_guidelines("trimethoprim-sulfamethoxazole")
+        assert len(results) >= 1
+        ids = [r["guideline_id"] for r in results]
+        assert "idsa_uti_2022" in ids
+
+    def test_search_structure(self):
+        """Verify structure of IDSA UTI guideline search result."""
+        results = search_guidelines("complicated urinary tract infection")
+        assert len(results) >= 1
+        match = [r for r in results if r["guideline_id"] == "idsa_uti_2022"][0]
+        assert "doi" in match
+        assert "available_sections" in match
+        assert "definitions_and_scope" in match["available_sections"]
+        assert "empiric_antibiotic_selection" in match["available_sections"]
+        assert "iv_to_oral_transition" in match["available_sections"]
+        assert "treatment_duration" in match["available_sections"]
+
+
+class TestRetrieveGuidelineIDSAUTI2022:
+    """Retrieve tests for every section of the IDSA Complicated UTI 2022 guideline."""
+
+    def test_retrieve_definitions_and_scope(self):
+        """Retrieve the definitions and scope section of the IDSA UTI guideline."""
+        result = retrieve_guideline("idsa_uti_2022", "definitions_and_scope")
+        assert result.value == "idsa_uti_2022/definitions_and_scope"
+        assert "complicated" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1093/cid/ciac749"
+
+    def test_retrieve_definitions_content(self):
+        """The definitions section should contain cUTI definition details."""
+        result = retrieve_guideline("idsa_uti_2022", "definitions_and_scope")
+        assert "fever" in result.interpretation.lower() or "Fever" in result.interpretation
+        assert "bladder" in result.interpretation.lower()
+        assert "Nitrofurantoin" in result.interpretation
+
+    def test_retrieve_empiric_antibiotic_selection(self):
+        """Retrieve the empiric antibiotic selection section of the IDSA UTI guideline."""
+        result = retrieve_guideline("idsa_uti_2022", "empiric_antibiotic_selection")
+        assert result.value == "idsa_uti_2022/empiric_antibiotic_selection"
+        assert "ceftriaxone" in result.interpretation.lower() or "Ceftriaxone" in result.interpretation
+        assert result.evidence.source_doi == "10.1093/cid/ciac749"
+
+    def test_retrieve_empiric_content(self):
+        """The empiric selection section should contain the 4-step framework and dosing."""
+        result = retrieve_guideline("idsa_uti_2022", "empiric_antibiotic_selection")
+        assert "Step 1" in result.interpretation
+        assert "sepsis" in result.interpretation.lower()
+        assert "antibiogram" in result.interpretation.lower()
+        assert "fluoroquinolone" in result.interpretation.lower()
+        assert "12 months" in result.interpretation
+
+    def test_retrieve_empiric_dosing(self):
+        """The empiric selection section should contain specific IV dosing."""
+        result = retrieve_guideline("idsa_uti_2022", "empiric_antibiotic_selection")
+        assert "750 mg" in result.interpretation
+        assert "4.5 g" in result.interpretation
+        assert "90%" in result.interpretation
+
+    def test_retrieve_iv_to_oral_transition(self):
+        """Retrieve the IV-to-oral transition section of the IDSA UTI guideline."""
+        result = retrieve_guideline("idsa_uti_2022", "iv_to_oral_transition")
+        assert result.value == "idsa_uti_2022/iv_to_oral_transition"
+        assert "oral" in result.interpretation.lower()
+        assert result.evidence.source_doi == "10.1093/cid/ciac749"
+
+    def test_retrieve_iv_to_oral_content(self):
+        """The IV-to-oral section should contain switch criteria and oral dosing."""
+        result = retrieve_guideline("idsa_uti_2022", "iv_to_oral_transition")
+        assert "clinically improving" in result.interpretation.lower() or "Clinical improvement" in result.interpretation
+        assert "levofloxacin" in result.interpretation.lower() or "Levofloxacin" in result.interpretation
+        assert "TMP-SMX" in result.interpretation
+        assert "bioavailability" in result.interpretation.lower()
+
+    def test_retrieve_iv_to_oral_oral_dosing(self):
+        """The IV-to-oral section should contain specific oral dosing regimens."""
+        result = retrieve_guideline("idsa_uti_2022", "iv_to_oral_transition")
+        assert "750 mg" in result.interpretation
+        assert "160/800 mg" in result.interpretation
+        assert "875/125 mg" in result.interpretation
+
+    def test_retrieve_treatment_duration(self):
+        """Retrieve the treatment duration section of the IDSA UTI guideline."""
+        result = retrieve_guideline("idsa_uti_2022", "treatment_duration")
+        assert result.value == "idsa_uti_2022/treatment_duration"
+        assert "5-7 days" in result.interpretation
+        assert result.evidence.source_doi == "10.1093/cid/ciac749"
+
+    def test_retrieve_treatment_duration_content(self):
+        """The treatment duration section should contain short-course and bacteremia details."""
+        result = retrieve_guideline("idsa_uti_2022", "treatment_duration")
+        assert "7 days" in result.interpretation
+        assert "bacteremia" in result.interpretation.lower()
+        assert "fluoroquinolone" in result.interpretation.lower()
+        assert "De-escalate" in result.interpretation or "de-escalate" in result.interpretation

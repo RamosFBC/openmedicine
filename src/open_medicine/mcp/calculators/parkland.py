@@ -1,3 +1,4 @@
+# Related guidelines: aba_burn_2016 (fluid_resuscitation section)
 from pydantic import BaseModel, Field
 from open_medicine.foundation.base import ClinicalResult, Evidence
 

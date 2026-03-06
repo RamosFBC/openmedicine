@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-03-06
+
+### Added
+- **28 New Clinical Calculators (Phases 5-7):**
+  - **Cross-Domain Essentials (Phase 5):** RCRI (Revised Cardiac Risk Index), Charlson Comorbidity Index, ECOG Performance Status, Karnofsky Performance Status, Apgar Score, PSI/PORT (Pneumonia Severity Index), Clinical Frailty Scale, TBSA Rule of Nines, Edinburgh Postnatal Depression Scale (EPDS), CAGE Questionnaire.
+  - **Infectious Disease & Toxicology (Phase 6):** MASCC Score (Febrile Neutropenia), Modified Duke Criteria (Endocarditis), CIWA-Ar (Alcohol Withdrawal), COWS (Clinical Opiate Withdrawal Scale), Rumack-Matthew Nomogram (Acetaminophen Toxicity), Naranjo ADR Probability Scale, IPSS (International Prostate Symptom Score), MEWS (Modified Early Warning Score).
+  - **ICU/Delirium & Pediatrics (Phase 7):** CAM-ICU (Confusion Assessment Method), RASS (Richmond Agitation-Sedation Scale), STOP-BANG (OSA Screening), AIMS65 (Upper GI Bleed Mortality), Pediatric GCS, PEWS (Pediatric Early Warning Score), LRINEC (Necrotizing Fasciitis), CRB-65 (Community Pneumonia).
+- **7 New Clinical Guideline Modules:**
+  - **ABA Burn Care 2016** — initial assessment, fluid resuscitation (Parkland formula), wound management, inhalation injury.
+  - **ACOG Perinatal Depression 2018** — screening recommendations (EPDS), treatment during pregnancy, postpartum management.
+  - **AHA/AAP NRP 2020** — neonatal resuscitation algorithm, Apgar scoring, initial steps, positive pressure ventilation.
+  - **AHA Infective Endocarditis 2015** — Duke criteria, empiric/targeted antimicrobial therapy, surgical indications.
+  - **IDSA Bacterial Meningitis 2017** — empiric antibiotics, dexamethasone adjunctive therapy, pathogen-specific treatment.
+  - **IDSA Complicated UTI 2022** — diagnosis, empiric and targeted antimicrobial therapy, catheter-associated UTI.
+  - **ACR Gout 2020** — urate-lowering therapy, acute flare management, treat-to-target strategy.
+- **Property-based bounds tests** (Hypothesis) for all 28 new calculators.
+- **Comparative validation tests** for Rumack-Matthew nomogram.
+- **Cross-reference links** between new calculators and guidelines (Duke Criteria ↔ Endocarditis, CIWA-Ar ↔ AUD, PSI/PORT ↔ CAP, EPDS ↔ Perinatal Depression, TBSA ↔ Burn Care, Apgar ↔ NRP, CAGE ↔ AUD, CRB-65 ↔ CAP).
+- **Project totals:** 92 calculators, 43 guideline modules, 2335 tests.
+
+### Fixed
+- Duke Criteria fuzz test corrected to match intentional design (no LOINC code exists for Duke classification).
+- Minor fixes to GCS, Parkland, and PHQ-9 calculators.
+
 ## [0.4.0] - 2026-03-02
 
 ### Added

@@ -28,6 +28,7 @@ from open_medicine.mcp.calculators.grace_score import calculate_grace_score, GRA
 # Phase 1: Early Warning
 from open_medicine.mcp.calculators.qsofa import calculate_qsofa, QSOFAParams
 from open_medicine.mcp.calculators.news2 import calculate_news2, NEWS2Params
+from open_medicine.mcp.calculators.mews import calculate_mews, MEWSParams
 
 # Phase 1: Clinical Equations
 from open_medicine.mcp.calculators.corrected_qtc import calculate_corrected_qtc, CorrectedQTcParams
@@ -81,6 +82,8 @@ from open_medicine.mcp.calculators.ottawa_ankle import calculate_ottawa_ankle, O
 from open_medicine.mcp.calculators.gad7 import calculate_gad7, GAD7Params
 from open_medicine.mcp.calculators.phq9 import calculate_phq9, PHQ9Params
 from open_medicine.mcp.calculators.audit_c import calculate_audit_c, AUDITCParams
+from open_medicine.mcp.calculators.cage import calculate_cage, CAGEParams
+from open_medicine.mcp.calculators.epds import calculate_epds, EPDSParams
 
 # ICU Severity Scoring
 from open_medicine.mcp.calculators.apache2 import calculate_apache2, APACHE2Params
@@ -104,6 +107,70 @@ from open_medicine.mcp.calculators.frax import calculate_frax, FRAXParams
 # Rheumatology
 from open_medicine.mcp.calculators.das28 import calculate_das28, DAS28Params
 
+# Perioperative Cardiac Risk
+from open_medicine.mcp.calculators.rcri import calculate_rcri, RCRIParams
+
+# Comorbidity
+from open_medicine.mcp.calculators.charlson import calculate_charlson, CharlsonParams
+
+# Oncology
+from open_medicine.mcp.calculators.ecog import calculate_ecog, ECOGParams
+from open_medicine.mcp.calculators.karnofsky import calculate_karnofsky, KarnofskyParams
+
+# Geriatrics / Frailty
+from open_medicine.mcp.calculators.clinical_frailty import calculate_clinical_frailty, ClinicalFrailtyParams
+
+# Neonatal
+from open_medicine.mcp.calculators.apgar import calculate_apgar, ApgarParams
+
+# Burn Assessment
+from open_medicine.mcp.calculators.tbsa import calculate_tbsa, TBSAParams
+
+# Pneumonia Severity
+from open_medicine.mcp.calculators.psi_port import calculate_psi_port, PSIPortParams
+from open_medicine.mcp.calculators.crb65 import calculate_crb65, CRB65Params
+
+# Toxicology
+from open_medicine.mcp.calculators.rumack_matthew import calculate_rumack_matthew, RumackMatthewParams
+
+# Urology
+from open_medicine.mcp.calculators.ipss import calculate_ipss, IPSSParams
+
+# Infectious Disease
+from open_medicine.mcp.calculators.duke_criteria import calculate_duke_criteria, DukeCriteriaParams
+
+# Oncology: Febrile Neutropenia
+from open_medicine.mcp.calculators.mascc import calculate_mascc, MASCCParams
+
+# Pharmacovigilance / Drug Safety
+from open_medicine.mcp.calculators.naranjo import calculate_naranjo, NaranjoParams
+
+# Alcohol Withdrawal
+from open_medicine.mcp.calculators.ciwa_ar import calculate_ciwa_ar, CIWAArParams
+
+# Opioid Withdrawal
+from open_medicine.mcp.calculators.cows import calculate_cows, COWSParams
+
+# GI Bleeding Risk
+from open_medicine.mcp.calculators.aims65 import calculate_aims65, AIMS65Params
+
+# Sleep Medicine / Perioperative OSA Screening
+from open_medicine.mcp.calculators.stop_bang import calculate_stop_bang, STOPBangParams
+
+# Soft Tissue Infection
+from open_medicine.mcp.calculators.lrinec import calculate_lrinec, LRINECParams
+
+# ICU Sedation Assessment
+from open_medicine.mcp.calculators.rass import calculate_rass, RASSParams
+
+# Pediatric Neurology
+from open_medicine.mcp.calculators.pediatric_gcs import calculate_pediatric_gcs, PediatricGCSParams
+
+# ICU Delirium Assessment
+from open_medicine.mcp.calculators.cam_icu import calculate_cam_icu, CAMICUParams
+
+# Pediatric Early Warning
+from open_medicine.mcp.calculators.pews import calculate_pews, PEWSParams
 
 
 class RegisteredTool:
@@ -225,6 +292,11 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the NEWS2 (National Early Warning Score 2) for acute illness severity with SpO2 Scale 1/2 and ACVPU consciousness.",
         pydantic_model=NEWS2Params,
         execute_function=calculate_news2
+    ),
+    "calculate_mews": RegisteredTool(
+        description="Calculates the Modified Early Warning Score (MEWS) for identifying medical patients at risk of clinical deterioration based on vital signs and AVPU consciousness level.",
+        pydantic_model=MEWSParams,
+        execute_function=calculate_mews
     ),
 
     # --- Phase 1: Clinical Equations ---
@@ -435,6 +507,16 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         pydantic_model=AUDITCParams,
         execute_function=calculate_audit_c
     ),
+    "calculate_cage": RegisteredTool(
+        description="Calculates the CAGE Questionnaire score (0-4) for alcohol use screening based on four yes/no questions (Cut down, Annoyed, Guilty, Eye-opener).",
+        pydantic_model=CAGEParams,
+        execute_function=calculate_cage
+    ),
+    "calculate_epds": RegisteredTool(
+        description="Calculates the Edinburgh Postnatal Depression Scale (EPDS) score for screening postnatal depression in the perinatal period.",
+        pydantic_model=EPDSParams,
+        execute_function=calculate_epds
+    ),
 
     # --- ICU Severity Scoring ---
     "calculate_apache2": RegisteredTool(
@@ -488,5 +570,162 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the DAS28 (Disease Activity Score 28) for rheumatoid arthritis disease activity assessment, supporting both ESR and CRP variants.",
         pydantic_model=DAS28Params,
         execute_function=calculate_das28
+    ),
+
+    # --- Perioperative Cardiac Risk ---
+    "calculate_rcri": RegisteredTool(
+        description="Calculates the Revised Cardiac Risk Index (RCRI / Lee Index) for estimating risk of major cardiac complications after noncardiac surgery based on 6 clinical predictors.",
+        pydantic_model=RCRIParams,
+        execute_function=calculate_rcri
+    ),
+
+    # --- Comorbidity ---
+    "calculate_charlson": RegisteredTool(
+        description="Calculates the Charlson Comorbidity Index (CCI) for predicting 10-year mortality based on 19 weighted comorbid conditions with optional age adjustment.",
+        pydantic_model=CharlsonParams,
+        execute_function=calculate_charlson
+    ),
+
+    # --- Oncology ---
+    "calculate_ecog": RegisteredTool(
+        description="Records and interprets the ECOG (Eastern Cooperative Oncology Group) Performance Status for oncology functional assessment, treatment decisions, and clinical trial eligibility.",
+        pydantic_model=ECOGParams,
+        execute_function=calculate_ecog
+    ),
+    "calculate_karnofsky": RegisteredTool(
+        description="Records and interprets the Karnofsky Performance Status (KPS) score for oncology functional assessment, chemotherapy tolerance, and prognosis estimation.",
+        pydantic_model=KarnofskyParams,
+        execute_function=calculate_karnofsky
+    ),
+
+    # --- Neonatal ---
+    "calculate_apgar": RegisteredTool(
+        description="Calculates the Apgar Score for rapid assessment of newborn condition at birth based on five criteria: Appearance, Pulse, Grimace, Activity, and Respiration.",
+        pydantic_model=ApgarParams,
+        execute_function=calculate_apgar
+    ),
+
+    # --- Burn Assessment ---
+    "calculate_tbsa": RegisteredTool(
+        description="Calculates the estimated Total Body Surface Area (TBSA) burned using the Wallace Rule of Nines for adult burn assessment and fluid resuscitation guidance.",
+        pydantic_model=TBSAParams,
+        execute_function=calculate_tbsa
+    ),
+
+    # --- Pneumonia Severity ---
+    "calculate_psi_port": RegisteredTool(
+        description="Calculates the PSI/PORT (Pneumonia Severity Index) score for community-acquired pneumonia risk stratification, predicting 30-day mortality and guiding the initial site-of-care decision.",
+        pydantic_model=PSIPortParams,
+        execute_function=calculate_psi_port
+    ),
+    "calculate_crb65": RegisteredTool(
+        description="Calculates the CRB-65 score for community-acquired pneumonia severity assessment without laboratory tests, predicting 30-day mortality and guiding site-of-care decisions in primary care and pre-hospital settings.",
+        pydantic_model=CRB65Params,
+        execute_function=calculate_crb65
+    ),
+
+    # --- Geriatrics / Frailty ---
+    "calculate_clinical_frailty": RegisteredTool(
+        description="Calculates the Clinical Frailty Scale (CFS) by Rockwood et al. for classifying frailty in older adults from very fit (1) to terminally ill (9), guiding goals-of-care and intervention decisions.",
+        pydantic_model=ClinicalFrailtyParams,
+        execute_function=calculate_clinical_frailty
+    ),
+
+    # --- Infectious Disease: Endocarditis ---
+    "calculate_duke_criteria": RegisteredTool(
+        description="Evaluates the Modified Duke Criteria for the diagnosis of Infective Endocarditis, classifying patients as Definite, Possible, or Rejected based on pathological, major, and minor clinical criteria.",
+        pydantic_model=DukeCriteriaParams,
+        execute_function=calculate_duke_criteria
+    ),
+
+    # --- Oncology: Febrile Neutropenia ---
+    "calculate_mascc": RegisteredTool(
+        description="Calculates the MASCC (Multinational Association for Supportive Care in Cancer) Risk Index for identifying low-risk febrile neutropenic cancer patients who may be candidates for outpatient oral antibiotic therapy.",
+        pydantic_model=MASCCParams,
+        execute_function=calculate_mascc
+    ),
+
+    # --- Urology ---
+    "calculate_ipss": RegisteredTool(
+        description="Calculates the International Prostate Symptom Score (IPSS) for assessing lower urinary tract symptom severity in benign prostatic hyperplasia (BPH), with optional Quality of Life (QoL) assessment.",
+        pydantic_model=IPSSParams,
+        execute_function=calculate_ipss
+    ),
+
+    # --- Pharmacovigilance / Drug Safety ---
+    "calculate_naranjo": RegisteredTool(
+        description="Calculates the Naranjo Adverse Drug Reaction (ADR) Probability Scale to estimate the likelihood that an adverse event was caused by a drug, classifying causality as Definite, Probable, Possible, or Doubtful.",
+        pydantic_model=NaranjoParams,
+        execute_function=calculate_naranjo
+    ),
+
+    # --- Alcohol Withdrawal ---
+    "calculate_ciwa_ar": RegisteredTool(
+        description="Calculates the CIWA-Ar (Clinical Institute Withdrawal Assessment for Alcohol, Revised) score (0-67) to quantify the severity of alcohol withdrawal and guide symptom-triggered benzodiazepine therapy.",
+        pydantic_model=CIWAArParams,
+        execute_function=calculate_ciwa_ar
+    ),
+
+    # --- Toxicology ---
+    "calculate_rumack_matthew": RegisteredTool(
+        description="Evaluates acetaminophen (paracetamol) toxicity risk using the Rumack-Matthew Nomogram, plotting serum concentration against time since ingestion to determine need for N-acetylcysteine (NAC) treatment.",
+        pydantic_model=RumackMatthewParams,
+        execute_function=calculate_rumack_matthew
+    ),
+
+    # --- Opioid Withdrawal ---
+    "calculate_cows": RegisteredTool(
+        description="Calculates the Clinical Opiate Withdrawal Scale (COWS) total score (0-48) to quantify opioid withdrawal severity and guide buprenorphine induction timing.",
+        pydantic_model=COWSParams,
+        execute_function=calculate_cows
+    ),
+
+    # --- GI Bleeding Risk ---
+    "calculate_aims65": RegisteredTool(
+        description="Calculates the AIMS65 Score (0-5) for predicting in-hospital mortality in acute upper gastrointestinal bleeding based on Albumin, INR, Mental status, Systolic BP, and age >= 65.",
+        pydantic_model=AIMS65Params,
+        execute_function=calculate_aims65
+    ),
+
+    # --- Sleep Medicine / Perioperative OSA Screening ---
+    "calculate_stop_bang": RegisteredTool(
+        description="Calculates the STOP-Bang score (0-8) for obstructive sleep apnea screening based on Snoring, Tiredness, Observed apnea, high blood Pressure, BMI, Age, Neck circumference, and Gender.",
+        pydantic_model=STOPBangParams,
+        execute_function=calculate_stop_bang
+    ),
+
+    # --- Soft Tissue Infection ---
+    "calculate_lrinec": RegisteredTool(
+        description="Calculates the LRINEC (Laboratory Risk Indicator for Necrotizing Fasciitis) score (0-13) to distinguish necrotizing fasciitis from other soft tissue infections using six routine laboratory values (CRP, WBC, hemoglobin, sodium, creatinine, glucose).",
+        pydantic_model=LRINECParams,
+        execute_function=calculate_lrinec
+    ),
+
+    # --- ICU Sedation Assessment ---
+    "calculate_rass": RegisteredTool(
+        description="Records and interprets the Richmond Agitation-Sedation Scale (RASS) score (-5 to +4) for assessing agitation and sedation levels in adult ICU patients, guiding sedative titration and agitation management.",
+        pydantic_model=RASSParams,
+        execute_function=calculate_rass
+    ),
+
+    # --- Pediatric Neurology ---
+    "calculate_pediatric_gcs": RegisteredTool(
+        description="Calculates the Pediatric Glasgow Coma Scale (pGCS) score for children <= 2 years using age-appropriate eye, verbal, and motor response criteria to assess consciousness level after brain injury.",
+        pydantic_model=PediatricGCSParams,
+        execute_function=calculate_pediatric_gcs
+    ),
+
+    # --- Pediatric Early Warning ---
+    "calculate_pews": RegisteredTool(
+        description="Calculates the Bedside Paediatric Early Warning System (PEWS) score (0-26) for hospitalized children using seven age-specific vital sign and clinical observation components to identify risk of clinical deterioration.",
+        pydantic_model=PEWSParams,
+        execute_function=calculate_pews
+    ),
+
+    # --- ICU Delirium Assessment ---
+    "calculate_cam_icu": RegisteredTool(
+        description="Calculates the CAM-ICU (Confusion Assessment Method for the ICU) for delirium assessment in critically ill patients, evaluating acute onset, inattention, altered consciousness, and disorganized thinking.",
+        pydantic_model=CAMICUParams,
+        execute_function=calculate_cam_icu
     ),
 }
