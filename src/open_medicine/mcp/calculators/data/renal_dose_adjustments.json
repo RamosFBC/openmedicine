@@ -53,8 +53,8 @@
     "requires_tdm": false,
     "monitoring_parameters": ["Serum creatinine", "Signs of CNS depression"],
     "hepatic_interaction_flag": false,
-    "source_doi": "10.1016/S0140-6736(09)62099-3",
-    "source_description": "Gabapentin FDA-approved prescribing information (Neurontin label); Bockbrader HN et al. Clin Pharmacokinet 2010.",
+    "source_doi": "10.2147/JPR.S130942",
+    "source_description": "Bockbrader HN et al. Clinical pharmacokinetics of gabapentin. J Pain Res 2010; Neurontin FDA-approved prescribing information.",
     "evidence_level": "FDA Package Insert",
     "tiers": [
       {
@@ -121,6 +121,677 @@
         "adjustment_type": "contraindicated",
         "dialysis_note": "Contraindicated in dialysis patients",
         "warnings": ["Risk of lactic acidosis", "Contraindicated per FDA label"]
+      }
+    ]
+  },
+  "gentamicin": {
+    "drug_name": "gentamicin",
+    "brand_names": ["Garamycin"],
+    "drug_class": "aminoglycoside antibiotic",
+    "route": "IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "5-7 mg/kg IV q24h (extended-interval dosing)",
+    "requires_tdm": true,
+    "monitoring_parameters": ["Peak 20-35 mcg/mL (EID)", "Trough <1 mcg/mL", "Serum creatinine", "BUN"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1093/jac/dku023",
+    "source_description": "Dager WE et al. Gentamicin pharmacokinetics and extended-interval dosing in renal impairment. J Antimicrob Chemother 2014; Garamycin FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "5-7 mg/kg IV q24h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Monitor peak and trough levels"]
+      },
+      {
+        "min": 40, "max": 59,
+        "dose": "5-7 mg/kg IV q36h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Monitor trough levels; redose when <1 mcg/mL"]
+      },
+      {
+        "min": 20, "max": 39,
+        "dose": "5-7 mg/kg IV q48h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Extended interval; monitor trough before redosing", "High nephrotoxicity risk"]
+      },
+      {
+        "min": 0, "max": 19,
+        "dose": "5-7 mg/kg IV once; redose when level <1 mcg/mL",
+        "adjustment_type": "use_with_caution",
+        "dialysis_note": "Dose after hemodialysis; monitor levels to guide redosing",
+        "warnings": ["Near-anuric; dose entirely by drug levels", "High nephrotoxicity and ototoxicity risk"]
+      }
+    ]
+  },
+  "levofloxacin": {
+    "drug_name": "levofloxacin",
+    "brand_names": ["Levaquin"],
+    "drug_class": "fluoroquinolone antibiotic",
+    "route": "PO/IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "750 mg PO/IV q24h",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "QTc interval"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.2165/00003088-199937050-00003",
+    "source_description": "Fish DN, Chow AT. Clinical pharmacokinetics of levofloxacin. Clin Pharmacokinet 1997; Levaquin FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "750 mg PO/IV q24h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 20, "max": 49,
+        "dose": "750 mg PO/IV q48h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Accumulation risk; monitor for QTc prolongation"]
+      },
+      {
+        "min": 0, "max": 19,
+        "dose": "750 mg once, then 500 mg PO/IV q48h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "No supplemental dose required after hemodialysis or CAPD",
+        "warnings": ["Significant accumulation risk", "Monitor for CNS and GI adverse effects"]
+      }
+    ]
+  },
+  "cefepime": {
+    "drug_name": "cefepime",
+    "brand_names": ["Maxipime"],
+    "drug_class": "cephalosporin antibiotic",
+    "route": "IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "1-2 g IV q8h",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Signs of neurotoxicity (encephalopathy, seizures)"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1128/AAC.01856-12",
+    "source_description": "Rhodes NJ et al. Cefepime dosing in renal impairment. Antimicrob Agents Chemother 2015; Maxipime FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 61, "max": null,
+        "dose": "1-2 g IV q8h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 60,
+        "dose": "1-2 g IV q12h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Monitor for neurotoxicity"]
+      },
+      {
+        "min": 11, "max": 29,
+        "dose": "1-2 g IV q24h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Risk of neurotoxicity including encephalopathy and seizures", "Monitor neurological status closely"]
+      },
+      {
+        "min": 0, "max": 10,
+        "dose": "0.5-1 g IV q24h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "68% removed during 3-hour hemodialysis; dose after HD",
+        "warnings": ["High risk of cefepime neurotoxicity", "Dose after hemodialysis sessions"]
+      }
+    ]
+  },
+  "meropenem": {
+    "drug_name": "meropenem",
+    "brand_names": ["Merrem IV"],
+    "drug_class": "carbapenem antibiotic",
+    "route": "IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "1 g IV q8h",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Seizure risk assessment"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1128/AAC.00140-18",
+    "source_description": "Meropenem pharmacokinetics in renal impairment; Merrem IV FDA-approved prescribing information (NDA 050706).",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 51, "max": null,
+        "dose": "1 g IV q8h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 26, "max": 50,
+        "dose": "1 g IV q12h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Monitor for seizures"]
+      },
+      {
+        "min": 10, "max": 25,
+        "dose": "500 mg IV q12h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Half-life extended to 3.8-5.7 hours"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "500 mg IV q24h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Meropenem is hemodialyzable; dose after HD session",
+        "warnings": ["Significantly prolonged half-life", "Dose after hemodialysis"]
+      }
+    ]
+  },
+  "piperacillin_tazobactam": {
+    "drug_name": "piperacillin_tazobactam",
+    "brand_names": ["Zosyn"],
+    "drug_class": "beta-lactam/beta-lactamase inhibitor antibiotic",
+    "route": "IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "3.375 g IV q6h or 4.5 g IV q6h",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "CBC with differential"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1128/AAC.00381-09",
+    "source_description": "Piperacillin/tazobactam dosing in renal impairment; Zosyn FDA-approved prescribing information (NDA 050684).",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 41, "max": null,
+        "dose": "3.375-4.5 g IV q6h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 20, "max": 40,
+        "dose": "2.25 g IV q6h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Reduced dose; monitor for efficacy"]
+      },
+      {
+        "min": 0, "max": 19,
+        "dose": "2.25 g IV q8h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Supplemental dose of 0.75 g after each hemodialysis session",
+        "warnings": ["Extended interval with reduced dose", "Supplemental dose required after HD"]
+      }
+    ]
+  },
+  "pregabalin": {
+    "drug_name": "pregabalin",
+    "brand_names": ["Lyrica"],
+    "drug_class": "anticonvulsant/analgesic",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "150-600 mg PO daily in 2-3 divided doses",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Signs of CNS depression", "Peripheral edema"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.2147/JPR.S130942",
+    "source_description": "Bockbrader HN et al. Rational dosing of gabapentin and pregabalin in CKD. J Pain Res 2017; Lyrica FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "150-600 mg PO daily in 2-3 divided doses",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 59,
+        "dose": "75-300 mg PO daily in 2-3 divided doses",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["50% of normal dose", "Monitor for CNS depression"]
+      },
+      {
+        "min": 15, "max": 29,
+        "dose": "25-150 mg PO daily in 1-2 doses",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["25% of normal dose", "Significant accumulation risk"]
+      },
+      {
+        "min": 0, "max": 14,
+        "dose": "25-75 mg PO once daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Supplemental dose of 25-75 mg after hemodialysis",
+        "warnings": ["Severe accumulation risk", "Post-hemodialysis supplemental dose required"]
+      }
+    ]
+  },
+  "morphine": {
+    "drug_name": "morphine",
+    "brand_names": ["MS Contin", "Kadian"],
+    "drug_class": "opioid analgesic",
+    "route": "PO/IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "10-30 mg PO q4h or 2-10 mg IV q4h (titrate to effect)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Respiratory rate", "Sedation level", "Pain assessment", "Serum creatinine"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.1016/j.jpain.2003.09.005",
+    "source_description": "Dean M. Opioids in renal failure and dialysis patients. J Pain Symptom Manage 2004; morphine FDA-approved prescribing information.",
+    "evidence_level": "Expert Review",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "10-30 mg PO q4h or 2-10 mg IV q4h (titrate to effect)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 10, "max": 49,
+        "dose": "Reduce dose by 25-50%; extend interval to q6-8h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["M6G active metabolite accumulates in renal impairment", "Monitor closely for respiratory depression and sedation", "Consider alternative opioid (fentanyl, hydromorphone)"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "Reduce dose by 50-75%; use with extreme caution or avoid",
+        "adjustment_type": "use_with_caution",
+        "dialysis_note": "Morphine-6-glucuronide (M6G) not effectively dialyzed",
+        "warnings": ["Severe M3G/M6G metabolite accumulation", "High risk of respiratory depression", "Consider fentanyl as safer alternative in severe CKD", "Avoid chronic use if possible"]
+      }
+    ]
+  },
+  "digoxin": {
+    "drug_name": "digoxin",
+    "brand_names": ["Lanoxin"],
+    "drug_class": "cardiac glycoside",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "0.125-0.25 mg PO daily",
+    "requires_tdm": true,
+    "monitoring_parameters": ["Serum digoxin level (target 0.5-0.9 ng/mL)", "Serum potassium", "Serum creatinine", "ECG"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1016/j.ahj.2014.01.010",
+    "source_description": "Digoxin pharmacokinetics and dosing in renal impairment; Lanoxin FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 51, "max": null,
+        "dose": "0.125-0.25 mg PO daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Target serum level 0.5-0.9 ng/mL"]
+      },
+      {
+        "min": 10, "max": 50,
+        "dose": "0.0625-0.125 mg PO daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Reduce dose 25-75% of normal", "Monitor serum digoxin levels closely", "Half-life prolonged; accumulation risk"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "0.0625 mg PO every other day",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Not significantly removed by hemodialysis",
+        "warnings": ["10-25% of usual dose", "High risk of toxicity", "Monitor potassium; hypokalemia increases digoxin toxicity"]
+      }
+    ]
+  },
+  "atenolol": {
+    "drug_name": "atenolol",
+    "brand_names": ["Tenormin"],
+    "drug_class": "beta-blocker",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "50-100 mg PO daily",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Heart rate", "Blood pressure", "Serum creatinine"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1111/j.1365-2125.1977.tb00098.x",
+    "source_description": "Mason WD et al. Atenolol kinetics and bioavailability. Br J Clin Pharmacol 1979; Tenormin FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 35, "max": null,
+        "dose": "50-100 mg PO daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 15, "max": 34,
+        "dose": "Maximum 50 mg PO daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Half-life prolonged to 16-27 hours", "Significant accumulation risk"]
+      },
+      {
+        "min": 0, "max": 14,
+        "dose": "Maximum 25 mg PO daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Atenolol is significantly removed by hemodialysis; dose after HD",
+        "warnings": ["Severe accumulation; half-life >27 hours", "Dose after hemodialysis sessions"]
+      }
+    ]
+  },
+  "sotalol": {
+    "drug_name": "sotalol",
+    "brand_names": ["Betapace", "Betapace AF", "Sorine"],
+    "drug_class": "class III antiarrhythmic / beta-blocker",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "80 mg PO BID, titrate up to 160 mg BID",
+    "requires_tdm": false,
+    "monitoring_parameters": ["QTc interval (ECG before each dose increase)", "Heart rate", "Blood pressure", "Serum creatinine"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1016/j.hrthm.2017.10.036",
+    "source_description": "Sotalol FDA-approved prescribing information (Betapace/Betapace AF); ACC/AHA antiarrhythmic dosing guidance.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 61, "max": null,
+        "dose": "80 mg PO BID, titrate up to 160 mg BID",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Must monitor QTc before each dose increase"]
+      },
+      {
+        "min": 40, "max": 60,
+        "dose": "80 mg PO once daily",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Dose escalation at intervals of ≥5 doses", "Monitor QTc closely"]
+      },
+      {
+        "min": 0, "max": 39,
+        "dose": "Contraindicated",
+        "adjustment_type": "contraindicated",
+        "dialysis_note": "Contraindicated; sotalol is dialyzable but proarrhythmic risk is high",
+        "warnings": ["Contraindicated per FDA label due to proarrhythmic risk", "Risk of Torsades de Pointes"]
+      }
+    ]
+  },
+  "fluconazole": {
+    "drug_name": "fluconazole",
+    "brand_names": ["Diflucan"],
+    "drug_class": "azole antifungal",
+    "route": "PO/IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "200-400 mg PO/IV daily (indication-dependent)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Liver function tests", "QTc interval"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.1093/ndt/gfg480",
+    "source_description": "Debruyne D. Dosing guidelines for fluconazole in renal failure. Nephrol Dial Transplant 2003; Diflucan FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 51, "max": null,
+        "dose": "200-400 mg PO/IV daily (indication-dependent)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 0, "max": 50,
+        "dose": "Loading dose unchanged; maintenance 50% of standard dose",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "One full dose after each hemodialysis session",
+        "warnings": ["Give full loading dose regardless of renal function", "Reduce only maintenance doses", "Half-life significantly prolonged"]
+      }
+    ]
+  },
+  "acyclovir": {
+    "drug_name": "acyclovir",
+    "brand_names": ["Zovirax"],
+    "drug_class": "antiviral",
+    "route": "PO/IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "5-10 mg/kg IV q8h or 800 mg PO 5x daily (indication-dependent)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "BUN", "Urine output", "Hydration status"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1128/AAC.27.2.178",
+    "source_description": "Acyclovir pharmacokinetics in renal impairment; Zovirax FDA-approved prescribing information (NDA 018603).",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 51, "max": null,
+        "dose": "5-10 mg/kg IV q8h or 800 mg PO 5x daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Ensure adequate hydration to prevent crystalluria"]
+      },
+      {
+        "min": 25, "max": 50,
+        "dose": "5-10 mg/kg IV q12h or 800 mg PO q8h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Maintain adequate hydration"]
+      },
+      {
+        "min": 10, "max": 24,
+        "dose": "5-10 mg/kg IV q24h or 800 mg PO q12h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Significant accumulation risk", "Risk of neurotoxicity"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "2.5-5 mg/kg IV q24h or 200 mg PO q12h",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Dose after hemodialysis; ~60% removed during HD",
+        "warnings": ["High risk of neurotoxicity and nephrotoxicity", "Dose after hemodialysis sessions"]
+      }
+    ]
+  },
+  "valacyclovir": {
+    "drug_name": "valacyclovir",
+    "brand_names": ["Valtrex"],
+    "drug_class": "antiviral prodrug",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "1 g PO TID (herpes zoster) or indication-dependent",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Signs of neurotoxicity", "Hydration status"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1128/AAC.42.7.1667",
+    "source_description": "Valacyclovir pharmacokinetics; Valtrex FDA-approved prescribing information (NDA 020487).",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "1 g PO TID (herpes zoster) or indication-dependent",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 49,
+        "dose": "1 g PO q12h (herpes zoster); adjust per indication",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Monitor for neurotoxicity"]
+      },
+      {
+        "min": 10, "max": 29,
+        "dose": "1 g PO q24h (herpes zoster); 500 mg q12h (labialis)",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Acyclovir metabolite accumulation", "Risk of thrombotic thrombocytopenic purpura/hemolytic uremic syndrome"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "500 mg PO q24h (herpes zoster); 500 mg single dose (labialis)",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Dose after hemodialysis; acyclovir is ~33% removed during 4-hour HD",
+        "warnings": ["Severe accumulation risk", "TTP/HUS risk increased", "Dose after hemodialysis sessions"]
+      }
+    ]
+  },
+  "allopurinol": {
+    "drug_name": "allopurinol",
+    "brand_names": ["Zyloprim"],
+    "drug_class": "xanthine oxidase inhibitor",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "100-800 mg PO daily (titrate to uric acid target)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum uric acid", "Serum creatinine", "Liver function tests", "CBC"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1136/ard.2007.079426",
+    "source_description": "Stamp LK et al. Allopurinol dosing in renal impairment. Ann Rheum Dis 2007; Zyloprim FDA-approved prescribing information.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "100-800 mg PO daily (titrate to uric acid target)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 10, "max": 59,
+        "dose": "Maximum 200 mg PO daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Risk of allopurinol hypersensitivity syndrome (AHS)", "Start low (50-100 mg) and titrate", "Monitor for rash, eosinophilia"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "Maximum 100 mg PO daily or every other day",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Allopurinol and oxipurinol removed by hemodialysis; dose after HD",
+        "warnings": ["High risk of allopurinol hypersensitivity syndrome", "Oxipurinol (active metabolite) accumulates significantly"]
+      }
+    ]
+  },
+  "methotrexate": {
+    "drug_name": "methotrexate",
+    "brand_names": ["Trexall", "Otrexup", "Rasuvo"],
+    "drug_class": "antimetabolite/DMARD",
+    "route": "PO/SC",
+    "label_renal_metric": "crcl",
+    "normal_dose": "7.5-25 mg PO/SC once weekly",
+    "requires_tdm": false,
+    "monitoring_parameters": ["CBC with differential", "Serum creatinine", "Liver function tests", "Serum albumin"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.1002/acr.24596",
+    "source_description": "ACR Guideline for Management of RA 2021; Methotrexate FDA-approved prescribing information.",
+    "evidence_level": "Clinical Practice Guideline",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "7.5-25 mg PO/SC once weekly",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 59,
+        "dose": "50% dose reduction; maximum 10-12.5 mg weekly",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Increased risk of myelosuppression and mucositis", "Monitor CBC and renal function more frequently", "Increased adverse reaction risk from CKD stage 2+"]
+      },
+      {
+        "min": 15, "max": 29,
+        "dose": "Avoid or use with extreme caution at very low doses",
+        "adjustment_type": "use_with_caution",
+        "dialysis_note": null,
+        "warnings": ["High risk of severe pancytopenia", "Consider alternative DMARD", "If used, maximum 5 mg weekly with close monitoring"]
+      },
+      {
+        "min": 0, "max": 14,
+        "dose": "Contraindicated",
+        "adjustment_type": "contraindicated",
+        "dialysis_note": "Not effectively removed by hemodialysis",
+        "warnings": ["Contraindicated in advanced CKD", "Risk of fatal pancytopenia"]
+      }
+    ]
+  },
+  "colchicine": {
+    "drug_name": "colchicine",
+    "brand_names": ["Colcrys", "Mitigare"],
+    "drug_class": "anti-inflammatory (gout)",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "0.6 mg PO BID (gout prophylaxis) or 1.2 mg then 0.6 mg (flare)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "CBC", "Signs of toxicity (GI, neuromuscular)"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.1002/art.30936",
+    "source_description": "Colchicine pharmacokinetics in renal impairment; Colcrys FDA-approved prescribing information (NDA 022352).",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "0.6 mg PO BID (prophylaxis) or 1.2 mg then 0.6 mg (flare)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 49,
+        "dose": "0.6 mg PO daily (prophylaxis); flare dose unchanged but do not repeat within 2 weeks",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Monitor closely for GI and neuromuscular toxicity", "Avoid concomitant P-gp or strong CYP3A4 inhibitors"]
+      },
+      {
+        "min": 0, "max": 29,
+        "dose": "0.3 mg PO daily (prophylaxis); flare: 0.6 mg single dose, do not repeat within 2 weeks",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Colchicine not removed by dialysis; use with extreme caution",
+        "warnings": ["Clearance reduced 75% in ESRD", "Half-life prolonged to ~19 hours", "Do NOT use with P-gp or CYP3A4 inhibitors", "High risk of fatal toxicity"]
+      }
+    ]
+  },
+  "lithium": {
+    "drug_name": "lithium",
+    "brand_names": ["Lithobid", "Eskalith"],
+    "drug_class": "mood stabilizer",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "300 mg PO BID-TID; titrate to serum level 0.6-1.2 mEq/L",
+    "requires_tdm": true,
+    "monitoring_parameters": ["Serum lithium level (target 0.6-1.2 mEq/L)", "Serum creatinine", "TSH", "Calcium", "ECG"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1177/070674371305801009",
+    "source_description": "Rej S et al. Optimal lithium dosage review. Can J Psychiatry 2013; Lithium FDA-approved prescribing information.",
+    "evidence_level": "Expert Review",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "300 mg PO BID-TID; titrate to serum level 0.6-1.2 mEq/L",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Narrow therapeutic index; monitor levels closely"]
+      },
+      {
+        "min": 30, "max": 59,
+        "dose": "150-300 mg PO daily; titrate slowly by serum levels",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Substantially reduced clearance", "Start low and titrate slowly", "Monitor levels more frequently (weekly initially)", "Increased risk of toxicity with NSAIDs, ACEi, diuretics"]
+      },
+      {
+        "min": 0, "max": 29,
+        "dose": "Not recommended; avoid if possible",
+        "adjustment_type": "contraindicated",
+        "dialysis_note": "Lithium is dialyzable; if used, dose after HD and monitor levels",
+        "warnings": ["Not recommended per FDA label", "Extremely high toxicity risk", "Consider alternative mood stabilizer"]
       }
     ]
   }
