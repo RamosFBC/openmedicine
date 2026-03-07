@@ -162,3 +162,27 @@ def test_json_schema_no_overlapping_tiers():
 def test_json_schema_doi_nonempty():
     for drug_key, drug in _DRUG_DB.items():
         assert drug["source_doi"].strip() != "", f"{drug_key} has empty DOI"
+
+
+# --- Per-drug parametrized tests for all drugs ---
+
+
+@pytest.mark.parametrize("drug_name", list(_DRUG_DB.keys()))
+def test_every_drug_normal_renal(drug_name):
+    """Every drug should return no_adjustment at normal renal function."""
+    drug = _DRUG_DB[drug_name]
+    metric = RenalMetric.EGFR if drug["label_renal_metric"] == "egfr" else RenalMetric.CRCL
+    params = RenalDoseAdjustmentParams(drug_name=drug_name, renal_value=90.0, renal_metric=metric)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "no_adjustment"
+    assert result.value["adjusted_dose"] == drug["normal_dose"]
+
+
+@pytest.mark.parametrize("drug_name", list(_DRUG_DB.keys()))
+def test_every_drug_low_renal(drug_name):
+    """Every drug should return a non-normal result at very low renal function."""
+    drug = _DRUG_DB[drug_name]
+    metric = RenalMetric.EGFR if drug["label_renal_metric"] == "egfr" else RenalMetric.CRCL
+    params = RenalDoseAdjustmentParams(drug_name=drug_name, renal_value=5.0, renal_metric=metric)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] != "no_adjustment"

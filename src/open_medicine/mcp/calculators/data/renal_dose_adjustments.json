@@ -140,7 +140,7 @@
     "tiers": [
       {
         "min": 60, "max": null,
-        "dose": "5-7 mg/kg IV q24h",
+        "dose": "5-7 mg/kg IV q24h (extended-interval dosing)",
         "adjustment_type": "no_adjustment",
         "dialysis_note": null,
         "warnings": ["Monitor peak and trough levels"]
@@ -299,7 +299,7 @@
     "drug_class": "beta-lactam/beta-lactamase inhibitor antibiotic",
     "route": "IV",
     "label_renal_metric": "crcl",
-    "normal_dose": "3.375 g IV q6h or 4.5 g IV q6h",
+    "normal_dose": "3.375-4.5 g IV q6h",
     "requires_tdm": false,
     "monitoring_parameters": ["Serum creatinine", "CBC with differential"],
     "hepatic_interaction_flag": false,
@@ -558,7 +558,7 @@
     "drug_class": "antiviral",
     "route": "PO/IV",
     "label_renal_metric": "crcl",
-    "normal_dose": "5-10 mg/kg IV q8h or 800 mg PO 5x daily (indication-dependent)",
+    "normal_dose": "5-10 mg/kg IV q8h or 800 mg PO 5x daily",
     "requires_tdm": false,
     "monitoring_parameters": ["Serum creatinine", "BUN", "Urine output", "Hydration status"],
     "hepatic_interaction_flag": false,
@@ -727,7 +727,7 @@
     "drug_class": "anti-inflammatory (gout)",
     "route": "PO",
     "label_renal_metric": "crcl",
-    "normal_dose": "0.6 mg PO BID (gout prophylaxis) or 1.2 mg then 0.6 mg (flare)",
+    "normal_dose": "0.6 mg PO BID (prophylaxis) or 1.2 mg then 0.6 mg (flare)",
     "requires_tdm": false,
     "monitoring_parameters": ["Serum creatinine", "CBC", "Signs of toxicity (GI, neuromuscular)"],
     "hepatic_interaction_flag": true,
