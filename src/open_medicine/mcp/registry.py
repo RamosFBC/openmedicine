@@ -172,6 +172,9 @@ from open_medicine.mcp.calculators.cam_icu import calculate_cam_icu, CAMICUParam
 # Pediatric Early Warning
 from open_medicine.mcp.calculators.pews import calculate_pews, PEWSParams
 
+# Renal Dose Adjustment
+from open_medicine.mcp.calculators.renal_dose_adjustment import calculate_renal_dose_adjustment, RenalDoseAdjustmentParams
+
 
 class RegisteredTool:
     def __init__(self, description: str, pydantic_model: type[BaseModel], execute_function: Callable):
@@ -727,5 +730,12 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         description="Calculates the CAM-ICU (Confusion Assessment Method for the ICU) for delirium assessment in critically ill patients, evaluating acute onset, inattention, altered consciousness, and disorganized thinking.",
         pydantic_model=CAMICUParams,
         execute_function=calculate_cam_icu
+    ),
+
+    # --- Renal Dose Adjustment (multi-drug lookup) ---
+    "calculate_renal_dose_adjustment": RegisteredTool(
+        description="Looks up FDA/guideline-approved renal dose adjustment for a drug based on CrCl or eGFR. Covers ~20 commonly renally-adjusted medications across antibiotics, analgesics, cardiovascular, antifungals, and antivirals.",
+        pydantic_model=RenalDoseAdjustmentParams,
+        execute_function=calculate_renal_dose_adjustment
     ),
 }
