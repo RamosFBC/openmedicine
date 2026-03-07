@@ -1,0 +1,127 @@
+{
+  "vancomycin": {
+    "drug_name": "vancomycin",
+    "brand_names": ["Vancocin"],
+    "drug_class": "antibiotic",
+    "route": "IV",
+    "label_renal_metric": "crcl",
+    "normal_dose": "15-20 mg/kg IV q8-12h",
+    "requires_tdm": true,
+    "monitoring_parameters": ["AUC/MIC 400-600 mg*h/L (preferred)", "Trough 15-20 mcg/mL (alternative)"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1093/cid/ciz895",
+    "source_description": "Rybak MJ et al. ASHP/IDSA/SIDP Vancomycin Therapeutic Monitoring Guidelines 2020.",
+    "evidence_level": "Clinical Practice Guideline",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "15-20 mg/kg IV q8-12h",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 49,
+        "dose": "15-20 mg/kg IV q12h",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": null,
+        "warnings": ["Monitor trough levels or AUC closely"]
+      },
+      {
+        "min": 10, "max": 29,
+        "dose": "15-20 mg/kg IV q24-48h; dose by levels",
+        "adjustment_type": "interval_extension",
+        "dialysis_note": "Redose guided by levels post-HD",
+        "warnings": ["Extended interval dosing", "Levels essential before redosing", "Target AUC/MIC 400-600 per ASHP/IDSA 2020"]
+      },
+      {
+        "min": 0, "max": 9,
+        "dose": "15-20 mg/kg IV; redose by levels only",
+        "adjustment_type": "use_with_caution",
+        "dialysis_note": "Redose guided by levels post-HD; supplemental dose after each dialysis session",
+        "warnings": ["Near-anuric; dose entirely by drug levels", "Target AUC/MIC 400-600 per ASHP/IDSA 2020"]
+      }
+    ]
+  },
+  "gabapentin": {
+    "drug_name": "gabapentin",
+    "brand_names": ["Neurontin"],
+    "drug_class": "anticonvulsant/analgesic",
+    "route": "PO",
+    "label_renal_metric": "crcl",
+    "normal_dose": "300-1200 mg PO TID (900-3600 mg/day)",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum creatinine", "Signs of CNS depression"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1016/S0140-6736(09)62099-3",
+    "source_description": "Gabapentin FDA-approved prescribing information (Neurontin label); Bockbrader HN et al. Clin Pharmacokinet 2010.",
+    "evidence_level": "FDA Package Insert",
+    "tiers": [
+      {
+        "min": 60, "max": null,
+        "dose": "300-1200 mg PO TID (900-3600 mg/day)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 59,
+        "dose": "200-700 mg PO BID (400-1400 mg/day)",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Monitor for CNS depression"]
+      },
+      {
+        "min": 15, "max": 29,
+        "dose": "200-700 mg PO once daily (200-700 mg/day)",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Significant accumulation risk", "Half-life extended to ~52 hours"]
+      },
+      {
+        "min": 0, "max": 14,
+        "dose": "100-300 mg PO once daily; reduce proportionally to CrCl",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "Supplemental dose of 125-350 mg after each 4-hour hemodialysis session",
+        "warnings": ["Severe accumulation risk", "Post-hemodialysis supplemental dose required"]
+      }
+    ]
+  },
+  "metformin": {
+    "drug_name": "metformin",
+    "brand_names": ["Glucophage", "Glucophage XR"],
+    "drug_class": "biguanide antidiabetic",
+    "route": "PO",
+    "label_renal_metric": "egfr",
+    "normal_dose": "500-2000 mg PO daily in divided doses",
+    "requires_tdm": false,
+    "monitoring_parameters": ["eGFR at least annually", "Vitamin B12 levels periodically", "Serum lactate if suspected lactic acidosis"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.2337/dc24-S009",
+    "source_description": "ADA Standards of Care in Diabetes 2024; FDA revised Glucophage label 2016.",
+    "evidence_level": "Clinical Practice Guideline",
+    "tiers": [
+      {
+        "min": 45, "max": null,
+        "dose": "500-2000 mg PO daily in divided doses",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 30, "max": 44,
+        "dose": "Maximum 1000 mg PO daily; do not initiate in this range",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Do not initiate metformin if eGFR 30-44", "Reassess risk/benefit if already on therapy", "Monitor eGFR every 3 months", "Temporarily discontinue before iodinated contrast"]
+      },
+      {
+        "min": 0, "max": 29,
+        "dose": "Contraindicated",
+        "adjustment_type": "contraindicated",
+        "dialysis_note": "Contraindicated in dialysis patients",
+        "warnings": ["Risk of lactic acidosis", "Contraindicated per FDA label"]
+      }
+    ]
+  }
+}
