@@ -19,7 +19,7 @@ uv sync --extra test
 uv run pytest -v
 ```
 
-All 57+ tests must pass before submitting a PR.
+All 2350+ tests must pass before submitting a PR.
 
 ## Adding a New Calculator
 

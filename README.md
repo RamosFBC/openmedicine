@@ -68,6 +68,24 @@ print(result.interpretation)    # "CHA2DS2-VASc score is 4. High risk..."
 print(result.evidence.source_doi)  # "10.1161/CIR.0000000000001193"
 ```
 
+#### Renal Dose Adjustment (Multi-Drug Lookup)
+```python
+from open_medicine.mcp.calculators.renal_dose_adjustment import (
+    calculate_renal_dose_adjustment, RenalDoseAdjustmentParams, RenalMetric
+)
+
+result = calculate_renal_dose_adjustment(RenalDoseAdjustmentParams(
+    drug_name="vancomycin",
+    renal_value=25.0,
+    renal_metric=RenalMetric.CRCL,
+))
+
+print(result.value["adjusted_dose"])     # "15-20 mg/kg IV q24-48h; dose by levels"
+print(result.value["adjustment_type"])   # "interval_extension"
+print(result.evidence.source_doi)        # "10.1093/cid/ciz895"
+print(result.value["warnings"])          # ["Extended interval dosing", ...]
+```
+
 #### Guideline Retrieval
 ```python
 from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
@@ -91,9 +109,9 @@ print(result.evidence.source_doi)  # "10.1161/CIR.0000000000001193"
 
 ## Current Coverage
 
-**Calculators (54):** AA Gradient, ABCD2, Anion Gap, Apixaban Dosing, ASCVD, BISAP, BMI, BSA (Mosteller), Canadian C-Spine, Caprini, CHA₂DS₂-VASc, Child-Pugh, CKD-EPI, Cockcroft-Gault, Corrected Calcium, Corrected QT, Corrected Sodium, CURB-65, Dabigatran Dosing, Edoxaban Dosing, Enoxaparin Dosing, FIB-4, Fisher Grade, GCS, Glasgow-Blatchford, GOLD COPD, GRACE, HAS-BLED, HEART Score, Heparin Dosing, Hunt & Hess, Insulin Basal Dosing, MELD-Na, NAFLD Fibrosis, NEWS2, NIHSS, Osmolar Gap, Padua, Parkland, PERC, qSOFA, Ranson's, Rivaroxaban Dosing, Rockall, Revised Trauma Score (RTS), Serum Osmolality, SOFA, TIMI STEMI, TIMI UA/NSTEMI, Warfarin Initiation, Wells' DVT, Wells' PE, Winter's Formula.
+**Calculators (93):** AA Gradient, ABCD2, AIMS65, Anion Gap, APACHE II, Apgar, Apixaban Dosing, ASCVD, AUDIT-C, BISAP, Bishop, BMI, BSA (Mosteller), CAGE, CAM-ICU, Canadian C-Spine, Caprini, Centor/McIsaac, CHA₂DS₂-VASc, Charlson Comorbidity, Child-Pugh, CIWA-Ar, CKD-EPI, Clinical Frailty Scale, Cockcroft-Gault, Corrected Calcium, Corrected QT, Corrected Sodium, COWS, CRB-65, CURB-65, Dabigatran Dosing, DAS28, Duke Criteria, ECOG, Edoxaban Dosing, Enoxaparin Dosing, EPDS, FIB-4, Fisher Grade, 4Ts HIT, Framingham, FRAX, GAD-7, GCS, Glasgow-Blatchford, GOLD COPD, GRACE, HAS-BLED, HEART Score, Heparin Dosing, Hunt & Hess, Insulin Basal Dosing, IPSS, Karnofsky, LRINEC, Maintenance IV Fluids, MASCC, MELD-Na, MEWS, NAFLD Fibrosis, Naranjo ADR, NEWS2, NIHSS, Osmolar Gap, Ottawa Ankle, Padua, Parkland, Pediatric GCS, PERC, PEWS, PHQ-9, PSI/PORT, qSOFA, Ranson's, RASS, RCRI, **Renal Dose Adjustment (20 drugs)**, Rivaroxaban Dosing, Rockall, Revised Trauma Score (RTS), Rumack-Matthew, Serum Osmolality, SOFA, STOP-BANG, TBSA, TIMI STEMI, TIMI UA/NSTEMI, Warfarin Initiation, Wells' DVT, Wells' PE, Winter's Formula.
 
-**Guidelines (14):** 
+**Guidelines (43):** Including
 - ACC/AHA AF 2023 (`acc_aha_af_2023`)
 - KDIGO CKD 2024 (`kdigo_ckd_2024`)
 - BTS CAP 2009 (`bts_cap_2009`)

@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-03-07
+
+### Added
+- **Renal Dose Adjustment Calculator** — a multi-drug lookup tool that returns FDA/guideline-approved renal dose adjustments for 20 commonly renally-adjusted medications based on CrCl or eGFR.
+  - **Drug classes covered:** Antibiotics (vancomycin, gentamicin, levofloxacin, cefepime, meropenem, piperacillin/tazobactam), Analgesics/Neuro (gabapentin, pregabalin, morphine), Cardiovascular (metformin, digoxin, atenolol, sotalol), Antifungals (fluconazole), Antivirals (acyclovir, valacyclovir), Other (allopurinol, methotrexate, colchicine, lithium).
+  - **Key features:** Per-drug DOI traceability, CrCl/eGFR metric mismatch detection with warnings, structured tier-based dosing, dialysis notes, hepatic interaction flags, TDM requirements.
+  - **Architecture:** JSON drug database (`renal_dose_adjustments.json`) with thin Python calculator for maintainability and extensibility.
+- **81 new tests:** Per-drug parametrized tests (normal + low renal function for all 20 drugs), tier boundary tests, metric mismatch validation, JSON schema validation, Hypothesis property-based fuzz test.
+- **Project totals:** 93 calculators, 43 guideline modules, 2350 tests.
+
 ## [0.5.0] - 2026-03-06
 
 ### Added
