@@ -40,6 +40,9 @@ from open_medicine.mcp.calculators.rass import calculate_rass, RASSParams
 from open_medicine.mcp.calculators.pediatric_gcs import calculate_pediatric_gcs, PediatricGCSParams
 from open_medicine.mcp.calculators.cam_icu import calculate_cam_icu, CAMICUParams
 from open_medicine.mcp.calculators.pews import calculate_pews, PEWSParams, PEWSAgeGroup, RespiratoryEffort
+from open_medicine.mcp.calculators.renal_dose_adjustment import (
+    calculate_renal_dose_adjustment, RenalDoseAdjustmentParams, RenalMetric, _DRUG_DB
+)
 
 @given(
     st.builds(
@@ -1237,3 +1240,22 @@ def test_pews_bounds(params):
     assert type(result.interpretation) == str
     assert len(result.interpretation) > 0
     assert "Bedside PEWS score is" in result.interpretation
+
+
+@given(
+    st.builds(
+        RenalDoseAdjustmentParams,
+        drug_name=st.sampled_from(list(_DRUG_DB.keys())),
+        renal_value=st.floats(min_value=0.0, max_value=200.0),
+        renal_metric=st.sampled_from(list(RenalMetric)),
+    )
+)
+def test_renal_dose_adjustment_never_crashes(params):
+    result = calculate_renal_dose_adjustment(params)
+    assert result is not None
+    assert result.value is not None
+    assert result.evidence.source_doi != ""
+    assert result.value["adjustment_type"] in {
+        "no_adjustment", "dose_reduction", "interval_extension",
+        "contraindicated", "use_with_caution",
+    }
