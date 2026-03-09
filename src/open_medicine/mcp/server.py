@@ -11,6 +11,7 @@ from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
 from open_medicine.mcp.differentials.engine import search_differentials, get_differential, DifferentialParams
 from open_medicine.mcp.pathways.engine import search_pathways, get_pathway, PathwayParams
+from open_medicine.mcp.routing.engine import assess_clinical_scenario, ScenarioParams
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -171,6 +172,34 @@ async def handle_list_tools() -> list[types.Tool]:
                     }
                 },
                 "required": ["query"]
+            }
+        ),
+        types.Tool(
+            name="assess_clinical_scenario",
+            description="Clinical routing engine — given a patient's conditions, returns a prioritized list of recommended tool calls (calculators, guidelines, differentials, pathways) to systematically evaluate the scenario. OpenMedicine acts as a clinical librarian, recommending what to look up. The agent decides what to actually execute.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "conditions": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of clinical conditions or presentations (e.g. ['atrial_fibrillation', 'ckd', 'chest_pain'])."
+                    },
+                    "age": {
+                        "type": "integer",
+                        "description": "Patient age in years (optional)."
+                    },
+                    "sex": {
+                        "type": "string",
+                        "description": "Patient sex — 'male' or 'female' (optional)."
+                    },
+                    "medications": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Current medications (optional)."
+                    }
+                },
+                "required": ["conditions"]
             }
         ),
     ]
@@ -378,6 +407,33 @@ async def handle_call_tool(
                 text=json.dumps({"search_type": "keyword", "matches": matches}, indent=2)
             )
         ]
+
+    elif name == "assess_clinical_scenario":
+        conditions = (arguments or {}).get("conditions", [])
+        age = (arguments or {}).get("age")
+        sex = (arguments or {}).get("sex")
+        medications = (arguments or {}).get("medications")
+        try:
+            params = ScenarioParams(
+                conditions=conditions,
+                age=age,
+                sex=sex,
+                medications=medications,
+            )
+            result = assess_clinical_scenario(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error: {e}"
+                )
+            ]
 
     else:
         raise ValueError(f"Unknown tool: {name}")
