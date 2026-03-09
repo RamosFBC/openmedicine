@@ -9,6 +9,8 @@ import mcp.types as types
 
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
+from open_medicine.mcp.differentials.engine import search_differentials, get_differential, DifferentialParams
+from open_medicine.mcp.pathways.engine import search_pathways, get_pathway, PathwayParams
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -82,7 +84,76 @@ async def handle_list_tools() -> list[types.Tool]:
                 },
                 "required": ["guideline_id", "section"]
             }
-        )
+        ),
+        types.Tool(
+            name="search_differential_diagnosis",
+            description="Searches available differential diagnoses by symptoms, presentations, or keywords. Returns matching differential IDs and descriptions.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Keywords to match against differential diagnoses (e.g. 'chest pain', 'dyspnea', 'headache')."
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        types.Tool(
+            name="get_differential_diagnosis",
+            description="Retrieves a full ranked differential diagnosis with must-not-miss conditions, key features, red flags, and recommended tests/calculators. Use search_differential_diagnosis first to find the ID.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "differential_id": {
+                        "type": "string",
+                        "description": "The exact differential ID returned from search_differential_diagnosis."
+                    },
+                    "age": {
+                        "type": "integer",
+                        "description": "Patient age in years (optional, for age-specific annotations)."
+                    },
+                    "sex": {
+                        "type": "string",
+                        "description": "Patient sex — 'male' or 'female' (optional, for sex-specific annotations)."
+                    }
+                },
+                "required": ["differential_id"]
+            }
+        ),
+        types.Tool(
+            name="search_treatment_pathways",
+            description="Searches available evidence-based treatment pathways by diagnosis or keywords. Returns matching pathway IDs and descriptions.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Keywords to match against treatment pathways (e.g. 'atrial fibrillation anticoagulation', 'DVT treatment')."
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
+        types.Tool(
+            name="get_treatment_pathway",
+            description="Retrieves a full evidence-based treatment pathway with step-by-step decision tree, medication options, dose calculators, and guideline citations. Use search_treatment_pathways first to find the ID.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "pathway_id": {
+                        "type": "string",
+                        "description": "The exact pathway ID returned from search_treatment_pathways."
+                    },
+                    "contraindications": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of contraindication keys (e.g. ['active_major_bleeding']). Pathway will include warnings for matched contraindications."
+                    }
+                },
+                "required": ["pathway_id"]
+            }
+        ),
     ]
 
 @server.call_tool()
@@ -166,6 +237,76 @@ async def handle_call_tool(
                 )
             ]
         except (ValueError, FileNotFoundError) as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error: {e}"
+                )
+            ]
+
+    elif name == "search_differential_diagnosis":
+        query = (arguments or {}).get("query", "")
+        results = search_differentials(query)
+        import json
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps({"matches": results}, indent=2)
+            )
+        ]
+
+    elif name == "get_differential_diagnosis":
+        diff_id = (arguments or {}).get("differential_id", "")
+        age = (arguments or {}).get("age")
+        sex = (arguments or {}).get("sex")
+        try:
+            params = DifferentialParams(
+                differential_id=diff_id,
+                age=age,
+                sex=sex,
+            )
+            result = get_differential(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=f"Error: {e}"
+                )
+            ]
+
+    elif name == "search_treatment_pathways":
+        query = (arguments or {}).get("query", "")
+        results = search_pathways(query)
+        import json
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps({"matches": results}, indent=2)
+            )
+        ]
+
+    elif name == "get_treatment_pathway":
+        pw_id = (arguments or {}).get("pathway_id", "")
+        contras = (arguments or {}).get("contraindications")
+        try:
+            params = PathwayParams(
+                pathway_id=pw_id,
+                contraindications=contras,
+            )
+            result = get_pathway(params)
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result.model_dump_json(indent=2)
+                )
+            ]
+        except Exception as e:
             return [
                 types.TextContent(
                     type="text",
