@@ -1,0 +1,195 @@
+{
+  "differential_id": "chest_pain",
+  "title": "Chest Pain Differential Diagnosis",
+  "description": "Differential diagnosis for acute chest pain in adults, covering cardiac, pulmonary, GI, and musculoskeletal etiologies.",
+  "keywords": ["chest pain", "angina", "ACS", "PE", "pneumothorax", "GERD", "costochondritis", "pericarditis", "aortic dissection"],
+  "source_doi": "10.1016/j.jacc.2021.07.053",
+  "evidence_level": "Clinical Practice Guideline",
+  "source_description": "2021 AHA/ACC/ASE/CHEST/SAEM/SCCT/SCMR Guideline for the Evaluation and Diagnosis of Chest Pain. Gulati M, et al. JACC 2021;78(22):e187-e285.",
+  "diagnoses": [
+    {
+      "name": "Acute Coronary Syndrome (ACS)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Substernal pressure/squeezing",
+        "Radiation to left arm, jaw, or back",
+        "Diaphoresis, dyspnea, nausea",
+        "Worse with exertion"
+      ],
+      "red_flags": [
+        "ST changes on ECG",
+        "Elevated troponin",
+        "Hemodynamic instability",
+        "New-onset heart failure symptoms"
+      ],
+      "recommended_tests": [
+        "ECG (12-lead) within 10 minutes",
+        "Serial high-sensitivity troponin",
+        "Chest X-ray",
+        "calculate_heart_score",
+        "calculate_timi_ua_nstemi"
+      ],
+      "related_guidelines": ["acc_aha_stemi_2013", "esc_acs_2023"],
+      "age_modifier": "risk_increases_over_45_male_55_female",
+      "sex_modifier": "atypical_presentation_more_common_in_female"
+    },
+    {
+      "name": "Pulmonary Embolism",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Pleuritic chest pain",
+        "Acute dyspnea",
+        "Tachycardia",
+        "Unilateral leg swelling"
+      ],
+      "red_flags": [
+        "Hypotension / shock",
+        "Severe hypoxia",
+        "Right heart strain on echo",
+        "Syncope"
+      ],
+      "recommended_tests": [
+        "D-dimer",
+        "CT pulmonary angiography",
+        "calculate_wells_pe",
+        "calculate_perc"
+      ],
+      "related_guidelines": ["ash_vte_2020"],
+      "age_modifier": null,
+      "sex_modifier": "increased_risk_with_oral_contraceptives_in_female"
+    },
+    {
+      "name": "Aortic Dissection",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sudden severe tearing/ripping pain",
+        "Radiation to back (interscapular)",
+        "Blood pressure differential between arms",
+        "New aortic regurgitation murmur"
+      ],
+      "red_flags": [
+        "Pulse deficits",
+        "Widened mediastinum on CXR",
+        "Neurological deficits",
+        "Acute limb ischemia"
+      ],
+      "recommended_tests": [
+        "CT angiography of aorta",
+        "D-dimer",
+        "Chest X-ray",
+        "Transthoracic echocardiography"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_60",
+      "sex_modifier": "more_common_in_male"
+    },
+    {
+      "name": "Pericarditis / Myocarditis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Sharp pleuritic chest pain",
+        "Pain relieved by sitting forward",
+        "Diffuse ST elevation on ECG",
+        "Pericardial friction rub on auscultation"
+      ],
+      "red_flags": [
+        "Pericardial effusion with tamponade physiology",
+        "Hemodynamic instability",
+        "New-onset heart failure (myocarditis)"
+      ],
+      "recommended_tests": [
+        "ECG (diffuse ST elevation, PR depression)",
+        "Troponin (elevated in myocarditis)",
+        "Echocardiography",
+        "CRP / ESR"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_young_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Pneumothorax",
+      "likelihood": "less_common",
+      "key_features": [
+        "Sudden pleuritic chest pain",
+        "Acute dyspnea",
+        "Decreased breath sounds unilaterally",
+        "Hyperresonance to percussion"
+      ],
+      "red_flags": [
+        "Tracheal deviation (tension pneumothorax)",
+        "Hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "Chest X-ray",
+        "Point-of-care ultrasound"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "primary_spontaneous_more_common_in_young_tall_males",
+      "sex_modifier": null
+    },
+    {
+      "name": "Esophageal Rupture (Boerhaave Syndrome)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Severe chest/epigastric pain after forceful vomiting",
+        "Subcutaneous emphysema (crepitus)",
+        "Odynophagia",
+        "Mackler triad: vomiting, chest pain, subcutaneous emphysema"
+      ],
+      "red_flags": [
+        "Mediastinal air on imaging",
+        "Sepsis / shock",
+        "Pleural effusion (left-sided)"
+      ],
+      "recommended_tests": [
+        "CT chest with oral contrast",
+        "Chest X-ray (pneumomediastinum)",
+        "Water-soluble contrast esophagram"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Gastroesophageal Reflux (GERD)",
+      "likelihood": "common",
+      "key_features": [
+        "Burning substernal pain",
+        "Worse after meals or lying down",
+        "Relieved by antacids",
+        "Sour taste / regurgitation"
+      ],
+      "red_flags": [
+        "Dysphagia",
+        "Unintentional weight loss",
+        "GI bleeding"
+      ],
+      "recommended_tests": [
+        "Trial of PPI therapy",
+        "ECG to rule out cardiac cause first"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Musculoskeletal / Costochondritis",
+      "likelihood": "common",
+      "key_features": [
+        "Localized tenderness on palpation",
+        "Reproducible with movement or palpation",
+        "Sharp, positional pain",
+        "No associated dyspnea or diaphoresis"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Clinical examination",
+        "ECG to rule out cardiac cause first"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ]
+}
