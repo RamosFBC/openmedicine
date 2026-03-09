@@ -367,7 +367,7 @@ wheels = [
 
 [[package]]
 name = "open-medicine"
-version = "0.4.0"
+version = "0.6.0"
 source = { editable = "." }
 dependencies = [
     { name = "mcp" },
@@ -375,6 +375,9 @@ dependencies = [
 ]
 
 [package.optional-dependencies]
+embeddings = [
+    { name = "httpx" },
+]
 test = [
     { name = "ascvd" },
     { name = "hypothesis" },
@@ -384,12 +387,13 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "ascvd", marker = "extra == 'test'", specifier = ">=0.5" },
+    { name = "httpx", marker = "extra == 'embeddings'", specifier = ">=0.27.0" },
     { name = "hypothesis", marker = "extra == 'test'", specifier = ">=6.0.0" },
     { name = "mcp", specifier = ">=1.0.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
 ]
-provides-extras = ["test"]
+provides-extras = ["test", "embeddings"]
 
 [[package]]
 name = "packaging"
