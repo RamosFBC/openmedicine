@@ -154,6 +154,25 @@ async def handle_list_tools() -> list[types.Tool]:
                 "required": ["pathway_id"]
             }
         ),
+        types.Tool(
+            name="search_medical_knowledge",
+            description="Unified semantic search across ALL OpenMedicine content — calculators, guidelines, differential diagnoses, and treatment pathways. Returns categorized ranked results. This is the primary entry point for discovering relevant clinical tools. Falls back to keyword search if semantic search is unavailable.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "Natural language clinical query (e.g. 'patient with chest pain and shortness of breath', 'anticoagulation in CKD')."
+                    },
+                    "domain": {
+                        "type": "string",
+                        "enum": ["all", "calculator", "guideline", "differential", "pathway"],
+                        "description": "Optional filter by content type. Default: 'all'."
+                    }
+                },
+                "required": ["query"]
+            }
+        ),
     ]
 
 @server.call_tool()
@@ -313,6 +332,52 @@ async def handle_call_tool(
                     text=f"Error: {e}"
                 )
             ]
+
+    elif name == "search_medical_knowledge":
+        query = (arguments or {}).get("query", "")
+        domain = (arguments or {}).get("domain", "all")
+
+        # Try semantic search first
+        from open_medicine.embeddings.search import semantic_search
+        results = semantic_search(query, domain=domain)
+
+        if results is not None:
+            import json
+            return [
+                types.TextContent(
+                    type="text",
+                    text=json.dumps({"search_type": "semantic", "matches": results}, indent=2)
+                )
+            ]
+
+        # Fallback: aggregate keyword search across all domains
+        query_lower = query.lower()
+        matches = []
+
+        if domain in ("all", "calculator"):
+            for calc_id, tool_def in CALCULATOR_REGISTRY.items():
+                if query_lower in calc_id.lower() or query_lower in tool_def.description.lower():
+                    matches.append({"id": calc_id, "domain": "calculator", "text": tool_def.description})
+
+        if domain in ("all", "guideline"):
+            for g in search_guidelines(query):
+                matches.append({"id": g["guideline_id"], "domain": "guideline", "text": g["title"]})
+
+        if domain in ("all", "differential"):
+            for d in search_differentials(query):
+                matches.append({"id": d["differential_id"], "domain": "differential", "text": d["title"]})
+
+        if domain in ("all", "pathway"):
+            for p in search_pathways(query):
+                matches.append({"id": p["pathway_id"], "domain": "pathway", "text": p["title"]})
+
+        import json
+        return [
+            types.TextContent(
+                type="text",
+                text=json.dumps({"search_type": "keyword", "matches": matches}, indent=2)
+            )
+        ]
 
     else:
         raise ValueError(f"Unknown tool: {name}")
