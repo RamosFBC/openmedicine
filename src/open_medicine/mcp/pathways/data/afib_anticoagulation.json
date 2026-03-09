@@ -1,0 +1,127 @@
+{
+  "pathway_id": "afib_anticoagulation",
+  "title": "Atrial Fibrillation Anticoagulation Pathway",
+  "description": "Evidence-based treatment pathway for anticoagulation in non-valvular atrial fibrillation.",
+  "keywords": ["atrial fibrillation", "AFib", "anticoagulation", "stroke prevention", "DOAC", "warfarin"],
+  "source_doi": "10.1161/CIR.0000000000001193",
+  "evidence_level": "Clinical Practice Guideline",
+  "source_description": "2023 ACC/AHA/ACCP/HRS Guideline for Diagnosis and Management of Atrial Fibrillation. Circulation 2024;149(1):e1-e156.",
+  "contraindication_warnings": {
+    "active_major_bleeding": "Active major bleeding is an absolute contraindication to anticoagulation. Address bleeding source first.",
+    "severe_thrombocytopenia": "Platelet count <50,000/uL — anticoagulation risk may outweigh benefit. Hematology consult recommended."
+  },
+  "steps": [
+    {
+      "order": 1,
+      "name": "Assess stroke risk",
+      "description": "Calculate CHA2DS2-VASc score to determine stroke risk and need for anticoagulation.",
+      "action_type": "calculate",
+      "tool_reference": "calculate_chadsvasc",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "decision_points": [
+        {"condition": "CHA2DS2-VASc >= 2 (male) or >= 3 (female)", "next_step": 2},
+        {"condition": "CHA2DS2-VASc 1 (male) or 2 (female)", "next_step": 2, "note": "Anticoagulation may be considered; assess additional risk modifiers (AF burden, LA size, obesity, eGFR <45)"},
+        {"condition": "CHA2DS2-VASc 0 (male) or 1 (female)", "next_step": null, "note": "Anticoagulation not recommended"}
+      ]
+    },
+    {
+      "order": 2,
+      "name": "Assess bleeding risk",
+      "description": "Calculate HAS-BLED score to identify modifiable bleeding risk factors. Per 2023 ACC/AHA guideline, bleeding risk scores should NOT be used to withhold anticoagulation — use them to address modifiable factors and guide monitoring intensity.",
+      "action_type": "calculate",
+      "tool_reference": "calculate_hasbled",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "decision_points": [
+        {"condition": "HAS-BLED >= 3", "next_step": 3, "note": "High bleeding risk — address modifiable factors (hypertension, labile INR, alcohol, NSAIDs), increase monitoring frequency. Do NOT withhold anticoagulation based on score alone."},
+        {"condition": "HAS-BLED < 3", "next_step": 3}
+      ]
+    },
+    {
+      "order": 3,
+      "name": "Assess renal function",
+      "description": "Calculate CrCl (Cockcroft-Gault) for DOAC dose adjustment. CrCl is preferred over eGFR for DOAC dosing as clinical trials used Cockcroft-Gault.",
+      "action_type": "calculate",
+      "tool_reference": "calculate_cockcroft_gault",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "decision_points": [
+        {"condition": "CrCl >= 50 mL/min", "next_step": 4},
+        {"condition": "CrCl 30-49 mL/min", "next_step": 4, "note": "Some DOACs require dose adjustment; check edoxaban CrCl >95 contraindication"},
+        {"condition": "CrCl 15-29 mL/min", "next_step": 5, "note": "Limited DOAC options; dabigatran contraindicated below CrCl 30 without specific P-gp considerations"},
+        {"condition": "CrCl < 15 mL/min or dialysis", "next_step": 6}
+      ]
+    },
+    {
+      "order": 4,
+      "name": "First-line: DOAC therapy",
+      "description": "DOACs are preferred over warfarin for most patients with non-valvular AF (Class 1 recommendation). Apixaban, rivaroxaban, dabigatran, or edoxaban.",
+      "action_type": "prescribe",
+      "tool_reference": "calculate_apixaban_dosing",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "options": [
+        {
+          "medication": "Apixaban",
+          "standard_dose": "5 mg PO BID",
+          "reduced_dose_criteria": "Need 2 of 3: age >= 80, weight <= 60 kg, or serum creatinine >= 1.5 mg/dL",
+          "reduced_dose": "2.5 mg PO BID",
+          "calculator": "calculate_apixaban_dosing",
+          "key_trial_doi": "10.1056/NEJMoa1107039"
+        },
+        {
+          "medication": "Rivaroxaban",
+          "standard_dose": "20 mg PO daily with evening meal",
+          "reduced_dose_criteria": "CrCl 15-50 mL/min",
+          "reduced_dose": "15 mg PO daily with evening meal",
+          "calculator": "calculate_rivaroxaban_dosing",
+          "key_trial_doi": "10.1056/NEJMoa1009638",
+          "note": "Avoid if CrCl < 15 mL/min"
+        },
+        {
+          "medication": "Dabigatran",
+          "standard_dose": "150 mg PO BID",
+          "reduced_dose_criteria": "CrCl 15-30 mL/min (any patient), OR CrCl 30-50 mL/min with concomitant dronedarone or systemic ketoconazole",
+          "reduced_dose": "75 mg PO BID",
+          "calculator": "calculate_dabigatran_dosing",
+          "key_trial_doi": "10.1056/NEJMoa0905561",
+          "note": "Contraindicated if CrCl < 15 mL/min. Avoid P-gp inhibitors entirely at CrCl 15-30. Other P-gp inhibitors (verapamil, amiodarone, quinidine) do NOT require dose adjustment at CrCl > 30."
+        },
+        {
+          "medication": "Edoxaban",
+          "standard_dose": "60 mg PO daily",
+          "reduced_dose_criteria": "CrCl 15-50 mL/min, weight <= 60 kg, or concomitant P-gp inhibitors (verapamil, quinidine, certain macrolides)",
+          "reduced_dose": "30 mg PO daily",
+          "calculator": "calculate_edoxaban_dosing",
+          "key_trial_doi": "10.1056/NEJMoa1310907",
+          "note": "FDA BOXED WARNING: Do NOT use if CrCl > 95 mL/min — reduced efficacy vs warfarin in ENGAGE AF-TIMI 48 trial."
+        }
+      ],
+      "decision_points": []
+    },
+    {
+      "order": 5,
+      "name": "Reduced renal function: Limited DOAC options",
+      "description": "CrCl 15-29 mL/min. Apixaban and rivaroxaban have data in this range. Dabigatran is contraindicated below CrCl 30 (no dosing recommendation). Warfarin is an alternative.",
+      "action_type": "prescribe",
+      "tool_reference": "calculate_renal_dose_adjustment",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "options": [
+        {"medication": "Apixaban 5 mg BID (or 2.5 mg BID if dose-reduction criteria met)", "calculator": "calculate_apixaban_dosing"},
+        {"medication": "Rivaroxaban 15 mg daily with evening meal", "calculator": "calculate_rivaroxaban_dosing"},
+        {"medication": "Warfarin (INR target 2.0-3.0)", "calculator": "calculate_warfarin_initiation"}
+      ],
+      "decision_points": []
+    },
+    {
+      "order": 6,
+      "name": "Severe CKD / Dialysis: Warfarin or apixaban",
+      "description": "CrCl < 15 mL/min or on dialysis. Rivaroxaban, dabigatran, and edoxaban are NOT recommended for ESKD/dialysis (insufficient evidence). Apixaban 5 mg BID (FDA-approved for HD) has limited data. Warfarin is the traditional choice. Shared decision-making essential.",
+      "action_type": "prescribe",
+      "tool_reference": "calculate_warfarin_initiation",
+      "evidence_doi": "10.1161/CIR.0000000000001193",
+      "options": [
+        {"medication": "Warfarin (INR target 2.0-3.0)", "calculator": "calculate_warfarin_initiation"},
+        {"medication": "Apixaban 5 mg BID (FDA-approved in ESKD; limited data from RENAL-AF trial)", "calculator": "calculate_apixaban_dosing", "supplementary_doi": "10.1161/CIRCULATIONAHA.121.054990"}
+      ],
+      "decision_points": []
+    }
+  ]
+}
