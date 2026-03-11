@@ -1,0 +1,378 @@
+{
+  "differential_id": "dyspnea",
+  "title": "Dyspnea (Shortness of Breath) Differential Diagnosis",
+  "description": "Differential diagnosis for dyspnea in adults, covering pulmonary, cardiac, systemic, and psychogenic etiologies. Dyspnea affects up to 25% of ambulatory patients and can be a manifestation of life-threatening disease.",
+  "keywords": ["dyspnea", "shortness of breath", "breathlessness", "respiratory distress", "SOB", "tachypnea", "orthopnea", "air hunger"],
+  "source_doi": "10.3238/arztebl.2016.0834",
+  "evidence_level": "Systematic Review",
+  "source_description": "Berliner D, Schneider N, Welte T, Bauersachs J. The Differential Diagnosis of Dyspnea. Dtsch Arztebl Int. 2016;113(49):834-845.",
+  "diagnoses": [
+    {
+      "name": "Pulmonary Embolism",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Acute onset dyspnea",
+        "Pleuritic chest pain",
+        "Tachycardia",
+        "Hemoptysis",
+        "Neck vein distention without lung rales"
+      ],
+      "red_flags": [
+        "Hypotension or shock",
+        "Severe hypoxia",
+        "Syncope",
+        "Right heart strain on echocardiography"
+      ],
+      "recommended_tests": [
+        "D-dimer (age-adjusted)",
+        "CT pulmonary angiography",
+        "calculate_wells_pe",
+        "calculate_perc"
+      ],
+      "related_guidelines": ["ash_vte_2020"],
+      "age_modifier": null,
+      "sex_modifier": "increased_risk_with_oral_contraceptives_in_female"
+    },
+    {
+      "name": "Acute Coronary Syndrome",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Dyspnea may be the sole presenting symptom",
+        "Exertional dyspnea as anginal equivalent",
+        "Diaphoresis and nausea",
+        "Atypical presentation common in diabetics"
+      ],
+      "red_flags": [
+        "ST changes on ECG",
+        "Elevated troponin",
+        "Hemodynamic instability",
+        "New-onset heart failure symptoms"
+      ],
+      "recommended_tests": [
+        "ECG (12-lead) within 10 minutes",
+        "Serial high-sensitivity troponin",
+        "calculate_heart_score",
+        "calculate_timi_ua_nstemi"
+      ],
+      "related_guidelines": ["acc_aha_stemi_2013", "esc_acs_2023"],
+      "age_modifier": "risk_increases_over_45_male_55_female",
+      "sex_modifier": "atypical_presentation_more_common_in_female"
+    },
+    {
+      "name": "Pneumothorax",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sudden onset dyspnea",
+        "Pleuritic chest pain",
+        "Diminished breath sounds unilaterally",
+        "Hyperresonance to percussion"
+      ],
+      "red_flags": [
+        "Tracheal deviation (tension pneumothorax)",
+        "Hemodynamic instability",
+        "Cyanosis"
+      ],
+      "recommended_tests": [
+        "Chest X-ray",
+        "Point-of-care ultrasound"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "primary_spontaneous_more_common_in_young_tall_males",
+      "sex_modifier": null
+    },
+    {
+      "name": "Pericardial Tamponade",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Dyspnea with neck vein distention",
+        "Normal lung sounds despite hemodynamic compromise",
+        "Pulsus paradoxus",
+        "Muffled heart sounds"
+      ],
+      "red_flags": [
+        "Hypotension",
+        "Beck triad (hypotension, JVD, muffled heart sounds)",
+        "Electrical alternans on ECG"
+      ],
+      "recommended_tests": [
+        "Echocardiography (emergent)",
+        "Chest X-ray (enlarged cardiac silhouette)",
+        "ECG"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Anaphylaxis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Acute onset after allergen exposure",
+        "Dyspnea with stridor or wheezing",
+        "Urticaria or angioedema",
+        "Gastrointestinal symptoms (nausea, vomiting)"
+      ],
+      "red_flags": [
+        "Hypotension or shock",
+        "Upper airway obstruction (stridor)",
+        "Rapid progression of symptoms"
+      ],
+      "recommended_tests": [
+        "Clinical diagnosis",
+        "Serum tryptase (post-event confirmation)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Congestive Heart Failure",
+      "likelihood": "common",
+      "key_features": [
+        "Exertional dyspnea progressing to orthopnea",
+        "Paroxysmal nocturnal dyspnea",
+        "Peripheral edema and weight gain",
+        "Elevated jugular venous pressure with pulmonary rales"
+      ],
+      "red_flags": [
+        "Acute pulmonary edema",
+        "Cardiogenic shock",
+        "New-onset atrial fibrillation"
+      ],
+      "recommended_tests": [
+        "NT-proBNP or BNP (exclusion threshold: NT-proBNP <300, BNP <100 pg/mL)",
+        "Echocardiography (LVEF assessment)",
+        "Chest X-ray",
+        "ECG"
+      ],
+      "related_guidelines": ["aha_acc_hf_2022"],
+      "age_modifier": "prevalence_increases_with_age",
+      "sex_modifier": "hfpef_more_common_in_female"
+    },
+    {
+      "name": "COPD Exacerbation",
+      "likelihood": "common",
+      "key_features": [
+        "Worsening dyspnea over baseline",
+        "Increased sputum volume and purulence",
+        "Wheezing and prolonged expiration",
+        "History of smoking (>10 pack-years)"
+      ],
+      "red_flags": [
+        "Use of accessory muscles",
+        "Altered consciousness or exhaustion",
+        "Severe hypoxemia or hypercapnia"
+      ],
+      "recommended_tests": [
+        "Spirometry (FEV1/FVC <0.7)",
+        "Arterial blood gas",
+        "Chest X-ray",
+        "calculate_gold_copd"
+      ],
+      "related_guidelines": ["gold_copd_2024"],
+      "age_modifier": "more_common_over_40",
+      "sex_modifier": null
+    },
+    {
+      "name": "Asthma",
+      "likelihood": "common",
+      "key_features": [
+        "Episodic dyspnea with wheezing",
+        "Nocturnal symptoms and early morning worsening",
+        "Trigger-related (allergens, exercise, cold air)",
+        "Reversible airflow obstruction on spirometry"
+      ],
+      "red_flags": [
+        "Silent chest (severe bronchospasm)",
+        "Inability to speak in full sentences",
+        "Peak flow <25% predicted (life-threatening)"
+      ],
+      "recommended_tests": [
+        "Spirometry with bronchodilator reversibility",
+        "Peak expiratory flow monitoring",
+        "Chest X-ray (to exclude other diagnoses)"
+      ],
+      "related_guidelines": ["gina_asthma_2024"],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Pneumonia",
+      "likelihood": "common",
+      "key_features": [
+        "Dyspnea with fever and productive cough",
+        "Pleuritic chest pain",
+        "Rales or crackles on auscultation",
+        "Dyspnea is the predominant symptom in patients over 65 (approximately 80%)"
+      ],
+      "red_flags": [
+        "Tachypnea (respiratory rate >30)",
+        "Hypoxemia",
+        "Multilobar infiltrates",
+        "Sepsis or hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "Chest X-ray",
+        "CRP and CBC",
+        "Blood cultures (if admission indicated)",
+        "calculate_curb65",
+        "calculate_psi_port"
+      ],
+      "related_guidelines": ["ats_idsa_cap_2019"],
+      "age_modifier": "dyspnea_predominant_symptom_over_65",
+      "sex_modifier": null
+    },
+    {
+      "name": "Interstitial Lung Disease",
+      "likelihood": "less_common",
+      "key_features": [
+        "Progressive exertional dyspnea",
+        "Nonproductive dry cough",
+        "Bibasilar fine inspiratory crackles (velcro rales)",
+        "Digital clubbing"
+      ],
+      "red_flags": [
+        "Rapidly progressive course (acute interstitial pneumonia)",
+        "Severe hypoxemia at rest"
+      ],
+      "recommended_tests": [
+        "Pulmonary function tests (reduced VC/TLC, decreased DLCO)",
+        "High-resolution CT chest",
+        "calculate_aa_gradient"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "idiopathic_pulmonary_fibrosis_more_common_over_60",
+      "sex_modifier": null
+    },
+    {
+      "name": "Pulmonary Hypertension",
+      "likelihood": "less_common",
+      "key_features": [
+        "Progressive exertional dyspnea",
+        "Exertional syncope or presyncope",
+        "Elevated jugular venous pressure",
+        "Loud pulmonic component of S2"
+      ],
+      "red_flags": [
+        "Right heart failure signs",
+        "Syncope on exertion",
+        "Hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "Echocardiography (estimated RVSP)",
+        "Right heart catheterization (definitive)",
+        "NT-proBNP",
+        "6-minute walk test"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "idiopathic_pah_more_common_in_female"
+    },
+    {
+      "name": "Valvular Heart Disease (Aortic Stenosis)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Exertional dyspnea with diminished exercise tolerance",
+        "Exertional syncope or presyncope",
+        "Angina equivalent",
+        "Harsh crescendo-decrescendo systolic murmur at right upper sternal border"
+      ],
+      "red_flags": [
+        "Syncope on exertion",
+        "Heart failure symptoms",
+        "Hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "Echocardiography (valve area, gradient)",
+        "ECG (left ventricular hypertrophy)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "degenerative_calcific_more_common_over_65",
+      "sex_modifier": null
+    },
+    {
+      "name": "Anemia",
+      "likelihood": "less_common",
+      "key_features": [
+        "Exertional dyspnea with fatigue",
+        "Pallor of skin and mucous membranes",
+        "Tachycardia at rest or with minimal exertion",
+        "Symptoms poorly correlated with hemoglobin level"
+      ],
+      "red_flags": [
+        "Hemodynamic instability (acute blood loss)",
+        "Symptomatic at rest"
+      ],
+      "recommended_tests": [
+        "Complete blood count",
+        "Reticulocyte count",
+        "Iron studies, B12, folate"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "iron_deficiency_more_common_in_premenopausal_female"
+    },
+    {
+      "name": "Anxiety / Panic Disorder",
+      "likelihood": "common",
+      "key_features": [
+        "Dyspnea improved by distraction or exercise",
+        "Hyperventilation with perioral or extremity paresthesias",
+        "Associated palpitations and chest tightness",
+        "Normal cardiopulmonary examination"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Exclusion diagnosis after somatic workup",
+        "Psychometric assessment",
+        "ECG and basic labs to rule out organic cause"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Thyrotoxicosis",
+      "rationale": "Hypermetabolic state causing tachypnea and exertional dyspnea; check TSH in unexplained persistent dyspnea"
+    },
+    {
+      "name": "Neuromuscular Disease (Guillain-Barré, Myasthenia Gravis, ALS)",
+      "rationale": "Respiratory muscle weakness causing progressive dyspnea; check for proximal weakness, declining FVC"
+    },
+    {
+      "name": "Metabolic Acidosis (Kussmaul Breathing)",
+      "rationale": "Compensatory hyperventilation perceived as dyspnea; check ABG and electrolytes in diabetic or renal patients"
+    },
+    {
+      "name": "Foreign Body Aspiration",
+      "rationale": "Sudden onset in elderly or patients with impaired consciousness; unilateral wheeze or diminished breath sounds"
+    },
+    {
+      "name": "Superior Vena Cava Syndrome",
+      "rationale": "Dyspnea with facial and upper extremity swelling; associated with thoracic malignancy"
+    },
+    {
+      "name": "Large Pleural Effusion",
+      "rationale": "Progressive dyspnea with dullness to percussion and decreased breath sounds; confirm with chest X-ray or ultrasound"
+    },
+    {
+      "name": "Obesity Hypoventilation Syndrome",
+      "rationale": "Chronic dyspnea in BMI >40 with daytime hypercapnia; elevated PaCO2 on ABG"
+    },
+    {
+      "name": "Severe Deconditioning",
+      "rationale": "Exertional dyspnea with entirely normal cardiopulmonary workup; diagnosis of exclusion"
+    },
+    {
+      "name": "Vocal Cord Dysfunction",
+      "rationale": "Inspiratory stridor mimicking asthma; poor response to bronchodilators, diagnosed by laryngoscopy during symptoms"
+    },
+    {
+      "name": "Pheochromocytoma",
+      "rationale": "Episodic dyspnea with paroxysmal hypertension, headache, and diaphoresis; check plasma metanephrines"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Consider atypical presentations, comorbidity interactions, medication effects (e.g., beta-blockers, ACE-inhibitor cough mimicking dyspnea), and diagnoses not listed here based on the specific patient's age, sex, history, and examination findings. In elderly patients, multiple simultaneous etiologies frequently coexist. In young patients with a normal workup, consider functional causes only after thorough exclusion of organic disease."
+}

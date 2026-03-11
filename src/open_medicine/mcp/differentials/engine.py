@@ -95,15 +95,23 @@ def get_differential(params: DifferentialParams) -> ClinicalResult:
     priority = {"must_not_miss": 0, "less_common": 1, "common": 2}
     diagnoses.sort(key=lambda d: priority.get(d["likelihood"], 99))
 
+    also_consider = diff.get("also_consider", [])
+    clinical_reasoning_prompt = diff.get("clinical_reasoning_prompt", "")
+
     value = {
         "differential_id": diff["differential_id"],
         "title": diff["title"],
         "diagnoses": diagnoses,
+        "also_consider": also_consider,
+        "clinical_reasoning_prompt": clinical_reasoning_prompt,
     }
 
+    must_not_miss = [d["name"] for d in diagnoses if d["likelihood"] == "must_not_miss"]
     interpretation = (
-        f"{diff['title']}: {len(diagnoses)} diagnoses ranked by clinical priority. "
-        f"Must-not-miss: {', '.join(d['name'] for d in diagnoses if d['likelihood'] == 'must_not_miss')}."
+        f"{diff['title']}: {len(diagnoses)} evidence-based diagnoses ranked by clinical priority. "
+        f"Must-not-miss: {', '.join(must_not_miss)}. "
+        f"Also consider {len(also_consider)} additional rare/atypical diagnoses listed in also_consider. "
+        f"{clinical_reasoning_prompt}"
     )
 
     evidence = Evidence(
