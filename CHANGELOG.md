@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.9.0] - 2026-03-11
+
+### Added
+- **Tokenized Search with Clinical Synonym Expansion** — replaced naive substring matching across all 5 search tools with token-based scoring and ~70 clinical synonym groups. Agents can now discover tools using natural language, abbreviations (afib, PE, MI, COPD), and synonym terms (renal → kidney, blood thinner → anticoagulant).
+  - **Synonym coverage:** Renal/kidney, cardiac/heart, stroke/CVA/TIA, liver/hepatic, pulmonary/lung, VTE/DVT/PE, anticoagulation, atrial fibrillation, sepsis, GFR/CrCl, diabetes, hypertension, anxiety, depression, fracture/osteoporosis, burn, trauma, pediatric, ICU, alcohol/opioid, oncology, acid-base, and 40+ more clinical concept groups.
+  - **Weighted scoring:** Direct token matches score higher than synonym-expanded matches; exact phrase matches get a bonus. Results are ranked by relevance.
+  - **27 new search tests** covering synonym expansion, scoring, and integration against the live registry.
+- Project totals: 93 calculators, 43 guideline modules, 2499 tests.
+
 ## [0.8.0] - 2026-03-11
 
 ### Added
