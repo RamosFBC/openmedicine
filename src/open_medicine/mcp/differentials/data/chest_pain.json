@@ -191,5 +191,48 @@
       "age_modifier": null,
       "sex_modifier": null
     }
-  ]
+  ],
+  "also_consider": [
+    {
+      "name": "Takotsubo (Stress) Cardiomyopathy",
+      "rationale": "Mimics ACS especially in post-menopausal women after emotional/physical stress; normal coronaries on catheterization"
+    },
+    {
+      "name": "Herpes Zoster (Pre-Rash Phase)",
+      "rationale": "Dermatomal chest pain precedes vesicular rash by 2-3 days; can mimic ACS or PE before rash appears"
+    },
+    {
+      "name": "Pleuritis (Non-PE)",
+      "rationale": "Sharp pleuritic pain associated with viral URI or autoimmune disease; diagnosis of exclusion after PE ruled out"
+    },
+    {
+      "name": "Pulmonary Hypertension",
+      "rationale": "Exertional chest tightness with progressive dyspnea; check echocardiography for elevated RVSP"
+    },
+    {
+      "name": "Esophageal Spasm",
+      "rationale": "Mimics angina closely and may respond to nitroglycerin, creating diagnostic confusion; consider if cardiac workup negative"
+    },
+    {
+      "name": "Biliary Colic",
+      "rationale": "Epigastric or RUQ pain radiating to chest, post-prandial; check RUQ ultrasound"
+    },
+    {
+      "name": "Panic Disorder",
+      "rationale": "Chest pain with hyperventilation and paresthesias; diagnosis of exclusion after cardiac workup"
+    },
+    {
+      "name": "Acute Chest Syndrome (Sickle Cell Disease)",
+      "rationale": "Chest pain with fever and new pulmonary infiltrate in sickle cell patients; medical emergency"
+    },
+    {
+      "name": "Cocaine-Induced Coronary Vasospasm",
+      "rationale": "Coronary vasospasm causing ACS-like presentation; always ask about substance use in young adults with chest pain"
+    },
+    {
+      "name": "Tietze Syndrome",
+      "rationale": "Painful swelling of costochondral junction; distinguished from costochondritis by visible swelling on exam"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Consider atypical presentations (especially in women, diabetics, and elderly), substance use history, recent procedures or trauma, and diagnoses not listed here. Always exclude life-threatening causes before considering benign etiologies. A normal ECG and troponin do not exclude ACS — serial evaluation may be required."
 }
