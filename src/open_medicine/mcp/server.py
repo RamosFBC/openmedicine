@@ -102,7 +102,7 @@ async def handle_list_tools() -> list[types.Tool]:
         ),
         types.Tool(
             name="get_differential_diagnosis",
-            description="Retrieves a full ranked differential diagnosis with must-not-miss conditions, key features, red flags, and recommended tests/calculators. Use search_differential_diagnosis first to find the ID.",
+            description="Returns an evidence-based reference set of common and must-not-miss diagnoses for a clinical presentation, with DOI-backed features, red flags, and recommended tests/calculators. This is a truth anchor for clinical reasoning — not an exhaustive list. The response includes an also_consider field with additional rare/atypical diagnoses and a clinical_reasoning_prompt to support broader diagnostic reasoning. Use search_differential_diagnosis first to find the ID.",
             inputSchema={
                 "type": "object",
                 "properties": {
