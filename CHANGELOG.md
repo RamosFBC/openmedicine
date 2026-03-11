@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-03-11
+
+### Added
+- **Differential Broadening** — `also_consider` and `clinical_reasoning_prompt` fields added to differential diagnosis output, positioning curated differentials as truth anchors for broader AI reasoning.
+  - **`also_consider`**: 10 rare/atypical diagnoses per differential (chest pain, dyspnea) with clinically actionable rationales.
+  - **`clinical_reasoning_prompt`**: Presentation-specific guidance encouraging AI agents to consider atypical presentations, comorbidities, and diagnoses beyond the curated list.
+- **Dyspnea Differential Diagnosis** — 14 ranked diagnoses (5 must-not-miss, 4 common, 5 less common) with DOI-backed evidence from Berliner et al. 2016 systematic review.
+- **MCP tool description reframed** — `get_differential_diagnosis` now described as an evidence-based truth anchor rather than an exhaustive list.
+
+### Fixed
+- Disabled Hypothesis deadline on IPSS fuzz test to prevent flaky CI failures.
+
 ## [0.6.0] - 2026-03-07
 
 ### Added
