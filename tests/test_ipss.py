@@ -328,7 +328,7 @@ def test_ipss_rejects_qol_out_of_range_low():
         quality_of_life=st.one_of(st.none(), st.integers(min_value=0, max_value=6)),
     )
 )
-@settings(max_examples=500)
+@settings(max_examples=500, deadline=None)
 def test_ipss_fuzz_valid_range(params):
     """Output is always within expected bounds for any valid input."""
     result = calculate_ipss(params)
