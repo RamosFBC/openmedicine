@@ -6,6 +6,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.search_utils import tokenized_search
 
 
 class DifferentialParams(BaseModel):
@@ -32,23 +33,21 @@ _DIFFERENTIAL_DB = _load_all_differentials()
 
 
 def search_differentials(query: str) -> list[dict[str, Any]]:
-    """Search differentials by keyword matching against titles, descriptions, and keywords."""
-    query_lower = query.lower()
-    results = []
+    """Search differentials using tokenized matching with clinical synonym expansion."""
+    items = []
     for diff_id, diff in _DIFFERENTIAL_DB.items():
-        searchable = " ".join([
-            diff["title"].lower(),
-            diff["description"].lower(),
-            diff_id.lower(),
-            " ".join(k.lower() for k in diff.get("keywords", [])),
-        ])
-        if query_lower in searchable:
-            results.append({
-                "differential_id": diff_id,
-                "title": diff["title"],
-                "description": diff["description"],
-                "doi": diff["source_doi"],
-            })
+        keywords = " ".join(k for k in diff.get("keywords", []))
+        items.append({
+            "differential_id": diff_id,
+            "title": diff["title"],
+            "description": diff["description"],
+            "doi": diff["source_doi"],
+            "searchable_text": f"{diff_id} {diff['title']} {diff['description']} {keywords}",
+        })
+
+    results = tokenized_search(query, items)
+    for r in results:
+        r.pop("_score", None)
     return results
 
 

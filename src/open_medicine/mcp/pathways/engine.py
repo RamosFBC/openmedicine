@@ -6,6 +6,7 @@ from typing import Any, Optional
 from pydantic import BaseModel, Field
 
 from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.search_utils import tokenized_search
 
 
 class PathwayParams(BaseModel):
@@ -31,23 +32,21 @@ _PATHWAY_DB = _load_all_pathways()
 
 
 def search_pathways(query: str) -> list[dict[str, Any]]:
-    """Search pathways by keyword matching against titles, descriptions, and keywords."""
-    query_lower = query.lower()
-    results = []
+    """Search pathways using tokenized matching with clinical synonym expansion."""
+    items = []
     for pw_id, pw in _PATHWAY_DB.items():
-        searchable = " ".join([
-            pw["title"].lower(),
-            pw["description"].lower(),
-            pw_id.lower(),
-            " ".join(k.lower() for k in pw.get("keywords", [])),
-        ])
-        if query_lower in searchable:
-            results.append({
-                "pathway_id": pw_id,
-                "title": pw["title"],
-                "description": pw["description"],
-                "doi": pw["source_doi"],
-            })
+        keywords = " ".join(k for k in pw.get("keywords", []))
+        items.append({
+            "pathway_id": pw_id,
+            "title": pw["title"],
+            "description": pw["description"],
+            "doi": pw["source_doi"],
+            "searchable_text": f"{pw_id} {pw['title']} {pw['description']} {keywords}",
+        })
+
+    results = tokenized_search(query, items)
+    for r in results:
+        r.pop("_score", None)
     return results
 
 

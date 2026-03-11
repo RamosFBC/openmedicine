@@ -12,6 +12,7 @@ from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guide
 from open_medicine.mcp.differentials.engine import search_differentials, get_differential, DifferentialParams
 from open_medicine.mcp.pathways.engine import search_pathways, get_pathway, PathwayParams
 from open_medicine.mcp.routing.engine import assess_clinical_scenario, ScenarioParams
+from open_medicine.mcp.search_utils import tokenized_search
 
 # Initialize the MCP Server
 server = Server("open-medicine")
@@ -212,17 +213,22 @@ async def handle_call_tool(
     Handle tool execution requests.
     """
     if name == "search_clinical_calculators":
-        query = (arguments or {}).get("query", "").lower()
-        results = []
-        for calc_id, tool_def in CALCULATOR_REGISTRY.items():
-            # A simple substring match against the ID and the description
-            if query in calc_id.lower() or query in tool_def.description.lower():
-                results.append({
-                    "calculator_id": calc_id,
-                    "description": tool_def.description,
-                    "required_schema": tool_def.schema
-                })
-        
+        query = (arguments or {}).get("query", "")
+        # Build searchable items from registry
+        items = [
+            {
+                "calculator_id": calc_id,
+                "description": tool_def.description,
+                "required_schema": tool_def.schema,
+                "searchable_text": f"{calc_id} {tool_def.description}",
+            }
+            for calc_id, tool_def in CALCULATOR_REGISTRY.items()
+        ]
+        results = tokenized_search(query, items)
+        # Remove internal score from output
+        for r in results:
+            r.pop("_score", None)
+
         import json
         return [
             types.TextContent(
@@ -379,26 +385,54 @@ async def handle_call_tool(
                 )
             ]
 
-        # Fallback: aggregate keyword search across all domains
-        query_lower = query.lower()
-        matches = []
+        # Fallback: aggregate tokenized search across all domains
+        all_items: list[dict] = []
 
         if domain in ("all", "calculator"):
             for calc_id, tool_def in CALCULATOR_REGISTRY.items():
-                if query_lower in calc_id.lower() or query_lower in tool_def.description.lower():
-                    matches.append({"id": calc_id, "domain": "calculator", "text": tool_def.description})
+                all_items.append({
+                    "id": calc_id,
+                    "domain": "calculator",
+                    "text": tool_def.description,
+                    "searchable_text": f"{calc_id} {tool_def.description}",
+                })
 
         if domain in ("all", "guideline"):
-            for g in search_guidelines(query):
-                matches.append({"id": g["guideline_id"], "domain": "guideline", "text": g["title"]})
+            from open_medicine.mcp.guideline_engine import _load_registry
+            for g in _load_registry():
+                topics = " ".join(g.get("topics", []))
+                all_items.append({
+                    "id": g["id"],
+                    "domain": "guideline",
+                    "text": g["title"],
+                    "searchable_text": f"{g['id']} {g['title']} {g.get('organization', '')} {topics}",
+                })
 
         if domain in ("all", "differential"):
-            for d in search_differentials(query):
-                matches.append({"id": d["differential_id"], "domain": "differential", "text": d["title"]})
+            from open_medicine.mcp.differentials.engine import _DIFFERENTIAL_DB
+            for diff_id, diff in _DIFFERENTIAL_DB.items():
+                keywords = " ".join(diff.get("keywords", []))
+                all_items.append({
+                    "id": diff_id,
+                    "domain": "differential",
+                    "text": diff["title"],
+                    "searchable_text": f"{diff_id} {diff['title']} {diff['description']} {keywords}",
+                })
 
         if domain in ("all", "pathway"):
-            for p in search_pathways(query):
-                matches.append({"id": p["pathway_id"], "domain": "pathway", "text": p["title"]})
+            from open_medicine.mcp.pathways.engine import _PATHWAY_DB
+            for pw_id, pw in _PATHWAY_DB.items():
+                keywords = " ".join(pw.get("keywords", []))
+                all_items.append({
+                    "id": pw_id,
+                    "domain": "pathway",
+                    "text": pw["title"],
+                    "searchable_text": f"{pw_id} {pw['title']} {pw['description']} {keywords}",
+                })
+
+        matches = tokenized_search(query, all_items)
+        for m in matches:
+            m.pop("_score", None)
 
         import json
         return [

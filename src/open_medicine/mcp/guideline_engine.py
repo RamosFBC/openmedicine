@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.search_utils import tokenized_search
 
 
 # Resolve absolute paths relative to this package
@@ -21,32 +22,27 @@ def _load_registry() -> list[dict[str, Any]]:
 def search_guidelines(query: str) -> list[dict[str, Any]]:
     """
     Search the guideline registry by matching the query against
-    guideline titles and topic keywords. Returns a list of matching
-    guideline metadata objects with their available sections.
+    guideline titles, topic keywords, organization, and id using
+    tokenized matching with clinical synonym expansion.
     """
     registry = _load_registry()
-    query_lower = query.lower()
-    results = []
 
+    items = []
     for guideline in registry:
-        # Match against title, topics, organization, and id
-        searchable = " ".join([
-            guideline["title"].lower(),
-            guideline["id"].lower(),
-            guideline.get("organization", "").lower(),
-            " ".join(t.lower() for t in guideline.get("topics", []))
-        ])
+        topics = " ".join(t for t in guideline.get("topics", []))
+        items.append({
+            "guideline_id": guideline["id"],
+            "title": guideline["title"],
+            "doi": guideline["doi"],
+            "year": guideline.get("year"),
+            "organization": guideline.get("organization"),
+            "available_sections": guideline["sections"],
+            "searchable_text": f"{guideline['id']} {guideline['title']} {guideline.get('organization', '')} {topics}",
+        })
 
-        if query_lower in searchable:
-            results.append({
-                "guideline_id": guideline["id"],
-                "title": guideline["title"],
-                "doi": guideline["doi"],
-                "year": guideline.get("year"),
-                "organization": guideline.get("organization"),
-                "available_sections": guideline["sections"]
-            })
-
+    results = tokenized_search(query, items)
+    for r in results:
+        r.pop("_score", None)
     return results
 
 
