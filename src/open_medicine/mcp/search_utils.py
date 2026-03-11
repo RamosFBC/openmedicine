@@ -1,4 +1,5 @@
 """Shared search utilities for tokenized keyword matching with clinical synonyms."""
+import re
 from typing import Any
 
 
@@ -161,20 +162,24 @@ def _expand_query_tokens(query: str) -> set[str]:
     raw_tokens = set(query_lower.split())
     expanded = set(raw_tokens)
 
-    # Also try matching multi-word phrases from the query
+    # Try matching multi-word phrases from the query using word boundaries
     for term, group in _SYNONYM_INDEX.items():
-        if term in query_lower:
-            # Add all single-word tokens from synonym group
+        if " " in term and _word_boundary_match(term, query_lower):
             for synonym in group:
                 expanded.update(synonym.split())
 
-    # Expand each individual token
+    # Expand each individual raw token (exact match only, no substring)
     for token in raw_tokens:
         if token in _SYNONYM_INDEX:
             for synonym in _SYNONYM_INDEX[token]:
                 expanded.update(synonym.split())
 
     return expanded
+
+
+def _word_boundary_match(token: str, text_lower: str) -> bool:
+    """Check if token appears as a whole word in text (not as a substring inside another word)."""
+    return bool(re.search(r'(?<![a-z])' + re.escape(token) + r'(?![a-z])', text_lower))
 
 
 def score_match(query: str, searchable_text: str) -> float:
@@ -188,36 +193,33 @@ def score_match(query: str, searchable_text: str) -> float:
     The scoring weights:
     - Direct token matches count as 1.0
     - Synonym-expanded matches count as 0.7 (to prefer direct hits)
+
+    Uses word-boundary matching to avoid false positives where short tokens
+    (e.g., "af", "na") match as substrings inside longer words.
     """
     query_lower = query.lower()
     raw_tokens = set(query_lower.split())
     expanded_tokens = _expand_query_tokens(query)
     text_lower = searchable_text.lower()
-    text_tokens = set(text_lower.split())
 
     if not raw_tokens:
         return 0.0
 
     score = 0.0
-    max_score = 0.0
 
     for token in expanded_tokens:
         is_direct = token in raw_tokens
         weight = 1.0 if is_direct else 0.7
 
-        if is_direct:
-            max_score += weight
-
-        # Check both token-level match and substring match
-        if token in text_tokens or token in text_lower:
+        # Use word-boundary matching to prevent false substring matches
+        if _word_boundary_match(token, text_lower):
             score += weight
 
-    # Bonus for exact phrase match (the whole query appears as substring)
-    if query_lower in text_lower:
+    # Bonus for exact phrase match (the whole query appears as a word-boundary phrase)
+    if _word_boundary_match(query_lower, text_lower):
         score += 2.0
-        max_score += 2.0
 
-    # Normalize: use max of raw token count as denominator to keep scores comparable
+    # Normalize by raw token count
     denominator = max(len(raw_tokens), 1)
     return min(score / denominator, 1.0) if denominator > 0 else 0.0
 
@@ -226,7 +228,8 @@ def tokenized_search(
     query: str,
     items: list[dict[str, Any]],
     text_key: str = "searchable_text",
-    min_score: float = 0.1,
+    min_score: float = 0.3,
+    max_results: int = 10,
 ) -> list[dict[str, Any]]:
     """
     Search items using tokenized matching with synonym expansion.
@@ -236,10 +239,11 @@ def tokenized_search(
         items: List of dicts, each with a text field to search against.
         text_key: Key in each item dict containing the searchable text.
         min_score: Minimum score threshold to include in results.
+        max_results: Maximum number of results to return.
 
     Returns:
-        Items that match, sorted by relevance score (highest first).
-        Each item gets a '_score' key added.
+        Items that match, sorted by relevance score (highest first),
+        capped at max_results. Each item gets a '_score' key added.
     """
     if not query.strip():
         return []
@@ -254,4 +258,4 @@ def tokenized_search(
             scored.append(result)
 
     scored.sort(key=lambda x: x["_score"], reverse=True)
-    return scored
+    return scored[:max_results]
