@@ -13,7 +13,6 @@ import httpx
 
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.differentials.engine import _DIFFERENTIAL_DB
-from open_medicine.mcp.pathways.engine import _PATHWAY_DB
 
 
 _OUTPUT_PATH = Path(__file__).parent / "data" / "embeddings.json"
@@ -63,15 +62,6 @@ def _collect_items() -> list[dict[str, Any]]:
             "id": diff_id,
             "domain": "differential",
             "text": f"{diff_id}: {diff['title']}. {diff['description']}. Keywords: {keywords}",
-        })
-
-    # Pathways
-    for pw_id, pw in _PATHWAY_DB.items():
-        keywords = ", ".join(pw.get("keywords", []))
-        items.append({
-            "id": pw_id,
-            "domain": "pathway",
-            "text": f"{pw_id}: {pw['title']}. {pw['description']}. Keywords: {keywords}",
         })
 
     return items

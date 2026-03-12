@@ -10,8 +10,8 @@ def tools():
 
 
 def test_tool_count(tools):
-    """Should have 10 tools (original 4 + 4 workflow + 1 unified search + 1 routing)."""
-    assert len(tools) == 10
+    """Should have 7 tools (4 core + 2 differential + 1 unified search)."""
+    assert len(tools) == 7
 
 
 def test_new_differential_tools_exist(tools):
@@ -21,20 +21,9 @@ def test_new_differential_tools_exist(tools):
     assert "get_differential_diagnosis" in names
 
 
-def test_new_pathway_tools_exist(tools):
-    """New pathway tools should be registered."""
-    names = [t.name for t in tools]
-    assert "search_treatment_pathways" in names
-    assert "get_treatment_pathway" in names
-
-
 def test_search_medical_knowledge_tool_exists(tools):
     """Unified search tool should be registered."""
     names = [t.name for t in tools]
     assert "search_medical_knowledge" in names
 
 
-def test_assess_clinical_scenario_tool_exists(tools):
-    """Routing engine tool should be registered."""
-    names = [t.name for t in tools]
-    assert "assess_clinical_scenario" in names

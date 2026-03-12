@@ -55,7 +55,7 @@ def semantic_search(
     Args:
         query: Search query string.
         domain: Filter by domain — 'calculator', 'guideline', 'differential',
-                'pathway', or 'all'.
+                or 'all'.
         top_k: Number of top results to return.
 
     Returns:

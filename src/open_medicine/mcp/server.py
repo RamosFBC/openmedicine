@@ -10,8 +10,6 @@ import mcp.types as types
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
 from open_medicine.mcp.differentials.engine import search_differentials, get_differential, DifferentialParams
-from open_medicine.mcp.pathways.engine import search_pathways, get_pathway, PathwayParams
-from open_medicine.mcp.routing.engine import assess_clinical_scenario, ScenarioParams
 from open_medicine.mcp.search_utils import tokenized_search
 
 # Initialize the MCP Server
@@ -124,41 +122,8 @@ async def handle_list_tools() -> list[types.Tool]:
             }
         ),
         types.Tool(
-            name="search_treatment_pathways",
-            description="Searches available evidence-based treatment pathways by diagnosis or keywords. Returns matching pathway IDs and descriptions.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "query": {
-                        "type": "string",
-                        "description": "Keywords to match against treatment pathways (e.g. 'atrial fibrillation anticoagulation', 'DVT treatment')."
-                    }
-                },
-                "required": ["query"]
-            }
-        ),
-        types.Tool(
-            name="get_treatment_pathway",
-            description="Retrieves a full evidence-based treatment pathway with step-by-step decision tree, medication options, dose calculators, and guideline citations. Use search_treatment_pathways first to find the ID.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "pathway_id": {
-                        "type": "string",
-                        "description": "The exact pathway ID returned from search_treatment_pathways."
-                    },
-                    "contraindications": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of contraindication keys (e.g. ['active_major_bleeding']). Pathway will include warnings for matched contraindications."
-                    }
-                },
-                "required": ["pathway_id"]
-            }
-        ),
-        types.Tool(
             name="search_medical_knowledge",
-            description="Unified semantic search across ALL OpenMedicine content — calculators, guidelines, differential diagnoses, and treatment pathways. Returns categorized ranked results. This is the primary entry point for discovering relevant clinical tools. Falls back to keyword search if semantic search is unavailable.",
+            description="Unified semantic search across ALL OpenMedicine content — calculators, guidelines, and differential diagnoses. Returns categorized ranked results. This is the primary entry point for discovering relevant clinical tools. Falls back to keyword search if semantic search is unavailable.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -168,39 +133,11 @@ async def handle_list_tools() -> list[types.Tool]:
                     },
                     "domain": {
                         "type": "string",
-                        "enum": ["all", "calculator", "guideline", "differential", "pathway"],
+                        "enum": ["all", "calculator", "guideline", "differential"],
                         "description": "Optional filter by content type. Default: 'all'."
                     }
                 },
                 "required": ["query"]
-            }
-        ),
-        types.Tool(
-            name="assess_clinical_scenario",
-            description="Clinical routing engine — given a patient's conditions, returns a prioritized list of recommended tool calls (calculators, guidelines, differentials, pathways) to systematically evaluate the scenario. OpenMedicine acts as a clinical librarian, recommending what to look up. The agent decides what to actually execute.",
-            inputSchema={
-                "type": "object",
-                "properties": {
-                    "conditions": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "List of clinical conditions or presentations (e.g. ['atrial_fibrillation', 'ckd', 'chest_pain'])."
-                    },
-                    "age": {
-                        "type": "integer",
-                        "description": "Patient age in years (optional)."
-                    },
-                    "sex": {
-                        "type": "string",
-                        "description": "Patient sex — 'male' or 'female' (optional)."
-                    },
-                    "medications": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                        "description": "Current medications (optional)."
-                    }
-                },
-                "required": ["conditions"]
             }
         ),
     ]
@@ -334,40 +271,6 @@ async def handle_call_tool(
                 )
             ]
 
-    elif name == "search_treatment_pathways":
-        query = (arguments or {}).get("query", "")
-        results = search_pathways(query)
-        import json
-        return [
-            types.TextContent(
-                type="text",
-                text=json.dumps({"matches": results}, indent=2)
-            )
-        ]
-
-    elif name == "get_treatment_pathway":
-        pw_id = (arguments or {}).get("pathway_id", "")
-        contras = (arguments or {}).get("contraindications")
-        try:
-            params = PathwayParams(
-                pathway_id=pw_id,
-                contraindications=contras,
-            )
-            result = get_pathway(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error: {e}"
-                )
-            ]
-
     elif name == "search_medical_knowledge":
         query = (arguments or {}).get("query", "")
         domain = (arguments or {}).get("domain", "all")
@@ -419,17 +322,6 @@ async def handle_call_tool(
                     "searchable_text": f"{diff_id} {diff['title']} {diff['description']} {keywords}",
                 })
 
-        if domain in ("all", "pathway"):
-            from open_medicine.mcp.pathways.engine import _PATHWAY_DB
-            for pw_id, pw in _PATHWAY_DB.items():
-                keywords = " ".join(pw.get("keywords", []))
-                all_items.append({
-                    "id": pw_id,
-                    "domain": "pathway",
-                    "text": pw["title"],
-                    "searchable_text": f"{pw_id} {pw['title']} {pw['description']} {keywords}",
-                })
-
         matches = tokenized_search(query, all_items)
         for m in matches:
             m.pop("_score", None)
@@ -441,33 +333,6 @@ async def handle_call_tool(
                 text=json.dumps({"search_type": "keyword", "matches": matches}, indent=2)
             )
         ]
-
-    elif name == "assess_clinical_scenario":
-        conditions = (arguments or {}).get("conditions", [])
-        age = (arguments or {}).get("age")
-        sex = (arguments or {}).get("sex")
-        medications = (arguments or {}).get("medications")
-        try:
-            params = ScenarioParams(
-                conditions=conditions,
-                age=age,
-                sex=sex,
-                medications=medications,
-            )
-            result = assess_clinical_scenario(params)
-            return [
-                types.TextContent(
-                    type="text",
-                    text=result.model_dump_json(indent=2)
-                )
-            ]
-        except Exception as e:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=f"Error: {e}"
-                )
-            ]
 
     else:
         raise ValueError(f"Unknown tool: {name}")

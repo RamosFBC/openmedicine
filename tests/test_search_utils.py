@@ -219,14 +219,3 @@ class TestSearchIntegration:
         results = search_differentials("chest pain")
         assert len(results) >= 1
 
-    def test_pathway_search_works(self):
-        """Pathway search should return results for anticoagulation queries."""
-        from open_medicine.mcp.pathways.engine import search_pathways
-        results = search_pathways("anticoagulation")
-        assert len(results) >= 1
-
-    def test_pathway_search_synonym(self):
-        """'blood thinner' should find the anticoagulation pathway via synonym."""
-        from open_medicine.mcp.pathways.engine import search_pathways
-        results = search_pathways("blood thinner")
-        assert len(results) >= 1
