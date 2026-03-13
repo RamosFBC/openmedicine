@@ -15,4 +15,7 @@ def get_index_statements() -> list[str]:
         "CREATE INDEX logic_node_type IF NOT EXISTS FOR (n:LogicNode) ON (n.type)",
         "CREATE INDEX logic_node_guideline IF NOT EXISTS FOR (n:LogicNode) ON (n.guideline_id)",
         "CREATE FULLTEXT INDEX evidence_text IF NOT EXISTS FOR (n:EvidenceChunk) ON EACH [n.text]",
+        "CREATE VECTOR INDEX evidence_embedding IF NOT EXISTS FOR (n:EvidenceChunk) ON (n.embedding) "
+        "OPTIONS {indexConfig: {`vector.dimensions`: 1024, `vector.similarity_function`: 'cosine'}}",
+        "CREATE INDEX patient_variable_loinc IF NOT EXISTS FOR (n:PatientVariable) ON (n.loinc_code)",
     ]

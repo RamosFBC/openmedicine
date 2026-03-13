@@ -17,4 +17,17 @@ class TestIndexStatements:
     def test_returns_list_of_strings(self):
         for stmt in get_constraint_statements():
             assert isinstance(stmt, str)
-            assert "CREATE" in stmt or "DROP" in stmt or stmt.startswith("CREATE")
+            assert "CREATE" in stmt
+
+    def test_vector_index_defined(self):
+        stmts = get_index_statements()
+        text = " ".join(stmts)
+        assert "VECTOR" in text
+        assert "evidence_embedding" in text
+        assert "1024" in text
+
+    def test_patient_variable_index(self):
+        stmts = get_index_statements()
+        text = " ".join(stmts)
+        assert "PatientVariable" in text
+        assert "loinc_code" in text
