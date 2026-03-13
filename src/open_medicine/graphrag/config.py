@@ -1,3 +1,4 @@
+# src/open_medicine/graphrag/config.py
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,8 +10,9 @@ class GraphRAGSettings(BaseSettings):
     neo4j_password: str = "openmedicine"
 
     anthropic_api_key: str = ""
-    embedding_model: str = "text-embedding-3-small"
-    embedding_dimensions: int = 1536
+    voyage_api_key: str = ""
+    embedding_model: str = "voyage-3-lite"
+    embedding_dimensions: int = 1024
 
     api_keys: str = ""  # comma-separated
     rate_limit: int = 100
