@@ -24,13 +24,15 @@ class TestGraphConnection:
                 assert conn is not None
             mock_instance.close.assert_called_once()
 
-    def test_execute_query(self):
+    def test_execute_read_uses_managed_transaction(self):
         with patch("neo4j.GraphDatabase.driver") as mock_driver:
             mock_instance = MagicMock()
             mock_session = MagicMock()
+            mock_tx = MagicMock()
             mock_result = MagicMock()
             mock_result.data.return_value = [{"n": 1}]
-            mock_session.run.return_value = mock_result
+            mock_tx.run.return_value = mock_result
+            mock_session.execute_read.side_effect = lambda fn: fn(mock_tx)
             mock_instance.session.return_value.__enter__ = lambda s: mock_session
             mock_instance.session.return_value.__exit__ = MagicMock(return_value=False)
             mock_driver.return_value = mock_instance
@@ -38,3 +40,38 @@ class TestGraphConnection:
             conn = GraphConnection(uri="bolt://localhost:7687", user="neo4j", password="test")
             results = conn.execute_read("MATCH (n) RETURN n LIMIT 1")
             assert results == [{"n": 1}]
+            mock_session.execute_read.assert_called_once()
+
+    def test_execute_write_uses_managed_transaction(self):
+        with patch("neo4j.GraphDatabase.driver") as mock_driver:
+            mock_instance = MagicMock()
+            mock_session = MagicMock()
+            mock_tx = MagicMock()
+            mock_result = MagicMock()
+            mock_result.data.return_value = []
+            mock_tx.run.return_value = mock_result
+            mock_session.execute_write.side_effect = lambda fn: fn(mock_tx)
+            mock_instance.session.return_value.__enter__ = lambda s: mock_session
+            mock_instance.session.return_value.__exit__ = MagicMock(return_value=False)
+            mock_driver.return_value = mock_instance
+
+            conn = GraphConnection(uri="bolt://localhost:7687", user="neo4j", password="test")
+            conn.execute_write("CREATE (n:Test {id: 1})")
+            mock_session.execute_write.assert_called_once()
+
+    def test_execute_write_tx_runs_all_queries(self):
+        with patch("neo4j.GraphDatabase.driver") as mock_driver:
+            mock_instance = MagicMock()
+            mock_session = MagicMock()
+            mock_tx = MagicMock()
+            mock_session.execute_write.side_effect = lambda fn: fn(mock_tx)
+            mock_instance.session.return_value.__enter__ = lambda s: mock_session
+            mock_instance.session.return_value.__exit__ = MagicMock(return_value=False)
+            mock_driver.return_value = mock_instance
+
+            conn = GraphConnection(uri="bolt://localhost:7687", user="neo4j", password="test")
+            conn.execute_write_tx([
+                ("CREATE (a:A {id: 1})", {}),
+                ("CREATE (b:B {id: 2})", {}),
+            ])
+            assert mock_tx.run.call_count == 2

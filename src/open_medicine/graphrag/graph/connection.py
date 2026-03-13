@@ -18,17 +18,19 @@ class GraphConnection:
 
     def execute_read(self, query: str, parameters: dict[str, Any] | None = None) -> list[dict]:
         with self._driver.session() as session:
-            result = session.run(query, parameters or {})
-            return result.data()
+            return session.execute_read(
+                lambda tx: tx.run(query, parameters or {}).data()
+            )
 
     def execute_write(self, query: str, parameters: dict[str, Any] | None = None) -> list[dict]:
         with self._driver.session() as session:
-            result = session.run(query, parameters or {})
-            return result.data()
+            return session.execute_write(
+                lambda tx: tx.run(query, parameters or {}).data()
+            )
 
     def execute_write_tx(self, queries: list[tuple[str, dict[str, Any]]]) -> None:
+        def _work(tx: Any) -> None:
+            for query, params in queries:
+                tx.run(query, params)
         with self._driver.session() as session:
-            with session.begin_transaction() as tx:
-                for query, params in queries:
-                    tx.run(query, params)
-                tx.commit()
+            session.execute_write(_work)
