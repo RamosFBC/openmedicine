@@ -70,3 +70,5 @@ packages = ["src/open_medicine"]
 
 [project.scripts]
 open-medicine-mcp = "open_medicine.mcp.server:main"
+open-medicine-graphrag = "open_medicine.graphrag.server.__main__:main"
+open-medicine-graphrag-ingest = "open_medicine.graphrag.ingest:main"
