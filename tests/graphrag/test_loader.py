@@ -1,5 +1,5 @@
-from unittest.mock import MagicMock, call
-from open_medicine.graphrag.ingestion.loader import load_guideline, LoadableGuideline
+from unittest.mock import MagicMock, patch
+from open_medicine.graphrag.ingestion.loader import load_guideline, LoadableGuideline, detect_conflicts
 from open_medicine.graphrag.ingestion.chunker import Chunk
 from open_medicine.graphrag.ingestion.extractor import ExtractionResult, ConceptRef
 from open_medicine.graphrag.graph.schema import (
@@ -26,6 +26,7 @@ def _make_loadable() -> LoadableGuideline:
                     strength="Strong/A", guideline_id="test_001", page=1,
                 ),
                 concepts=[ConceptRef("lisinopril", "drug")],
+                source_chunk_id="child_1",
             ),
         ],
     )
@@ -34,38 +35,118 @@ def _make_loadable() -> LoadableGuideline:
 class TestLoader:
     def test_calls_execute_write_tx(self):
         conn = MagicMock()
-        loadable = _make_loadable()
-        load_guideline(conn, loadable)
+        load_guideline(conn, _make_loadable())
         conn.execute_write_tx.assert_called()
 
-    def test_generates_cypher_for_guideline_node(self):
+    def test_generates_sourced_from_edge(self):
         conn = MagicMock()
-        loadable = _make_loadable()
-        load_guideline(conn, loadable)
+        load_guideline(conn, _make_loadable())
         queries = conn.execute_write_tx.call_args[0][0]
         cypher_strs = [q[0] for q in queries]
-        assert any("Guideline" in s for s in cypher_strs)
+        assert any("SOURCED_FROM" in s for s in cypher_strs)
 
-    def test_generates_cypher_for_chunks(self):
+    def test_generates_evaluates_edge(self):
         conn = MagicMock()
-        loadable = _make_loadable()
-        load_guideline(conn, loadable)
+        load_guideline(conn, _make_loadable())
         queries = conn.execute_write_tx.call_args[0][0]
         cypher_strs = [q[0] for q in queries]
-        assert any("EvidenceChunk" in s for s in cypher_strs)
+        assert any("EVALUATES" in s for s in cypher_strs)
 
-    def test_generates_cypher_for_logic_nodes(self):
+    def test_generates_patient_variable_node(self):
         conn = MagicMock()
-        loadable = _make_loadable()
-        load_guideline(conn, loadable)
+        load_guideline(conn, _make_loadable())
         queries = conn.execute_write_tx.call_args[0][0]
         cypher_strs = [q[0] for q in queries]
-        assert any("LogicNode" in s for s in cypher_strs)
+        assert any("PatientVariable" in s for s in cypher_strs)
 
-    def test_generates_cypher_for_concepts(self):
+    def test_generates_all_edge_types(self):
         conn = MagicMock()
-        loadable = _make_loadable()
-        load_guideline(conn, loadable)
+        load_guideline(conn, _make_loadable())
         queries = conn.execute_write_tx.call_args[0][0]
         cypher_strs = [q[0] for q in queries]
-        assert any("Concept" in s for s in cypher_strs)
+        for edge in ["BELONGS_TO", "CHILD_OF", "DEFINED_BY", "PARTICIPATES_IN", "SOURCED_FROM", "EVALUATES"]:
+            assert any(edge in s for s in cypher_strs), f"Missing {edge} edge"
+
+    def test_generates_guideline_and_chunks_and_logic_nodes(self):
+        conn = MagicMock()
+        load_guideline(conn, _make_loadable())
+        queries = conn.execute_write_tx.call_args[0][0]
+        cypher_strs = [q[0] for q in queries]
+        for node in ["Guideline", "EvidenceChunk", "LogicNode", "Concept"]:
+            assert any(node in s for s in cypher_strs), f"Missing {node} node"
+
+
+class TestConflictDetection:
+    def test_contradictory_actions_detected(self):
+        extractions = [
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_a", type=LogicNodeType.DOSING,
+                    conditions=[], action="initiate", action_detail="Start drug",
+                    strength="Weak/C", guideline_id="g_old", page=1,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c1",
+            ),
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_b", type=LogicNodeType.DOSING,
+                    conditions=[], action="contraindicated", action_detail="Do not use",
+                    strength="Strong/A", guideline_id="g_new", page=1,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c2",
+            ),
+        ]
+        conflicts = detect_conflicts(extractions)
+        assert len(conflicts) == 1
+        assert conflicts[0][0] in ("ln_a", "ln_b")
+        assert conflicts[0][1] in ("ln_a", "ln_b")
+
+    def test_same_action_no_conflict(self):
+        extractions = [
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_a", type=LogicNodeType.DOSING,
+                    conditions=[], action="initiate", action_detail="Start",
+                    strength="Strong/A", guideline_id="g1", page=1,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c1",
+            ),
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_b", type=LogicNodeType.DOSING,
+                    conditions=[], action="initiate", action_detail="Also start",
+                    strength="Moderate/B", guideline_id="g2", page=1,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c2",
+            ),
+        ]
+        conflicts = detect_conflicts(extractions)
+        assert len(conflicts) == 0
+
+    def test_different_types_no_conflict(self):
+        extractions = [
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_a", type=LogicNodeType.DOSING,
+                    conditions=[], action="initiate", action_detail="Start",
+                    strength="Strong/A", guideline_id="g1", page=1,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c1",
+            ),
+            ExtractionResult(
+                logic_node=LogicNode(
+                    id="ln_b", type=LogicNodeType.MONITORING,
+                    conditions=[], action="monitor", action_detail="Check INR",
+                    strength="Strong/A", guideline_id="g1", page=2,
+                ),
+                concepts=[ConceptRef("apixaban", "drug")],
+                source_chunk_id="c2",
+            ),
+        ]
+        conflicts = detect_conflicts(extractions)
+        assert len(conflicts) == 0
