@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.10.0] - 2026-03-13
+
+### Added
+- **12 new differential diagnoses (Phase 1 expansion)** — abdominal pain, acute kidney injury, altered mental status, bleeding disorders, fever, headache, joint pain, liver disease, lower extremity swelling, palpitations, sore throat, and syncope. Each with DOI-backed evidence, calculator cross-references, `also_consider` entries, and clinical reasoning prompts.
+- Project totals: 14 differentials (137 new diagnoses), 54 calculators, 14 guidelines, 2478 tests.
+
+### Changed
+- **Removed routing engine and treatment pathways** — both duplicated LLM tool-composition ability and guideline content respectively, creating maintenance risk with no agent benefit. MCP server reduced from 10 to 7 tools.
+
 ## [0.9.1] - 2026-03-11
 
 ### Fixed
