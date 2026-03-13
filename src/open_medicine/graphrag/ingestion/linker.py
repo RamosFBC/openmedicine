@@ -71,3 +71,44 @@ def link_entity(name: str, entity_type: str) -> LinkedEntity | None:
     if not mapping:
         return None
     return mapping.get(name.lower())
+
+
+@dataclass
+class LinkedVariable:
+    canonical_name: str
+    loinc_code: str | None
+    unit: str
+    var_type: str  # "continuous" | "categorical" | "boolean"
+
+
+_VAR_MAP: dict[str, LinkedVariable] = {
+    "egfr": LinkedVariable("eGFR", "77147-7", "mL/min/1.73m²", "continuous"),
+    "creatinine": LinkedVariable("Creatinine", "2160-0", "mg/dL", "continuous"),
+    "potassium": LinkedVariable("Potassium", "2823-3", "mEq/L", "continuous"),
+    "sodium": LinkedVariable("Sodium", "2951-2", "mEq/L", "continuous"),
+    "age": LinkedVariable("Age", None, "years", "continuous"),
+    "weight_kg": LinkedVariable("Weight", "29463-7", "kg", "continuous"),
+    "height_cm": LinkedVariable("Height", "8302-2", "cm", "continuous"),
+    "bmi": LinkedVariable("BMI", "39156-5", "kg/m²", "continuous"),
+    "inr": LinkedVariable("INR", "6301-6", "", "continuous"),
+    "bnp": LinkedVariable("BNP", "42637-9", "pg/mL", "continuous"),
+    "nt-probnp": LinkedVariable("NT-proBNP", "33762-6", "pg/mL", "continuous"),
+    "lvef": LinkedVariable("LVEF", "10230-1", "%", "continuous"),
+    "qtc": LinkedVariable("QTc", "8897-1", "ms", "continuous"),
+    "crcl": LinkedVariable("CrCl", "2164-2", "mL/min", "continuous"),
+    "hemoglobin": LinkedVariable("Hemoglobin", "718-7", "g/dL", "continuous"),
+    "hba1c": LinkedVariable("HbA1c", "4548-4", "%", "continuous"),
+    "ldl": LinkedVariable("LDL", "13457-7", "mg/dL", "continuous"),
+    "alt": LinkedVariable("ALT", "1742-6", "U/L", "continuous"),
+    "ast": LinkedVariable("AST", "1920-8", "U/L", "continuous"),
+    "albumin": LinkedVariable("Albumin", "1751-7", "g/dL", "continuous"),
+    "pregnancy": LinkedVariable("Pregnancy", None, "", "boolean"),
+    "breastfeeding": LinkedVariable("Breastfeeding", None, "", "boolean"),
+    "dialysis": LinkedVariable("Dialysis", None, "", "boolean"),
+    "sex": LinkedVariable("Sex", "46098-0", "", "categorical"),
+}
+
+
+def link_variable(name: str) -> LinkedVariable | None:
+    """Resolve a patient variable name to its canonical form with LOINC code."""
+    return _VAR_MAP.get(name.lower())

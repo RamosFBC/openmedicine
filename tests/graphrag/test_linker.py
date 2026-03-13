@@ -27,3 +27,36 @@ class TestLinker:
         result = link_entity("Eliquis", "drug")
         assert result is not None
         assert result.canonical_name == "Apixaban"
+
+
+from open_medicine.graphrag.ingestion.linker import link_variable, LinkedVariable
+
+
+class TestVariableLinker:
+    def test_known_variable(self):
+        result = link_variable("eGFR")
+        assert result is not None
+        assert result.canonical_name == "eGFR"
+        assert result.loinc_code == "77147-7"
+        assert result.unit == "mL/min/1.73m²"
+        assert result.var_type == "continuous"
+
+    def test_case_insensitive(self):
+        r1 = link_variable("EGFR")
+        r2 = link_variable("egfr")
+        assert r1 is not None and r2 is not None
+        assert r1.loinc_code == r2.loinc_code
+
+    def test_unknown_variable(self):
+        result = link_variable("nonexistent_var")
+        assert result is None
+
+    def test_boolean_variable(self):
+        result = link_variable("pregnancy")
+        assert result is not None
+        assert result.var_type == "boolean"
+
+    def test_age_variable(self):
+        result = link_variable("age")
+        assert result is not None
+        assert result.var_type == "continuous"
