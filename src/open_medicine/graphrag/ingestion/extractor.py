@@ -1,7 +1,9 @@
 from __future__ import annotations
 import json
 import logging
-from dataclasses import dataclass
+import time
+from dataclasses import dataclass, field
+import anthropic as _anthropic
 from open_medicine.graphrag.graph.schema import LogicNode, Condition
 
 logger = logging.getLogger(__name__)
@@ -17,6 +19,7 @@ class ConceptRef:
 class ExtractionResult:
     logic_node: LogicNode
     concepts: list[ConceptRef]
+    source_chunk_id: str = ""
 
 
 EXTRACTION_PROMPT = """You are a clinical guideline extraction agent.
@@ -54,6 +57,21 @@ def _call_llm(prompt: str) -> str:
     return response.content[0].text
 
 
+def _call_llm_with_retry(
+    prompt: str,
+    max_retries: int = 3,
+    base_delay: float = 1.0,
+) -> str:
+    """Call LLM with exponential backoff on transient errors."""
+    for attempt in range(max_retries):
+        try:
+            return _call_llm(prompt)
+        except (_anthropic.RateLimitError, _anthropic.APIConnectionError):
+            if attempt == max_retries - 1:
+                raise
+            time.sleep(base_delay * (2 ** attempt))
+
+
 def extract_logic_nodes(
     chunk_text: str,
     parent_context: str,
@@ -69,7 +87,7 @@ def extract_logic_nodes(
     )
 
     try:
-        raw = _call_llm(prompt)
+        raw = _call_llm_with_retry(prompt)
     except Exception:
         logger.exception("LLM call failed")
         return []

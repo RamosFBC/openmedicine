@@ -1,7 +1,8 @@
 import json
+import time
 import pytest
 from unittest.mock import patch, MagicMock
-from open_medicine.graphrag.ingestion.extractor import extract_logic_nodes
+from open_medicine.graphrag.ingestion.extractor import extract_logic_nodes, _call_llm_with_retry
 from open_medicine.graphrag.graph.schema import LogicNodeType
 
 
@@ -66,3 +67,33 @@ class TestExtractor:
             guideline_id="g", page=1,
         )
         assert len(results) == 0
+
+
+class TestRetry:
+    @patch("open_medicine.graphrag.ingestion.extractor._call_llm")
+    def test_retries_on_rate_limit(self, mock_llm):
+        import anthropic
+        mock_llm.side_effect = [
+            anthropic.RateLimitError("rate limited", response=MagicMock(status_code=429), body=None),
+            "[]",
+        ]
+        result = _call_llm_with_retry("prompt", max_retries=3, base_delay=0.01)
+        assert result == "[]"
+        assert mock_llm.call_count == 2
+
+    @patch("open_medicine.graphrag.ingestion.extractor._call_llm")
+    def test_raises_after_max_retries(self, mock_llm):
+        import anthropic
+        mock_llm.side_effect = anthropic.RateLimitError(
+            "rate limited", response=MagicMock(status_code=429), body=None,
+        )
+        with pytest.raises(anthropic.RateLimitError):
+            _call_llm_with_retry("prompt", max_retries=2, base_delay=0.01)
+        assert mock_llm.call_count == 2
+
+    @patch("open_medicine.graphrag.ingestion.extractor._call_llm")
+    def test_no_retry_on_other_errors(self, mock_llm):
+        mock_llm.side_effect = ValueError("bad input")
+        with pytest.raises(ValueError):
+            _call_llm_with_retry("prompt", max_retries=3, base_delay=0.01)
+        assert mock_llm.call_count == 1
