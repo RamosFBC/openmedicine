@@ -5,9 +5,12 @@ from open_medicine.graphrag.reasoning.engine import ReasoningEngine
 from open_medicine.graphrag.reasoning.types import ClinicalQuery
 
 
-def _mock_conn_with_results(results: list[dict]) -> MagicMock:
+def _mock_conn_with_results(read_results: list[dict], conflict_results: list[dict] | None = None) -> MagicMock:
     conn = MagicMock()
-    conn.execute_read.return_value = results
+    if conflict_results is not None:
+        conn.execute_read.side_effect = [read_results, conflict_results]
+    else:
+        conn.execute_read.side_effect = [read_results, []]
     return conn
 
 
@@ -31,7 +34,7 @@ class TestConditionEvaluation:
         engine = ReasoningEngine.__new__(ReasoningEngine)
         cond = {"variable": "weight_kg", "operator": ">", "threshold": 60}
         result = engine._evaluate_condition(cond, {"eGFR": 20})
-        assert result is None  # unknown
+        assert result is None
 
 
 class TestReasoningEngine:
@@ -113,3 +116,32 @@ class TestReasoningEngine:
         query = ClinicalQuery(intent="dosing", concepts=["drug"])
         result = engine.query(query)
         assert result.matches[0].logic_node_id == "ln_new"
+
+    def test_deduplication_by_logic_node_id(self):
+        """Same LogicNode appearing via two EvidenceChunks should be deduplicated."""
+        mock_results = [
+            {
+                "ln_id": "ln_001", "ln_type": "dosing", "ln_action": "dose_adjust",
+                "ln_detail": "Reduce", "ln_strength": "Strong/A",
+                "ln_conditions": json.dumps([]),
+                "ln_page": 10,
+                "ec_id": "c1", "ec_text": "Source 1",
+                "g_title": "Guide", "g_doi": "10.1/x", "g_year": 2023,
+                "ec_section": "dosing",
+            },
+            {
+                "ln_id": "ln_001", "ln_type": "dosing", "ln_action": "dose_adjust",
+                "ln_detail": "Reduce", "ln_strength": "Strong/A",
+                "ln_conditions": json.dumps([]),
+                "ln_page": 10,
+                "ec_id": "c2", "ec_text": "Source 2",
+                "g_title": "Guide", "g_doi": "10.1/x", "g_year": 2023,
+                "ec_section": "dosing",
+            },
+        ]
+        conn = _mock_conn_with_results(mock_results)
+        engine = ReasoningEngine(conn)
+        query = ClinicalQuery(intent="dosing", concepts=["drug"])
+        result = engine.query(query)
+        assert len(result.matches) == 1
+        assert len(result.evidence) == 2  # both citations kept
