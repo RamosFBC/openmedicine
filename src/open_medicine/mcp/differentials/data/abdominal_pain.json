@@ -1,0 +1,373 @@
+{
+  "differential_id": "abdominal_pain",
+  "title": "Abdominal Pain Differential Diagnosis",
+  "description": "Differential diagnosis for acute abdominal pain in adults, covering gastrointestinal, hepatobiliary, urologic, vascular, and gynecologic etiologies presenting to emergency or primary care settings.",
+  "keywords": ["abdominal pain", "acute abdomen", "belly pain", "stomach pain", "appendicitis", "cholecystitis", "pancreatitis", "bowel obstruction", "diverticulitis", "AAA", "ectopic pregnancy", "mesenteric ischemia"],
+  "source_doi": "10.1056/NEJMra2304821",
+  "evidence_level": "Clinical Practice Guideline",
+  "source_description": "Acute Abdomen in the Modern Era. Rogers SO Jr, Kirton OC. N Engl J Med 2024;391(1):60-67.",
+  "diagnoses": [
+    {
+      "name": "Acute Appendicitis",
+      "likelihood": "common",
+      "key_features": [
+        "Periumbilical pain migrating to right lower quadrant",
+        "Anorexia, nausea, vomiting",
+        "Low-grade fever",
+        "Rebound tenderness and guarding at McBurney point",
+        "Positive Rovsing, psoas, and obturator signs"
+      ],
+      "red_flags": [
+        "Diffuse peritonitis suggesting perforation",
+        "High fever with rigors",
+        "Free air on imaging"
+      ],
+      "recommended_tests": [
+        "CT abdomen and pelvis with IV contrast",
+        "Abdominal ultrasound (first-line in pregnancy and young women)",
+        "CBC with differential",
+        "CRP"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "peak_incidence_10_to_30_years",
+      "sex_modifier": "lifetime_risk_higher_in_male"
+    },
+    {
+      "name": "Acute Cholecystitis",
+      "likelihood": "common",
+      "key_features": [
+        "Right upper quadrant or epigastric pain",
+        "Pain radiating to right shoulder or scapula",
+        "Positive Murphy sign on examination",
+        "Postprandial exacerbation especially after fatty meals",
+        "Nausea and vomiting"
+      ],
+      "red_flags": [
+        "Jaundice suggesting choledocholithiasis or cholangitis",
+        "Charcot triad (fever, jaundice, RUQ pain) indicating cholangitis",
+        "Reynolds pentad (Charcot triad plus hypotension and altered mental status)"
+      ],
+      "recommended_tests": [
+        "Right upper quadrant ultrasound",
+        "Hepatobiliary markers (AST, ALT, bilirubin, alkaline phosphatase)",
+        "CBC with differential",
+        "Lipase"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_40",
+      "sex_modifier": "more_common_in_female"
+    },
+    {
+      "name": "Acute Pancreatitis",
+      "likelihood": "common",
+      "key_features": [
+        "Epigastric pain radiating to back",
+        "Pain worse when supine, improved leaning forward",
+        "Nausea, vomiting, anorexia",
+        "Lipase elevated greater than 3 times upper limit of normal",
+        "History of gallstones or alcohol use"
+      ],
+      "red_flags": [
+        "Hemodynamic instability or shock",
+        "Organ failure (respiratory, renal, cardiovascular)",
+        "Grey Turner or Cullen sign indicating hemorrhagic pancreatitis",
+        "Persistent organ failure beyond 48 hours"
+      ],
+      "recommended_tests": [
+        "Serum lipase",
+        "CT abdomen with IV contrast (if diagnosis uncertain or no improvement at 48-72 hours)",
+        "calculate_bisap",
+        "calculate_ransons",
+        "Hepatobiliary markers",
+        "Triglycerides"
+      ],
+      "related_guidelines": ["acg_acute_pancreatitis_2024"],
+      "age_modifier": null,
+      "sex_modifier": "gallstone_pancreatitis_more_common_in_female"
+    },
+    {
+      "name": "Abdominal Aortic Aneurysm (AAA) Rupture",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sudden severe abdominal or back pain",
+        "Pulsatile abdominal mass on examination",
+        "Hypotension or syncope",
+        "Pain radiating to flank or groin"
+      ],
+      "red_flags": [
+        "Hemodynamic instability or hemorrhagic shock",
+        "Known AAA with new pain",
+        "Syncope with abdominal pain in elderly",
+        "Retroperitoneal hemorrhage signs"
+      ],
+      "recommended_tests": [
+        "CT angiography of abdomen (if hemodynamically stable)",
+        "Bedside ultrasound (FAST) for unstable patients",
+        "Type and crossmatch, CBC, coagulation studies",
+        "Immediate surgical consultation"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_significantly_over_65",
+      "sex_modifier": "more_common_in_male"
+    },
+    {
+      "name": "Mesenteric Ischemia",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Severe abdominal pain out of proportion to physical examination",
+        "History of atrial fibrillation, atherosclerotic disease, or hypercoagulable state",
+        "Rapid onset of diffuse abdominal pain",
+        "Bloody diarrhea or hematochezia (late sign)",
+        "Abdominal distension with absent bowel sounds"
+      ],
+      "red_flags": [
+        "Pain out of proportion to exam findings",
+        "Elevated lactate",
+        "Metabolic acidosis",
+        "Peritoneal signs indicating bowel necrosis"
+      ],
+      "recommended_tests": [
+        "CT angiography of abdomen and pelvis",
+        "Serum lactate",
+        "CBC, basic metabolic panel",
+        "Arterial blood gas",
+        "calculate_anion_gap"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_60",
+      "sex_modifier": null
+    },
+    {
+      "name": "Ectopic Pregnancy",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Lower abdominal or pelvic pain in reproductive-age female",
+        "Missed or abnormal menstrual period",
+        "Vaginal bleeding or spotting",
+        "Adnexal tenderness or mass",
+        "Positive pregnancy test"
+      ],
+      "red_flags": [
+        "Hemodynamic instability suggesting rupture",
+        "Peritoneal signs",
+        "Syncope or near-syncope",
+        "Shoulder tip pain (diaphragmatic irritation from hemoperitoneum)"
+      ],
+      "recommended_tests": [
+        "Urine and serum beta-hCG",
+        "Transvaginal ultrasound",
+        "CBC, type and crossmatch",
+        "Serial beta-hCG if intrauterine pregnancy not confirmed"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "exclusive_to_female_of_reproductive_age"
+    },
+    {
+      "name": "Small Bowel Obstruction",
+      "likelihood": "less_common",
+      "key_features": [
+        "Colicky abdominal pain with intermittent cramping",
+        "Nausea, vomiting (bilious if proximal obstruction)",
+        "Abdominal distension",
+        "Obstipation or absence of flatus",
+        "History of prior abdominal surgery (adhesions)"
+      ],
+      "red_flags": [
+        "Fever and tachycardia suggesting strangulation",
+        "Peritoneal signs indicating bowel necrosis or perforation",
+        "Closed-loop obstruction on imaging",
+        "Elevated lactate"
+      ],
+      "recommended_tests": [
+        "CT abdomen and pelvis with IV contrast",
+        "Abdominal X-ray (air-fluid levels, dilated loops)",
+        "CBC, basic metabolic panel, lactate",
+        "Surgical consultation"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Perforated Viscus",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sudden onset of severe diffuse abdominal pain",
+        "Board-like rigidity on examination",
+        "Absent bowel sounds",
+        "History of peptic ulcer disease, diverticular disease, or NSAID use",
+        "Tachycardia and fever"
+      ],
+      "red_flags": [
+        "Free air under diaphragm on imaging",
+        "Peritonitis with diffuse guarding",
+        "Hemodynamic instability",
+        "Sepsis"
+      ],
+      "recommended_tests": [
+        "CT abdomen and pelvis with IV contrast",
+        "Upright chest X-ray (free air under diaphragm)",
+        "CBC, lactate, blood cultures",
+        "calculate_sofa",
+        "Immediate surgical consultation"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_with_age",
+      "sex_modifier": null
+    },
+    {
+      "name": "Acute Diverticulitis",
+      "likelihood": "common",
+      "key_features": [
+        "Left lower quadrant pain (most common location)",
+        "Low-grade fever",
+        "Change in bowel habits",
+        "Anorexia and nausea without vomiting",
+        "Localized tenderness without peritonitis in uncomplicated cases"
+      ],
+      "red_flags": [
+        "Diffuse peritonitis suggesting perforation",
+        "Abscess formation",
+        "Fistula (pneumaturia, fecaluria)",
+        "Obstruction"
+      ],
+      "recommended_tests": [
+        "CT abdomen and pelvis with IV contrast",
+        "CBC with differential",
+        "CRP",
+        "Urinalysis (to exclude urinary cause)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_over_50",
+      "sex_modifier": null
+    },
+    {
+      "name": "Urolithiasis (Renal Colic)",
+      "likelihood": "common",
+      "key_features": [
+        "Severe colicky flank pain radiating to groin or lower abdomen",
+        "Hematuria (gross or microscopic)",
+        "Nausea and vomiting",
+        "Restlessness and inability to find comfortable position",
+        "Costovertebral angle tenderness"
+      ],
+      "red_flags": [
+        "Fever suggesting infected obstructing stone (urological emergency)",
+        "Anuria or bilateral obstruction",
+        "Solitary kidney with obstruction"
+      ],
+      "recommended_tests": [
+        "Non-contrast CT abdomen and pelvis",
+        "Urinalysis",
+        "Basic metabolic panel including creatinine",
+        "Point-of-care ultrasound (first-line in young patients)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "peak_incidence_30_to_60_years",
+      "sex_modifier": "more_common_in_male"
+    },
+    {
+      "name": "Peptic Ulcer Disease / Gastritis",
+      "likelihood": "common",
+      "key_features": [
+        "Epigastric burning or gnawing pain",
+        "Pain improved or worsened by food intake",
+        "History of NSAID use or H. pylori infection",
+        "Nausea, bloating, early satiety",
+        "Nocturnal pain awakening patient"
+      ],
+      "red_flags": [
+        "Hematemesis or melena suggesting GI bleeding",
+        "Sudden severe pain suggesting perforation",
+        "Hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "H. pylori testing (stool antigen or urea breath test)",
+        "CBC (for anemia)",
+        "calculate_glasgow_blatchford",
+        "Endoscopy if red flags present",
+        "Trial of PPI therapy"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Gastroenteritis",
+      "likelihood": "common",
+      "key_features": [
+        "Diffuse crampy abdominal pain",
+        "Diarrhea (watery or bloody)",
+        "Nausea and vomiting",
+        "Recent sick contacts or food exposure",
+        "Low-grade fever"
+      ],
+      "red_flags": [
+        "Severe dehydration",
+        "Bloody diarrhea with high fever",
+        "Immunocompromised patient"
+      ],
+      "recommended_tests": [
+        "Clinical diagnosis in most cases",
+        "Basic metabolic panel if dehydrated",
+        "Stool cultures if bloody diarrhea or high fever",
+        "CBC"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Ovarian Torsion",
+      "rationale": "Acute onset severe pelvic pain in reproductive-age women, often with nausea and vomiting; requires emergent pelvic ultrasound with Doppler"
+    },
+    {
+      "name": "Pelvic Inflammatory Disease",
+      "rationale": "Lower abdominal pain with vaginal discharge, cervical motion tenderness, and adnexal tenderness; consider in sexually active women"
+    },
+    {
+      "name": "Diabetic Ketoacidosis",
+      "rationale": "Diffuse abdominal pain may be the presenting complaint; check glucose, anion gap, and ketones in diabetic patients or new-onset diabetes"
+    },
+    {
+      "name": "Splenic Rupture or Infarction",
+      "rationale": "Left upper quadrant pain with referred left shoulder pain (Kehr sign); consider in trauma, hematologic disorders, or anticoagulation"
+    },
+    {
+      "name": "Incarcerated Hernia",
+      "rationale": "Localized pain at hernia site (inguinal, umbilical, or incisional) with irreducible mass; can progress to strangulation and bowel necrosis"
+    },
+    {
+      "name": "Testicular Torsion",
+      "rationale": "Lower abdominal pain may be referred from torsed testicle; always perform genital examination in males with lower abdominal pain"
+    },
+    {
+      "name": "Inferior Wall Myocardial Infarction",
+      "rationale": "Epigastric pain mimicking GI etiology; obtain ECG in patients with cardiovascular risk factors presenting with upper abdominal pain"
+    },
+    {
+      "name": "Adrenal Crisis",
+      "rationale": "Diffuse abdominal pain with hypotension and shock in patients on chronic corticosteroids who abruptly discontinue or under physiologic stress"
+    },
+    {
+      "name": "Herpes Zoster (Abdominal Dermatome)",
+      "rationale": "Dermatomal abdominal pain may precede vesicular rash by days; consider if pain follows a unilateral band-like distribution"
+    },
+    {
+      "name": "Spontaneous Bacterial Peritonitis",
+      "rationale": "Diffuse abdominal pain and fever in patients with ascites/cirrhosis; perform diagnostic paracentesis"
+    },
+    {
+      "name": "Acute Intermittent Porphyria",
+      "rationale": "Recurrent episodes of severe abdominal pain with neuropsychiatric symptoms; consider in young women with unexplained recurrent abdominal pain"
+    },
+    {
+      "name": "Familial Mediterranean Fever",
+      "rationale": "Recurrent episodes of fever and peritonitis in patients of Mediterranean descent; episodes self-resolve within 24-72 hours"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Abdominal pain has over 150 possible etiologies. Always assess hemodynamic stability first and rule out life-threatening causes (ruptured AAA, mesenteric ischemia, ectopic pregnancy, perforated viscus) before considering benign diagnoses. Obtain a pregnancy test in all premenopausal women. Consider extra-abdominal causes (inferior MI, pneumonia, DKA) especially in older adults. Pain location, onset pattern, and associated symptoms should guide the diagnostic workup."
+}

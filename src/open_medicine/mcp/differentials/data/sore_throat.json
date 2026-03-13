@@ -1,0 +1,328 @@
+{
+  "differential_id": "sore_throat",
+  "title": "Sore Throat / Pharyngitis Differential Diagnosis",
+  "description": "Differential diagnosis for acute sore throat (pharyngitis) in adolescents and adults, covering infectious (viral, bacterial, fungal) and non-infectious etiologies, with emphasis on identifying Group A Streptococcal pharyngitis and life-threatening complications.",
+  "keywords": ["sore throat", "pharyngitis", "strep throat", "tonsillitis", "odynophagia", "GAS", "group A streptococcus", "dysphagia"],
+  "source_doi": "10.1093/cid/cis629",
+  "evidence_level": "Clinical Practice Guideline",
+  "source_description": "Shulman ST, Bisno AL, Clegg HW, et al. Clinical Practice Guideline for the Diagnosis and Management of Group A Streptococcal Pharyngitis: 2012 Update by the Infectious Diseases Society of America. Clin Infect Dis 2012;55(10):e86-e102.",
+  "diagnoses": [
+    {
+      "name": "Epiglottitis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Severe sore throat with relatively normal-appearing oropharynx",
+        "Dysphagia and drooling",
+        "Muffled (hot potato) voice",
+        "Tripod positioning / preference to sit upright"
+      ],
+      "red_flags": [
+        "Stridor or respiratory distress",
+        "Rapid progression of symptoms",
+        "Inability to swallow secretions",
+        "Toxic appearance"
+      ],
+      "recommended_tests": [
+        "Lateral soft tissue neck X-ray (thumbprint sign)",
+        "Flexible nasopharyngoscopy (controlled setting)",
+        "Blood cultures",
+        "Airway management readiness"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "increasingly_recognized_in_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Peritonsillar Abscess",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Severe unilateral throat pain",
+        "Trismus (difficulty opening mouth)",
+        "Uvular deviation away from affected side",
+        "Muffled voice",
+        "Fever"
+      ],
+      "red_flags": [
+        "Airway compromise",
+        "Inability to swallow",
+        "Extension to deep neck space (torticollis, neck swelling)"
+      ],
+      "recommended_tests": [
+        "CT neck with contrast if deep space extension suspected",
+        "Needle aspiration (diagnostic and therapeutic)",
+        "Intraoral ultrasound"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_in_young_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Retropharyngeal Abscess",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sore throat with neck stiffness",
+        "Pain with neck extension",
+        "Dysphagia and drooling",
+        "Fever and toxic appearance"
+      ],
+      "red_flags": [
+        "Airway obstruction",
+        "Mediastinal extension",
+        "Sepsis",
+        "Neck swelling or crepitus"
+      ],
+      "recommended_tests": [
+        "CT neck with contrast",
+        "Lateral soft tissue neck X-ray (widened prevertebral space)",
+        "Blood cultures",
+        "CBC with differential"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_children_under_6",
+      "sex_modifier": null
+    },
+    {
+      "name": "Lemierre Syndrome (Septic Jugular Thrombophlebitis)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Sore throat followed by high spiking fevers and rigors",
+        "Lateral neck pain, swelling, or tenderness along sternocleidomastoid",
+        "Worsening symptoms days after initial pharyngitis",
+        "Septic emboli (pulmonary infiltrates, joint effusions)"
+      ],
+      "red_flags": [
+        "Persistent or worsening fever despite antibiotics",
+        "Sepsis or septic shock",
+        "Pleuritic chest pain (septic pulmonary emboli)",
+        "Unilateral neck swelling"
+      ],
+      "recommended_tests": [
+        "CT neck with contrast (internal jugular vein thrombosis)",
+        "Blood cultures (Fusobacterium necrophorum)",
+        "CT chest if pulmonary emboli suspected",
+        "CBC, CRP"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_in_adolescents_and_young_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Group A Streptococcal (GAS) Pharyngitis",
+      "likelihood": "common",
+      "key_features": [
+        "Acute onset of sore throat",
+        "Fever (often > 38.3C / 101F)",
+        "Tonsillar exudates",
+        "Tender anterior cervical lymphadenopathy",
+        "Absence of cough, rhinorrhea, or conjunctivitis",
+        "Palatal petechiae or scarlatiniform rash"
+      ],
+      "red_flags": [
+        "Signs of suppurative complications (peritonsillar abscess, neck swelling)",
+        "Scarlet fever rash with systemic toxicity"
+      ],
+      "recommended_tests": [
+        "Rapid antigen detection test (RADT)",
+        "Throat culture (if RADT negative in children/adolescents)",
+        "calculate_centor_mcisaac"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_ages_5_to_15_but_occurs_in_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Viral Pharyngitis (Rhinovirus, Adenovirus, Coronavirus, Parainfluenza, Influenza)",
+      "likelihood": "common",
+      "key_features": [
+        "Gradual onset of sore throat",
+        "Concurrent cough, rhinorrhea, or nasal congestion",
+        "Conjunctivitis (especially adenovirus)",
+        "Myalgias and malaise",
+        "Low-grade or no fever"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Clinical diagnosis (usually no testing needed)",
+        "Influenza rapid test if suspected during flu season",
+        "calculate_centor_mcisaac"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Infectious Mononucleosis (EBV)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Severe pharyngitis with exudative tonsillitis",
+        "Prominent posterior cervical lymphadenopathy",
+        "Prolonged fatigue and malaise",
+        "Splenomegaly and hepatomegaly",
+        "Maculopapular rash if given amoxicillin/ampicillin",
+        "Atypical lymphocytes on CBC"
+      ],
+      "red_flags": [
+        "Splenic rupture (avoid contact sports)",
+        "Airway compromise from tonsillar hypertrophy",
+        "Hepatitis"
+      ],
+      "recommended_tests": [
+        "Heterophile antibody test (Monospot)",
+        "EBV-specific serology (VCA IgM/IgG)",
+        "CBC with differential (atypical lymphocytes)",
+        "Liver function tests"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_in_adolescents_and_young_adults",
+      "sex_modifier": null
+    },
+    {
+      "name": "Fusobacterium necrophorum Pharyngitis (Non-Lemierre)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Clinically indistinguishable from GAS pharyngitis",
+        "Acute onset sore throat with exudates",
+        "Negative rapid strep test and throat culture",
+        "More common in adolescents and young adults"
+      ],
+      "red_flags": [
+        "Persistent or worsening symptoms after 5-7 days (risk of Lemierre syndrome)",
+        "Unilateral neck swelling or tenderness"
+      ],
+      "recommended_tests": [
+        "Throat culture (not routinely detected on standard culture)",
+        "Blood cultures if systemic symptoms",
+        "calculate_centor_mcisaac"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_ages_15_to_30",
+      "sex_modifier": null
+    },
+    {
+      "name": "Gonococcal Pharyngitis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Often asymptomatic or mild sore throat",
+        "History of orogenital sexual contact",
+        "Exudative pharyngitis possible",
+        "May coexist with urogenital infection"
+      ],
+      "red_flags": [
+        "Disseminated gonococcal infection (arthritis, skin lesions, fever)"
+      ],
+      "recommended_tests": [
+        "Pharyngeal nucleic acid amplification test (NAAT) for N. gonorrhoeae",
+        "Concurrent testing for Chlamydia and HIV"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Oropharyngeal Candidiasis (Thrush)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Sore throat with white curd-like plaques on mucosa",
+        "Plaques can be scraped off leaving erythematous base",
+        "Dysphagia or odynophagia",
+        "Immunocompromised host (HIV, chemotherapy, inhaled corticosteroids)"
+      ],
+      "red_flags": [
+        "New oral candidiasis in a patient without known risk factors (consider HIV testing)"
+      ],
+      "recommended_tests": [
+        "Clinical diagnosis (characteristic appearance)",
+        "KOH preparation if uncertain",
+        "HIV testing if no other risk factor identified"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Allergic or Irritant Pharyngitis",
+      "likelihood": "common",
+      "key_features": [
+        "Chronic or recurrent sore throat",
+        "Postnasal drip",
+        "Associated nasal congestion and sneezing",
+        "Dry or scratchy throat, especially in morning",
+        "Exposure to allergens, smoke, or dry air"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Clinical history and examination",
+        "Trial of antihistamine or nasal corticosteroid",
+        "Allergy testing if recurrent"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Gastroesophageal Reflux (GERD)-Related Pharyngitis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Chronic sore throat worse in morning",
+        "Globus sensation",
+        "Throat clearing and hoarseness",
+        "Heartburn or acid regurgitation",
+        "Posterior laryngeal erythema on examination"
+      ],
+      "red_flags": [
+        "Dysphagia",
+        "Unintentional weight loss"
+      ],
+      "recommended_tests": [
+        "Trial of proton pump inhibitor",
+        "Laryngoscopy if persistent symptoms"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Acute HIV Infection (Acute Retroviral Syndrome)",
+      "rationale": "Pharyngitis with fever, rash, and lymphadenopathy 2-4 weeks after exposure; always consider in sexually active patients with mononucleosis-like illness and negative Monospot"
+    },
+    {
+      "name": "Herpangina (Coxsackievirus)",
+      "rationale": "Vesicles and ulcers on posterior pharynx and soft palate; more common in children but occurs in adults, especially in summer/fall"
+    },
+    {
+      "name": "Herpes Simplex Pharyngitis",
+      "rationale": "Vesicles and shallow ulcers on anterior mouth and pharynx; consider in immunocompromised patients or with primary HSV infection"
+    },
+    {
+      "name": "Diphtheria",
+      "rationale": "Gray-white pharyngeal membrane that bleeds when removed; rare in vaccinated populations but must be considered in unvaccinated or travelers from endemic areas"
+    },
+    {
+      "name": "Ludwig Angina (Submandibular Space Infection)",
+      "rationale": "Floor of mouth swelling and elevation of tongue with throat pain; usually odontogenic origin, can compromise airway rapidly"
+    },
+    {
+      "name": "Kawasaki Disease",
+      "rationale": "Pharyngeal erythema with fever, conjunctivitis, rash, and extremity changes in children under 5; incomplete forms can present primarily with pharyngitis"
+    },
+    {
+      "name": "Arcanobacterium haemolyticum Pharyngitis",
+      "rationale": "Scarlatiniform rash with pharyngitis in adolescents/young adults; can mimic GAS pharyngitis and is not detected on standard RADT"
+    },
+    {
+      "name": "Head and Neck Malignancy",
+      "rationale": "Persistent unilateral sore throat, dysphagia, or neck mass in adults over 50; always consider in smokers or heavy alcohol users with symptoms lasting more than 2 weeks"
+    },
+    {
+      "name": "Thyroiditis (Subacute/De Quervain)",
+      "rationale": "Anterior neck pain radiating to throat and jaw, often following viral URI; tender thyroid on palpation with possible thyrotoxicosis symptoms"
+    },
+    {
+      "name": "Aphthous Stomatitis",
+      "rationale": "Recurrent painful shallow ulcers on non-keratinized oral mucosa; sore throat when lesions affect posterior pharynx"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Viral pharyngitis accounts for the majority (50-80%) of sore throat presentations, but the critical clinical task is to identify GAS pharyngitis (to prevent rheumatic fever) and to recognize life-threatening complications such as deep neck space infections, epiglottitis, and Lemierre syndrome. Use the Centor/McIsaac score to guide testing decisions for GAS. Consider atypical presentations, immunocompromised status, sexual history, travel history, and vaccination status. Persistent unilateral symptoms or failure to improve should prompt re-evaluation for suppurative complications or alternative diagnoses."
+}

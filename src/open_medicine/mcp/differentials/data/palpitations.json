@@ -1,0 +1,294 @@
+{
+  "differential_id": "palpitations",
+  "title": "Palpitations Differential Diagnosis",
+  "description": "Differential diagnosis for palpitations in adults, covering cardiac arrhythmic, structural cardiac, psychosomatic, systemic, and drug/substance-related etiologies.",
+  "keywords": ["palpitations", "arrhythmia", "tachycardia", "irregular heartbeat", "atrial fibrillation", "SVT", "premature beats", "heart racing", "heart fluttering"],
+  "source_doi": "10.1093/europace/eur130",
+  "evidence_level": "Expert Consensus",
+  "source_description": "Raviele A, Giada F, Bergfeldt L, Blanc JJ, Blomstrom-Lundqvist C, Mont L, Morgan JM, Raatikainen MJP, Steinbeck G, Viskin S, et al. Management of patients with palpitations: a position paper from the European Heart Rhythm Association. Europace 2011;13(7):920-934.",
+  "diagnoses": [
+    {
+      "name": "Ventricular Tachycardia",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Rapid regular palpitations with abrupt onset",
+        "Associated presyncope or syncope",
+        "History of structural heart disease or prior MI",
+        "Wide-complex tachycardia on ECG"
+      ],
+      "red_flags": [
+        "Syncope during palpitations",
+        "Hemodynamic instability or hypotension",
+        "Known reduced ejection fraction",
+        "Family history of sudden cardiac death"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Continuous telemetry monitoring",
+        "Echocardiography",
+        "Electrophysiological study",
+        "calculate_corrected_qtc"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_with_age_and_structural_heart_disease",
+      "sex_modifier": "more_common_in_male"
+    },
+    {
+      "name": "Atrial Fibrillation / Atrial Flutter",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Irregularly irregular palpitations (AF) or regular rapid palpitations (flutter)",
+        "May be paroxysmal with sudden onset and offset",
+        "Associated dyspnea, fatigue, or exercise intolerance",
+        "Irregular pulse on examination"
+      ],
+      "red_flags": [
+        "Rapid ventricular rate with hemodynamic compromise",
+        "Associated stroke or TIA symptoms",
+        "Heart failure symptoms",
+        "Pre-excited atrial fibrillation (WPW syndrome)"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Ambulatory ECG monitoring (Holter or event monitor)",
+        "Echocardiography",
+        "Thyroid function tests",
+        "calculate_chadsvasc",
+        "calculate_hasbled"
+      ],
+      "related_guidelines": ["acc_aha_af_2023"],
+      "age_modifier": "prevalence_increases_with_age_especially_over_65",
+      "sex_modifier": "more_common_in_male_but_higher_stroke_risk_in_female"
+    },
+    {
+      "name": "Supraventricular Tachycardia (SVT)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Regular rapid palpitations with abrupt onset and offset",
+        "Sensation of fluttering or racing in the chest or neck",
+        "Polyuria after episode (ANP release)",
+        "Responsive to vagal maneuvers"
+      ],
+      "red_flags": [
+        "Hemodynamic instability during tachycardia",
+        "Pre-excitation on resting ECG (delta wave suggesting WPW)"
+      ],
+      "recommended_tests": [
+        "12-lead ECG (during symptoms and at baseline)",
+        "Ambulatory ECG monitoring",
+        "Electrophysiological study if recurrent",
+        "calculate_corrected_qtc"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_young_adults",
+      "sex_modifier": "AVNRT_more_common_in_female"
+    },
+    {
+      "name": "Premature Atrial and Ventricular Complexes",
+      "likelihood": "common",
+      "key_features": [
+        "Sensation of skipped beats or extra beats",
+        "Isolated thumping followed by a pause",
+        "Often intermittent and position-dependent",
+        "May worsen with caffeine, stress, or fatigue"
+      ],
+      "red_flags": [
+        "Very frequent PVCs (>10% burden) may cause cardiomyopathy",
+        "Associated with structural heart disease"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Ambulatory ECG monitoring (24-48h Holter)",
+        "Echocardiography if frequent PVCs"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "prevalence_increases_with_age",
+      "sex_modifier": null
+    },
+    {
+      "name": "Sinus Tachycardia",
+      "likelihood": "common",
+      "key_features": [
+        "Gradual onset and offset of rapid heartbeat",
+        "Heart rate 100-150 bpm with normal P waves on ECG",
+        "Often associated with identifiable trigger (exercise, fever, anxiety)",
+        "Appropriate physiological response to stress or illness"
+      ],
+      "red_flags": [
+        "Persistent unexplained sinus tachycardia (consider PE, sepsis, hemorrhage)",
+        "Inappropriate sinus tachycardia without identifiable cause"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Complete blood count (anemia)",
+        "Thyroid function tests",
+        "Consider D-dimer if PE suspected"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Bradyarrhythmias (Sick Sinus Syndrome / AV Block)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Palpitations from compensatory pauses or escape beats",
+        "Associated presyncope, dizziness, or fatigue",
+        "Alternating bradycardia and tachycardia (tachy-brady syndrome)",
+        "Slow pulse on examination"
+      ],
+      "red_flags": [
+        "Syncope",
+        "Complete heart block",
+        "Symptomatic pauses >3 seconds"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Ambulatory ECG monitoring (extended if infrequent symptoms)",
+        "Electrophysiological study if high-grade block suspected"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_elderly",
+      "sex_modifier": null
+    },
+    {
+      "name": "Anxiety and Panic Disorder",
+      "likelihood": "common",
+      "key_features": [
+        "Palpitations with gradual onset after emotional stress",
+        "Associated hyperventilation, paresthesias, and sense of doom",
+        "Normal cardiac rhythm during symptoms",
+        "Recurrent episodes often in specific settings"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "12-lead ECG (to exclude arrhythmia)",
+        "Ambulatory ECG monitoring during symptomatic episode",
+        "Psychiatric evaluation if recurrent"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "more_common_in_female"
+    },
+    {
+      "name": "Hyperthyroidism",
+      "likelihood": "less_common",
+      "key_features": [
+        "Palpitations with sinus tachycardia or atrial fibrillation",
+        "Heat intolerance, weight loss, tremor",
+        "Diffuse or nodular goiter on examination",
+        "Warm moist skin, lid lag"
+      ],
+      "red_flags": [
+        "Thyroid storm (fever, tachycardia, altered mental status)",
+        "New-onset atrial fibrillation secondary to thyrotoxicosis"
+      ],
+      "recommended_tests": [
+        "TSH and free T4",
+        "12-lead ECG",
+        "Echocardiography if atrial fibrillation present"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "more_common_in_female"
+    },
+    {
+      "name": "Structural Heart Disease (Valvular / Cardiomyopathy)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Palpitations associated with exertional dyspnea",
+        "Mitral valve prolapse click and murmur",
+        "Signs of heart failure (elevated JVP, peripheral edema)",
+        "Hypertrophic cardiomyopathy with dynamic outflow obstruction"
+      ],
+      "red_flags": [
+        "Syncope with exertion (HCM)",
+        "New heart failure symptoms",
+        "Family history of sudden cardiac death (HCM, ARVC)"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Echocardiography",
+        "Cardiac MRI if cardiomyopathy suspected",
+        "Ambulatory ECG monitoring"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "HCM_presents_in_young_adults_valvular_disease_increases_with_age",
+      "sex_modifier": null
+    },
+    {
+      "name": "Drug and Substance-Induced Palpitations",
+      "likelihood": "common",
+      "key_features": [
+        "Temporal relationship with substance use",
+        "Caffeine, alcohol, nicotine, or stimulant use",
+        "Sympathomimetic medications (bronchodilators, decongestants)",
+        "Beta-blocker withdrawal"
+      ],
+      "red_flags": [
+        "Cocaine or amphetamine-induced arrhythmias",
+        "QT prolongation from medications"
+      ],
+      "recommended_tests": [
+        "12-lead ECG",
+        "Toxicology screen if substance abuse suspected",
+        "calculate_corrected_qtc",
+        "Review medication list"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Pheochromocytoma / Paraganglioma",
+      "rationale": "Episodic palpitations with hypertension, headache, and diaphoresis (classic triad); check plasma metanephrines"
+    },
+    {
+      "name": "Brugada Syndrome",
+      "rationale": "Inherited channelopathy with characteristic coved ST elevation in V1-V3; risk of VF and sudden death in young adults"
+    },
+    {
+      "name": "Long QT Syndrome",
+      "rationale": "Congenital or acquired QT prolongation predisposing to torsades de pointes; check QTc on baseline ECG and medication review"
+    },
+    {
+      "name": "Wolff-Parkinson-White (WPW) Syndrome",
+      "rationale": "Accessory pathway causing pre-excitation (delta wave on ECG); risk of rapid AF with hemodynamic collapse"
+    },
+    {
+      "name": "Postural Orthostatic Tachycardia Syndrome (POTS)",
+      "rationale": "Heart rate increase of 30+ bpm on standing with palpitations, lightheadedness; more common in young women"
+    },
+    {
+      "name": "Anemia",
+      "rationale": "Compensatory sinus tachycardia and palpitations from reduced oxygen-carrying capacity; check CBC and ferritin"
+    },
+    {
+      "name": "Pregnancy-Related Palpitations",
+      "rationale": "Physiological increase in heart rate and cardiac output; increased ectopy and SVT risk during pregnancy"
+    },
+    {
+      "name": "Hypoglycemia",
+      "rationale": "Adrenergic symptoms including palpitations, tremor, and diaphoresis; check blood glucose especially in diabetic patients"
+    },
+    {
+      "name": "Pacemaker Malfunction / Pacemaker-Mediated Tachycardia",
+      "rationale": "Palpitations in patients with implanted devices; interrogate pacemaker/ICD for arrhythmia logs"
+    },
+    {
+      "name": "Arrhythmogenic Right Ventricular Cardiomyopathy (ARVC)",
+      "rationale": "Ventricular arrhythmias originating from RV in young patients; epsilon waves on ECG, family history of sudden death"
+    },
+    {
+      "name": "Electrolyte Disturbances (Hypokalemia, Hypomagnesemia)",
+      "rationale": "Can trigger arrhythmias including AF, VT, and torsades; check basic metabolic panel and magnesium level"
+    },
+    {
+      "name": "Catecholaminergic Polymorphic VT (CPVT)",
+      "rationale": "Exercise or emotion-triggered bidirectional VT in structurally normal heart; resting ECG often normal"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Palpitations are a common symptom with a broad differential ranging from benign to life-threatening. The diagnostic priority is to identify or exclude cardiac arrhythmias, particularly in patients with structural heart disease, syncope, or family history of sudden cardiac death. Always obtain a 12-lead ECG and aim to capture rhythm during symptoms. Consider medication review, substance use history, and systemic causes (thyroid, anemia). A normal resting ECG does not exclude paroxysmal arrhythmias — ambulatory monitoring may be required."
+}

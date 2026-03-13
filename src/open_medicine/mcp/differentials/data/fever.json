@@ -1,0 +1,377 @@
+{
+  "differential_id": "fever",
+  "title": "Fever / Undifferentiated Infection Differential Diagnosis",
+  "description": "Differential diagnosis for fever and undifferentiated infection in adults, covering infectious, neoplastic, rheumatic/inflammatory, and miscellaneous etiologies. Organized by the classic four-category framework for systematic fever workup.",
+  "keywords": ["fever", "infection", "sepsis", "febrile illness", "pyrexia", "fever of unknown origin", "FUO", "bacteremia", "pneumonia", "UTI", "meningitis", "endocarditis"],
+  "source_doi": "10.1016/j.idc.2007.09.002",
+  "evidence_level": "Systematic Review",
+  "source_description": "Cunha BA. Fever of unknown origin: clinical overview of classic and current concepts. Infect Dis Clin North Am. 2007 Dec;21(4):867-915.",
+  "diagnoses": [
+    {
+      "name": "Sepsis / Septic Shock",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Temperature >38.3C or <36C",
+        "Tachycardia and tachypnea",
+        "Altered mental status or confusion",
+        "Hypotension refractory to fluid resuscitation (septic shock)",
+        "Known or suspected source of infection"
+      ],
+      "red_flags": [
+        "Lactate >2 mmol/L",
+        "Mean arterial pressure <65 mmHg despite fluids",
+        "Acute organ dysfunction (renal, hepatic, coagulopathy)",
+        "Need for vasopressors"
+      ],
+      "recommended_tests": [
+        "Blood cultures (2 sets before antibiotics)",
+        "Serum lactate",
+        "CBC with differential",
+        "Comprehensive metabolic panel",
+        "Urinalysis and urine culture",
+        "Chest X-ray",
+        "calculate_qsofa",
+        "calculate_sofa",
+        "calculate_news2"
+      ],
+      "related_guidelines": ["ssc_sepsis_2021"],
+      "age_modifier": "higher_mortality_in_elderly_over_65",
+      "sex_modifier": null
+    },
+    {
+      "name": "Bacterial Pneumonia",
+      "likelihood": "common",
+      "key_features": [
+        "Productive cough with purulent sputum",
+        "Pleuritic chest pain",
+        "Dyspnea",
+        "Focal crackles or bronchial breath sounds on auscultation",
+        "Consolidation on chest X-ray"
+      ],
+      "red_flags": [
+        "Hypoxia (SpO2 <90%)",
+        "Multilobar infiltrates",
+        "Hemodynamic instability",
+        "Parapneumonic effusion or empyema"
+      ],
+      "recommended_tests": [
+        "Chest X-ray",
+        "Sputum culture and Gram stain",
+        "Blood cultures",
+        "Procalcitonin",
+        "calculate_curb65",
+        "calculate_psi_port"
+      ],
+      "related_guidelines": ["ats_idsa_cap_2019"],
+      "age_modifier": "higher_incidence_and_mortality_in_elderly_over_65",
+      "sex_modifier": null
+    },
+    {
+      "name": "Urinary Tract Infection / Pyelonephritis",
+      "likelihood": "common",
+      "key_features": [
+        "Dysuria, frequency, urgency (lower UTI)",
+        "Flank pain and costovertebral angle tenderness (pyelonephritis)",
+        "Fever with rigors (pyelonephritis)",
+        "Suprapubic tenderness"
+      ],
+      "red_flags": [
+        "Urosepsis with hemodynamic instability",
+        "Obstructing ureteral stone with infected hydronephrosis",
+        "Emphysematous pyelonephritis"
+      ],
+      "recommended_tests": [
+        "Urinalysis with microscopy",
+        "Urine culture and sensitivity",
+        "Blood cultures if systemic signs",
+        "CT abdomen/pelvis if complicated or no response to therapy",
+        "calculate_news2"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "atypical_presentation_common_in_elderly",
+      "sex_modifier": "more_common_in_female"
+    },
+    {
+      "name": "Bacterial Meningitis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Fever with severe headache",
+        "Neck stiffness and meningismus",
+        "Photophobia",
+        "Altered mental status",
+        "Classic triad: fever, neck stiffness, altered consciousness"
+      ],
+      "red_flags": [
+        "Petechial or purpuric rash (meningococcemia)",
+        "Rapidly progressive obtundation",
+        "Seizures",
+        "Signs of raised intracranial pressure"
+      ],
+      "recommended_tests": [
+        "Lumbar puncture with CSF analysis",
+        "Blood cultures",
+        "CT head before LP if focal neurological signs",
+        "CBC, CRP, procalcitonin",
+        "calculate_news2"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "bimodal_risk_young_adults_and_elderly",
+      "sex_modifier": null
+    },
+    {
+      "name": "Infective Endocarditis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Persistent fever with new or changing heart murmur",
+        "Peripheral embolic phenomena (Janeway lesions, Osler nodes, splinter hemorrhages)",
+        "Positive blood cultures (often Staphylococcus or Streptococcus)",
+        "Predisposing valve disease or IV drug use"
+      ],
+      "red_flags": [
+        "Acute valvular regurgitation with heart failure",
+        "Stroke or systemic embolization",
+        "Mycotic aneurysm",
+        "Perivalvular abscess"
+      ],
+      "recommended_tests": [
+        "Blood cultures (3 sets from separate sites)",
+        "Transthoracic and transesophageal echocardiography",
+        "CBC, ESR, CRP",
+        "Urinalysis (microscopic hematuria)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_with_age_and_degenerative_valve_disease",
+      "sex_modifier": null
+    },
+    {
+      "name": "Intra-abdominal Abscess",
+      "likelihood": "less_common",
+      "key_features": [
+        "Fever with localized abdominal pain or tenderness",
+        "History of recent surgery, diverticulitis, or appendicitis",
+        "Palpable mass or localized peritoneal signs",
+        "Failure of fever to resolve with appropriate antibiotics"
+      ],
+      "red_flags": [
+        "Sepsis with hemodynamic instability",
+        "Peritonitis signs",
+        "Free air on imaging"
+      ],
+      "recommended_tests": [
+        "CT abdomen/pelvis with IV contrast",
+        "Blood cultures",
+        "CBC with differential",
+        "calculate_qsofa"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": "pelvic_abscess_consider_tubo_ovarian_in_female"
+    },
+    {
+      "name": "Lymphoma",
+      "likelihood": "less_common",
+      "key_features": [
+        "Prolonged fever with night sweats and weight loss (B symptoms)",
+        "Painless lymphadenopathy",
+        "Hepatosplenomegaly",
+        "Pel-Ebstein fever pattern (periodic fevers in Hodgkin lymphoma)"
+      ],
+      "red_flags": [
+        "Rapidly enlarging lymph nodes",
+        "Superior vena cava syndrome",
+        "Spinal cord compression"
+      ],
+      "recommended_tests": [
+        "CBC with differential and peripheral smear",
+        "LDH, ESR, CRP",
+        "CT chest/abdomen/pelvis",
+        "Lymph node biopsy (excisional preferred)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "hodgkin_bimodal_peak_young_adults_and_over_55",
+      "sex_modifier": null
+    },
+    {
+      "name": "Drug Fever",
+      "likelihood": "less_common",
+      "key_features": [
+        "Fever temporally related to drug initiation (usually 7-10 days)",
+        "Relative bradycardia (pulse-temperature dissociation)",
+        "Patient appears well despite high fever",
+        "Eosinophilia on CBC"
+      ],
+      "red_flags": [
+        "DRESS syndrome (rash, eosinophilia, organ involvement)",
+        "Stevens-Johnson syndrome or toxic epidermal necrolysis"
+      ],
+      "recommended_tests": [
+        "Review medication list with timeline",
+        "CBC with differential (eosinophilia)",
+        "Hepatic and renal function",
+        "Trial of drug withdrawal"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_elderly_due_to_polypharmacy",
+      "sex_modifier": null
+    },
+    {
+      "name": "Adult-Onset Still Disease",
+      "likelihood": "less_common",
+      "key_features": [
+        "Quotidian (daily) high spiking fevers with return to baseline",
+        "Evanescent salmon-colored macular rash",
+        "Arthritis or arthralgias",
+        "Markedly elevated serum ferritin",
+        "Leukocytosis with neutrophilia"
+      ],
+      "red_flags": [
+        "Macrophage activation syndrome (cytopenias, coagulopathy, liver failure)",
+        "Pericarditis or myocarditis"
+      ],
+      "recommended_tests": [
+        "Serum ferritin (often >1000 ng/mL)",
+        "Glycosylated ferritin fraction (<20% suggests Still disease)",
+        "CBC, ESR, CRP, LDH",
+        "ANA and RF (typically negative)",
+        "Liver function tests"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "bimodal_peak_15_to_25_and_36_to_46_years",
+      "sex_modifier": null
+    },
+    {
+      "name": "Tuberculosis (Pulmonary and Extrapulmonary)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Prolonged low-grade fever with night sweats",
+        "Chronic cough (>2 weeks), hemoptysis",
+        "Weight loss and anorexia",
+        "History of TB exposure, endemic area, or immunosuppression"
+      ],
+      "red_flags": [
+        "Miliary pattern on chest X-ray (disseminated TB)",
+        "TB meningitis (altered mental status, cranial nerve palsies)",
+        "Hemodynamic instability"
+      ],
+      "recommended_tests": [
+        "Chest X-ray",
+        "Sputum AFB smear and culture (3 specimens)",
+        "Interferon-gamma release assay or tuberculin skin test",
+        "CT chest if CXR equivocal",
+        "Nucleic acid amplification test (GeneXpert)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "reactivation_more_common_in_elderly_and_immunosuppressed",
+      "sex_modifier": null
+    },
+    {
+      "name": "Viral Syndrome (Self-Limited)",
+      "likelihood": "common",
+      "key_features": [
+        "Acute onset fever with myalgias and malaise",
+        "Upper respiratory symptoms (rhinorrhea, sore throat, cough)",
+        "Self-limited course (typically <7 days)",
+        "No focal source on examination"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Clinical assessment",
+        "Influenza and COVID-19 testing during epidemic seasons",
+        "CBC with differential if prolonged",
+        "calculate_news2"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Skin and Soft Tissue Infection (Cellulitis/Abscess)",
+      "likelihood": "common",
+      "key_features": [
+        "Localized erythema, warmth, swelling, and tenderness",
+        "Fever with clear cutaneous source",
+        "Purulent drainage (abscess)",
+        "Spreading erythema with defined margins"
+      ],
+      "red_flags": [
+        "Crepitus (necrotizing fasciitis)",
+        "Pain out of proportion to exam findings",
+        "Rapid progression with systemic toxicity",
+        "Hemorrhagic bullae"
+      ],
+      "recommended_tests": [
+        "Clinical examination",
+        "Blood cultures if systemic signs",
+        "Wound culture if purulent",
+        "CT or MRI if necrotizing fasciitis suspected",
+        "calculate_news2"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Malaria",
+      "rationale": "Must be considered in any febrile patient with travel to endemic area; thick and thin blood smears or rapid diagnostic test are diagnostic"
+    },
+    {
+      "name": "HIV Acute Retroviral Syndrome",
+      "rationale": "Fever, pharyngitis, lymphadenopathy, and rash 2-4 weeks after exposure; standard HIV antibody may be negative early, order HIV RNA viral load"
+    },
+    {
+      "name": "Subacute Thyroiditis (de Quervain)",
+      "rationale": "Fever with anterior neck pain and tender thyroid; elevated ESR with transient thyrotoxicosis followed by hypothyroidism"
+    },
+    {
+      "name": "Giant Cell (Temporal) Arteritis",
+      "rationale": "New headache, jaw claudication, and elevated ESR in adults over 50; risk of irreversible vision loss requires urgent corticosteroids"
+    },
+    {
+      "name": "Systemic Lupus Erythematosus",
+      "rationale": "Fever in young women with multisystem involvement (arthritis, serositis, rash, cytopenias); check ANA and anti-dsDNA"
+    },
+    {
+      "name": "Pulmonary Embolism",
+      "rationale": "Low-grade fever occurs in up to 14% of PE cases; consider in febrile patients with pleuritic chest pain, dyspnea, and risk factors for VTE"
+    },
+    {
+      "name": "Factitious Fever",
+      "rationale": "Discrepancy between high recorded temperature and clinical appearance; observed temperature measurement is diagnostic"
+    },
+    {
+      "name": "Hepatic Abscess (Pyogenic or Amoebic)",
+      "rationale": "Fever with right upper quadrant pain and elevated alkaline phosphatase; travel history raises suspicion for amoebic etiology"
+    },
+    {
+      "name": "Osteomyelitis",
+      "rationale": "Persistent fever with focal bone pain; often hematogenous in elderly or contiguous with diabetic foot infections; MRI is imaging of choice"
+    },
+    {
+      "name": "Sarcoidosis",
+      "rationale": "Fever with bilateral hilar lymphadenopathy, erythema nodosum, and elevated ACE level; noncaseating granulomas on biopsy"
+    },
+    {
+      "name": "Inflammatory Bowel Disease (Crohn Disease)",
+      "rationale": "Fever with chronic diarrhea, abdominal pain, and weight loss; extraintestinal manifestations may precede GI symptoms"
+    },
+    {
+      "name": "Alcoholic Hepatitis",
+      "rationale": "Fever with jaundice, hepatomegaly, and elevated AST:ALT ratio >2 in a patient with heavy alcohol use"
+    },
+    {
+      "name": "Catheter-Related Bloodstream Infection",
+      "rationale": "Fever in a patient with an indwelling vascular catheter; differential time to positivity of blood cultures aids diagnosis"
+    },
+    {
+      "name": "Prosthetic Joint or Device Infection",
+      "rationale": "Low-grade fever with pain at prosthetic site; may present months to years after implantation; joint aspiration is key diagnostic step"
+    },
+    {
+      "name": "Neuroleptic Malignant Syndrome",
+      "rationale": "High fever, muscle rigidity, altered mental status, and autonomic instability after dopamine antagonist initiation or dose change; CK markedly elevated"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. The four classic categories of fever etiology are infectious (most common), neoplastic, rheumatic/inflammatory, and miscellaneous. Consider the patient's immune status, medication history, travel and exposure history, duration of fever, and fever pattern when narrowing the differential. In patients with undifferentiated fever, always assess for sepsis urgently before pursuing a systematic diagnostic workup. Atypical presentations are common in the elderly, immunosuppressed, and those on antipyretics or corticosteroids."
+}

@@ -1,0 +1,289 @@
+{
+  "differential_id": "lower_extremity_swelling",
+  "title": "Lower Extremity Swelling Differential Diagnosis",
+  "description": "Differential diagnosis for unilateral and bilateral lower extremity swelling in adults, covering venous, lymphatic, infectious, cardiac, and systemic etiologies with emphasis on distinguishing acute from chronic and unilateral from bilateral presentations.",
+  "keywords": ["leg swelling", "lower extremity edema", "unilateral leg swelling", "bilateral leg edema", "DVT", "deep vein thrombosis", "venous insufficiency", "lymphedema", "cellulitis", "peripheral edema", "pitting edema"],
+  "source_doi": "10.3122/jabfm.19.2.148",
+  "evidence_level": "Systematic Review",
+  "source_description": "Ely JW, Osheroff JA, Chambliss ML, Ebell MH. Approach to Leg Edema of Unclear Etiology. J Am Board Fam Med 2006;19(2):148-160.",
+  "diagnoses": [
+    {
+      "name": "Deep Vein Thrombosis (DVT)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Acute unilateral leg swelling (onset within 72 hours)",
+        "Pitting edema with tenderness",
+        "Calf or thigh pain, worse with dorsiflexion",
+        "Increased warmth over affected area",
+        "Erythema along the course of the deep veins"
+      ],
+      "red_flags": [
+        "Massive swelling with phlegmasia cerulea dolens (limb-threatening)",
+        "Concurrent pleuritic chest pain or dyspnea suggesting PE",
+        "Active malignancy or recent surgery",
+        "Hemodynamic instability suggesting massive PE"
+      ],
+      "recommended_tests": [
+        "calculate_wells_dvt",
+        "D-dimer",
+        "Duplex ultrasonography (compression ultrasound)",
+        "calculate_wells_pe",
+        "calculate_perc"
+      ],
+      "related_guidelines": ["ash_vte_2020"],
+      "age_modifier": "risk_increases_over_60",
+      "sex_modifier": "increased_risk_with_oral_contraceptives_in_female"
+    },
+    {
+      "name": "Cellulitis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Unilateral erythema with spreading warmth",
+        "Fever and systemic symptoms",
+        "Tenderness and induration of affected area",
+        "Often follows skin break, wound, or tinea pedis"
+      ],
+      "red_flags": [
+        "Rapid progression or crepitus (necrotizing fasciitis)",
+        "Sepsis signs (fever, tachycardia, hypotension)",
+        "Bullae or hemorrhagic changes",
+        "Pain out of proportion to exam findings"
+      ],
+      "recommended_tests": [
+        "CBC with differential",
+        "Blood cultures if systemic signs present",
+        "Duplex ultrasonography to exclude concurrent DVT"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "more_common_in_elderly_and_immunocompromised",
+      "sex_modifier": null
+    },
+    {
+      "name": "Chronic Venous Insufficiency",
+      "likelihood": "common",
+      "key_features": [
+        "Bilateral or unilateral dependent edema, worse at end of day",
+        "Improves with elevation overnight",
+        "Brawny reddish-hued skin predilection for medial ankle",
+        "Hemosiderin deposition and stasis dermatitis",
+        "Venous ulcerations over medial malleolus in advanced disease"
+      ],
+      "red_flags": [
+        "Non-healing venous ulcers",
+        "Lipodermatosclerosis (woody induration of skin)"
+      ],
+      "recommended_tests": [
+        "Duplex ultrasonography for venous reflux",
+        "Ankle-brachial index (before compression therapy)",
+        "Clinical examination"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_cause_of_leg_edema_over_age_50",
+      "sex_modifier": null
+    },
+    {
+      "name": "Heart Failure",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Bilateral symmetric pitting edema",
+        "Jugular venous distention",
+        "Dyspnea on exertion and orthopnea",
+        "Paroxysmal nocturnal dyspnea",
+        "Weight gain from fluid retention"
+      ],
+      "red_flags": [
+        "Acute pulmonary edema",
+        "Hypotension or cardiogenic shock",
+        "New-onset atrial fibrillation",
+        "Anasarca"
+      ],
+      "recommended_tests": [
+        "BNP or NT-proBNP",
+        "Echocardiography",
+        "Chest X-ray",
+        "ECG (12-lead)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_65",
+      "sex_modifier": null
+    },
+    {
+      "name": "Lymphedema",
+      "likelihood": "less_common",
+      "key_features": [
+        "Chronic progressive non-pitting edema (late stage)",
+        "Pitting in early stages before fibrosis develops",
+        "Dorsal foot and toe swelling (squared-off digits)",
+        "Positive Kaposi-Stemmer sign (inability to tent skin of dorsal second toe)",
+        "Brawny, thickened, verrucous skin in advanced disease"
+      ],
+      "red_flags": [
+        "Rapid unilateral onset suggesting malignant lymphatic obstruction",
+        "New lymphedema with pelvic or inguinal mass"
+      ],
+      "recommended_tests": [
+        "Clinical examination (Kaposi-Stemmer sign)",
+        "Lymphoscintigraphy",
+        "CT or MRI if malignant obstruction suspected"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "primary_lymphedema_praecox_peaks_before_age_35_tarda_after_35",
+      "sex_modifier": "primary_lymphedema_more_common_in_female"
+    },
+    {
+      "name": "Medication-Induced Edema",
+      "likelihood": "common",
+      "key_features": [
+        "Bilateral soft pitting edema",
+        "Onset weeks after initiating offending medication",
+        "Resolves within days of discontinuation",
+        "Common culprits: calcium channel blockers, NSAIDs, corticosteroids, thiazolidinediones, estrogen/testosterone"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Medication review (systematic)",
+        "Trial discontinuation of suspected agent"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Nephrotic Syndrome",
+      "likelihood": "less_common",
+      "key_features": [
+        "Bilateral pitting edema, often periorbital in morning",
+        "Proteinuria (>3.5 g/day) and hypoalbuminemia",
+        "Frothy urine",
+        "Associated hyperlipidemia"
+      ],
+      "red_flags": [
+        "Concurrent DVT or renal vein thrombosis (hypercoagulable state)",
+        "Rapid-onset anasarca"
+      ],
+      "recommended_tests": [
+        "Urinalysis with protein-to-creatinine ratio",
+        "Serum albumin",
+        "Basic metabolic panel",
+        "Renal ultrasound"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Hepatic Cirrhosis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Bilateral pitting edema with ascites",
+        "Jaundice, spider angiomata, palmar erythema",
+        "History of hepatitis or alcohol use disorder",
+        "Hypoalbuminemia"
+      ],
+      "red_flags": [
+        "Spontaneous bacterial peritonitis",
+        "Hepatorenal syndrome"
+      ],
+      "recommended_tests": [
+        "Liver function tests",
+        "Serum albumin",
+        "Hepatic ultrasound with Doppler",
+        "Paracentesis if ascites present"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Pulmonary Hypertension / Cor Pulmonale",
+      "likelihood": "less_common",
+      "key_features": [
+        "Bilateral lower extremity edema with exertional dyspnea",
+        "Often associated with obstructive sleep apnea",
+        "Daytime somnolence, loud snoring, neck circumference >17 inches",
+        "Elevated jugular venous pressure"
+      ],
+      "red_flags": [
+        "Syncope on exertion",
+        "Right ventricular failure"
+      ],
+      "recommended_tests": [
+        "Echocardiography (elevated RVSP)",
+        "Polysomnography if OSA suspected",
+        "BNP or NT-proBNP"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Idiopathic Edema",
+      "likelihood": "common",
+      "key_features": [
+        "Bilateral edema in premenopausal women",
+        "Cyclic pattern related to menstrual cycle",
+        "Weight fluctuation >1.4 kg from morning to evening",
+        "Diagnosis of exclusion after systemic causes ruled out"
+      ],
+      "red_flags": [],
+      "recommended_tests": [
+        "Complete systemic workup to exclude other causes",
+        "Morning-to-evening weight measurement"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_cause_in_women_between_menarche_and_menopause",
+      "sex_modifier": "predominantly_affects_female"
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Compartment Syndrome",
+      "rationale": "Acute limb-threatening condition after trauma or reperfusion; pain out of proportion to exam with tense swelling requires emergent surgical evaluation"
+    },
+    {
+      "name": "Ruptured Baker Cyst",
+      "rationale": "Posterior knee cyst rupture mimics DVT with acute calf swelling and pain; confirm with knee and calf ultrasound"
+    },
+    {
+      "name": "May-Thurner Syndrome (Iliac Vein Compression)",
+      "rationale": "Left iliac vein compressed by right iliac artery causing left-sided DVT or chronic swelling; consider in young women with left leg predominance"
+    },
+    {
+      "name": "Lipedema",
+      "rationale": "Symmetric adipose deposition in legs sparing feet; almost exclusively in women; does not improve with elevation or weight loss"
+    },
+    {
+      "name": "Hypothyroidism (Myxedema)",
+      "rationale": "Generalized non-pitting edema with periorbital swelling and skin thickening; check TSH in bilateral edema of unclear cause"
+    },
+    {
+      "name": "Complex Regional Pain Syndrome",
+      "rationale": "Unilateral edema with pain, allodynia, and vasomotor changes weeks after trauma; diagnosis based on Budapest criteria"
+    },
+    {
+      "name": "Pretibial Myxedema (Graves Disease)",
+      "rationale": "Localized non-pitting edema of pretibial area in Graves disease; distinct orange-peel texture"
+    },
+    {
+      "name": "Musculoskeletal Injury (Fracture, Muscle Tear)",
+      "rationale": "Acute unilateral swelling after trauma; most common cause of acute unilateral leg swelling in emergency settings (up to 40%)"
+    },
+    {
+      "name": "Pelvic Mass or Tumor Compressing Iliac Veins",
+      "rationale": "Unilateral or bilateral leg edema from extrinsic venous or lymphatic compression; consider CT pelvis in unexplained proximal edema"
+    },
+    {
+      "name": "Constrictive Pericarditis",
+      "rationale": "Bilateral edema with elevated JVP and Kussmaul sign; consider when heart failure treatment is ineffective"
+    },
+    {
+      "name": "Inferior Vena Cava Obstruction",
+      "rationale": "Bilateral leg edema with prominent abdominal collateral veins; may be caused by thrombosis, tumor, or filter complications"
+    },
+    {
+      "name": "Filariasis (Lymphatic)",
+      "rationale": "Endemic parasitic cause of lymphedema in tropical regions; consider in patients from endemic areas with chronic leg swelling"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. Distinguish unilateral from bilateral swelling as the first branch point: acute unilateral swelling requires urgent DVT evaluation, while chronic bilateral edema more often reflects systemic disease. Always assess for medication causes, consider the tempo of onset (acute vs chronic), and examine for pitting vs non-pitting character. In patients with unilateral swelling and negative DVT workup, consider Baker cyst, musculoskeletal injury, and lymphatic obstruction. In bilateral edema, evaluate cardiac, hepatic, and renal function before attributing to venous insufficiency."
+}

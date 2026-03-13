@@ -1,0 +1,353 @@
+{
+  "differential_id": "acute_kidney_injury",
+  "title": "Acute Kidney Injury (AKI) Differential Diagnosis",
+  "description": "Differential diagnosis for acute kidney injury in adults, organized by prerenal, intrinsic renal, and postrenal etiologies as defined by the KDIGO 2012 AKI guideline.",
+  "keywords": ["acute kidney injury", "AKI", "renal failure", "acute renal failure", "oliguria", "anuria", "creatinine rise", "prerenal", "acute tubular necrosis", "ATN", "nephrotoxic", "obstructive uropathy", "glomerulonephritis"],
+  "source_doi": "10.1038/kisup.2012.1",
+  "evidence_level": "Clinical Practice Guideline",
+  "source_description": "KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney Disease: Improving Global Outcomes (KDIGO) Acute Kidney Injury Work Group. Kidney Int Suppl 2012;2(1):1-138.",
+  "diagnoses": [
+    {
+      "name": "Prerenal Azotemia (Hypovolemia / Hypoperfusion)",
+      "likelihood": "common",
+      "key_features": [
+        "History of volume loss (hemorrhage, vomiting, diarrhea, burns)",
+        "Hypotension or orthostatic changes",
+        "Concentrated urine with low fractional excretion of sodium (FENa <1%)",
+        "BUN-to-creatinine ratio >20:1",
+        "Rapid improvement with volume resuscitation"
+      ],
+      "red_flags": [
+        "Hemodynamic instability or shock",
+        "Failure to respond to fluid challenge (suggests progression to ATN)"
+      ],
+      "recommended_tests": [
+        "Serum creatinine and BUN",
+        "Urinalysis with urine sodium and FENa",
+        "Fluid challenge with assessment of response",
+        "calculate_ckd_epi",
+        "calculate_sofa"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "elderly_more_susceptible_due_to_reduced_renal_reserve",
+      "sex_modifier": null
+    },
+    {
+      "name": "Sepsis-Associated AKI",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Fever, hypotension, or signs of systemic infection",
+        "AKI in the context of documented or suspected infection",
+        "Often multifactorial (hemodynamic, inflammatory, nephrotoxic)",
+        "Most common cause of AKI in ICU patients"
+      ],
+      "red_flags": [
+        "Septic shock with vasopressor requirement",
+        "Multi-organ dysfunction",
+        "Oliguria or anuria despite resuscitation",
+        "Lactic acidosis"
+      ],
+      "recommended_tests": [
+        "Blood cultures",
+        "Serum lactate",
+        "Urinalysis and urine culture",
+        "calculate_sofa",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "advanced_age_increases_susceptibility",
+      "sex_modifier": null
+    },
+    {
+      "name": "Acute Tubular Necrosis (Ischemic)",
+      "likelihood": "common",
+      "key_features": [
+        "Follows prolonged hypotension, shock, or major surgery",
+        "Muddy brown granular casts on urine microscopy",
+        "FENa >2% (intrinsic renal injury)",
+        "Gradual creatinine rise over days",
+        "Oliguria followed by polyuric recovery phase"
+      ],
+      "red_flags": [
+        "Persistent oliguria or anuria beyond 2-3 weeks",
+        "Hyperkalemia requiring emergent treatment",
+        "Volume overload with pulmonary edema"
+      ],
+      "recommended_tests": [
+        "Urine microscopy (muddy brown casts)",
+        "FENa and urine osmolality",
+        "Serum creatinine trend",
+        "Electrolytes (potassium, phosphate)",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "advanced_age_increases_risk",
+      "sex_modifier": null
+    },
+    {
+      "name": "Nephrotoxic Acute Tubular Necrosis",
+      "likelihood": "common",
+      "key_features": [
+        "Temporal relationship to nephrotoxic drug exposure",
+        "Common culprits: aminoglycosides, vancomycin, amphotericin B, cisplatin",
+        "Radiocontrast-induced AKI (typically 24-72 hours post-exposure)",
+        "Non-oliguric AKI more common with aminoglycosides",
+        "Muddy brown casts on urine microscopy"
+      ],
+      "red_flags": [
+        "Concurrent use of multiple nephrotoxins",
+        "Pre-existing CKD with nephrotoxin exposure",
+        "Failure of creatinine to trend down after drug discontinuation"
+      ],
+      "recommended_tests": [
+        "Drug levels (vancomycin, aminoglycosides)",
+        "Urine microscopy",
+        "Serum creatinine trend after drug withdrawal",
+        "calculate_cockcroft_gault",
+        "calculate_renal_dose_adjustment"
+      ],
+      "related_guidelines": ["kdigo_aki_2012", "kdigo_ckd_2024"],
+      "age_modifier": "elderly_at_higher_risk_due_to_reduced_GFR",
+      "sex_modifier": null
+    },
+    {
+      "name": "Acute Interstitial Nephritis (AIN)",
+      "likelihood": "less_common",
+      "key_features": [
+        "Drug-induced most common (antibiotics, NSAIDs, PPIs)",
+        "Classic triad: fever, rash, eosinophilia (present in <10% of cases)",
+        "White blood cell casts or eosinophiluria on urine microscopy",
+        "Non-oliguric AKI",
+        "Sterile pyuria"
+      ],
+      "red_flags": [
+        "Rapid creatinine rise with recent drug initiation",
+        "Systemic eosinophilia",
+        "Failure to improve after offending drug withdrawal"
+      ],
+      "recommended_tests": [
+        "Urine microscopy (WBC casts, eosinophils)",
+        "Peripheral eosinophil count",
+        "Renal biopsy if diagnosis uncertain",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Rapidly Progressive Glomerulonephritis (RPGN)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Rapid decline in renal function over days to weeks",
+        "Active urine sediment: dysmorphic RBCs, RBC casts",
+        "Proteinuria (often nephritic range)",
+        "Causes: anti-GBM disease, ANCA vasculitis, lupus nephritis, IgA nephropathy"
+      ],
+      "red_flags": [
+        "Pulmonary-renal syndrome (hemoptysis with AKI)",
+        "Systemic vasculitis signs (purpura, sinusitis, neuropathy)",
+        "Progressive oliguria despite treatment",
+        "Creatinine doubling within days"
+      ],
+      "recommended_tests": [
+        "Urine microscopy (RBC casts, dysmorphic RBCs)",
+        "Anti-GBM antibody",
+        "ANCA (p-ANCA/c-ANCA)",
+        "Complement levels (C3, C4)",
+        "ANA, anti-dsDNA",
+        "Renal biopsy (urgent)",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "anti_GBM_bimodal_peaks_young_adults_and_elderly",
+      "sex_modifier": null
+    },
+    {
+      "name": "Obstructive Uropathy (Postrenal AKI)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Bilateral ureteral obstruction or bladder outlet obstruction",
+        "Common causes: BPH, pelvic malignancy, nephrolithiasis, neurogenic bladder",
+        "Hydronephrosis on renal ultrasound",
+        "May present with anuria or fluctuating urine output",
+        "Post-void residual >200 mL suggests bladder outlet obstruction"
+      ],
+      "red_flags": [
+        "Complete anuria (suggests bilateral or single-kidney obstruction)",
+        "Palpable bladder or flank mass",
+        "Known pelvic malignancy with rising creatinine",
+        "Hyperkalemia or metabolic acidosis"
+      ],
+      "recommended_tests": [
+        "Renal ultrasound (hydronephrosis)",
+        "Post-void residual volume",
+        "CT abdomen/pelvis without contrast if stone suspected",
+        "Foley catheter placement (diagnostic and therapeutic)",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "elderly_males_higher_risk_due_to_BPH",
+      "sex_modifier": "more_common_in_older_males_due_to_prostatic_disease"
+    },
+    {
+      "name": "Cardiorenal Syndrome (Acute)",
+      "likelihood": "less_common",
+      "key_features": [
+        "AKI in the setting of acute heart failure or cardiogenic shock",
+        "Venous congestion and reduced cardiac output both contribute",
+        "Elevated jugular venous pressure",
+        "Peripheral edema, pulmonary congestion",
+        "Creatinine rise with diuretic initiation or dose escalation"
+      ],
+      "red_flags": [
+        "Worsening renal function despite decongestive therapy",
+        "Diuretic resistance",
+        "Need for inotropic support or mechanical circulatory assist"
+      ],
+      "recommended_tests": [
+        "Echocardiography",
+        "BNP or NT-proBNP",
+        "Central venous pressure if available",
+        "Serum creatinine trend",
+        "calculate_sofa",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "risk_increases_with_age",
+      "sex_modifier": null
+    },
+    {
+      "name": "Hepatorenal Syndrome",
+      "likelihood": "less_common",
+      "key_features": [
+        "AKI in setting of advanced cirrhosis and portal hypertension",
+        "Diagnosis of exclusion after prerenal and structural causes ruled out",
+        "No improvement with albumin volume expansion",
+        "Bland urine sediment, low urine sodium",
+        "Type 1 (rapid, doubling of creatinine in <2 weeks) vs Type 2 (gradual)"
+      ],
+      "red_flags": [
+        "Type 1 HRS with rapidly rising creatinine",
+        "Concurrent spontaneous bacterial peritonitis",
+        "Multi-organ failure in liver disease"
+      ],
+      "recommended_tests": [
+        "Diagnostic paracentesis (rule out SBP)",
+        "Urinalysis (bland sediment expected)",
+        "Renal ultrasound (rule out obstruction)",
+        "Serum albumin, bilirubin, INR",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Rhabdomyolysis-Induced AKI",
+      "likelihood": "less_common",
+      "key_features": [
+        "Muscle injury from trauma, crush, prolonged immobilization, seizures, or statins",
+        "Markedly elevated creatine kinase (CK >5x upper limit of normal)",
+        "Dark (tea-colored) urine, positive dipstick for blood but few RBCs on microscopy",
+        "Myoglobin-induced tubular injury",
+        "Hyperkalemia and hyperphosphatemia disproportionate to renal failure"
+      ],
+      "red_flags": [
+        "CK >15,000 IU/L (high risk for AKI)",
+        "Severe hyperkalemia",
+        "Compartment syndrome signs",
+        "Disseminated intravascular coagulation"
+      ],
+      "recommended_tests": [
+        "Serum CK (serial)",
+        "Urine myoglobin",
+        "Serum potassium, calcium, phosphate",
+        "Urinalysis (dipstick positive blood, no RBCs)",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Thrombotic Microangiopathy (TMA)",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "AKI with microangiopathic hemolytic anemia and thrombocytopenia",
+        "Includes TTP, HUS, and atypical HUS",
+        "Schistocytes on peripheral blood smear",
+        "Elevated LDH, low haptoglobin, indirect hyperbilirubinemia",
+        "May present with diarrhea (typical HUS) or neurologic symptoms (TTP)"
+      ],
+      "red_flags": [
+        "Pentad of TTP: thrombocytopenia, MAHA, AKI, neurologic symptoms, fever",
+        "Severe thrombocytopenia (<30,000)",
+        "Bloody diarrhea preceding AKI (suggests STEC-HUS)",
+        "ADAMTS13 activity <10% (TTP emergency)"
+      ],
+      "recommended_tests": [
+        "Peripheral blood smear (schistocytes)",
+        "LDH, haptoglobin, indirect bilirubin",
+        "ADAMTS13 activity and inhibitor",
+        "Complement studies (C3, C4, factor H)",
+        "Stool culture and Shiga toxin assay",
+        "calculate_ckd_epi"
+      ],
+      "related_guidelines": ["kdigo_aki_2012"],
+      "age_modifier": "typical_HUS_more_common_in_children",
+      "sex_modifier": "TTP_more_common_in_females"
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Tumor Lysis Syndrome",
+      "rationale": "AKI with hyperuricemia, hyperkalemia, and hyperphosphatemia after chemotherapy initiation; uric acid crystal deposition causes intratubular obstruction"
+    },
+    {
+      "name": "Atheroembolic Disease (Cholesterol Embolism)",
+      "rationale": "AKI after vascular procedure or anticoagulation; livedo reticularis, blue toe syndrome, and eosinophilia are diagnostic clues"
+    },
+    {
+      "name": "Renal Artery Thrombosis or Embolism",
+      "rationale": "Sudden AKI with flank pain and hematuria in patients with atrial fibrillation, endocarditis, or aortic disease; CT angiography is diagnostic"
+    },
+    {
+      "name": "Bilateral Renal Vein Thrombosis",
+      "rationale": "AKI with flank pain and nephrotic-range proteinuria; associated with nephrotic syndrome, malignancy, and hypercoagulable states"
+    },
+    {
+      "name": "Scleroderma Renal Crisis",
+      "rationale": "Acute hypertensive emergency with AKI in systemic sclerosis; requires urgent ACE inhibitor therapy"
+    },
+    {
+      "name": "Myeloma Cast Nephropathy",
+      "rationale": "AKI in older adults with unexplained anemia and bone pain; free light chains form obstructive casts in distal tubules"
+    },
+    {
+      "name": "Acute Cortical Necrosis",
+      "rationale": "Irreversible AKI after severe obstetric hemorrhage, abruptio placentae, or septic shock; cortical calcification on CT"
+    },
+    {
+      "name": "Acute Phosphate Nephropathy",
+      "rationale": "AKI following oral sodium phosphate bowel preparation; calcium phosphate crystal deposition in tubules"
+    },
+    {
+      "name": "IgA Vasculitis (Henoch-Schonlein Purpura) Nephritis",
+      "rationale": "AKI with palpable purpura, arthralgia, and abdominal pain; renal involvement ranges from hematuria to RPGN"
+    },
+    {
+      "name": "Ethylene Glycol Poisoning",
+      "rationale": "AKI with high anion gap metabolic acidosis and osmolar gap; calcium oxalate crystals in urine are pathognomonic"
+    },
+    {
+      "name": "Abdominal Compartment Syndrome",
+      "rationale": "AKI due to elevated intra-abdominal pressure compressing renal vasculature; measure bladder pressure in critically ill with tense abdomen"
+    },
+    {
+      "name": "Malignant Hypertension with Renal Injury",
+      "rationale": "AKI with severely elevated blood pressure (>180/120), papilledema, and microangiopathic hemolytic anemia; urgent blood pressure control needed"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. AKI is frequently multifactorial -- consider overlapping prerenal, intrinsic, and postrenal contributions in the same patient. Always assess volume status, review medication list for nephrotoxins, obtain renal ultrasound to rule out obstruction, and examine urine sediment. In critically ill patients, multiple etiologies often coexist simultaneously. Consider the clinical context (community-acquired vs hospital-acquired, ICU vs ward) when prioritizing the differential."
+}

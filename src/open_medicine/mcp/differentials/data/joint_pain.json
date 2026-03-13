@@ -1,0 +1,318 @@
+{
+  "differential_id": "joint_pain",
+  "title": "Acute Joint Pain Differential Diagnosis",
+  "description": "Differential diagnosis for acute joint pain in adults, covering monoarthritis and polyarthritis etiologies including crystal-induced, infectious, inflammatory, and degenerative causes.",
+  "keywords": ["joint pain", "arthritis", "monoarthritis", "polyarthritis", "gout", "septic arthritis", "rheumatoid arthritis", "swollen joint", "arthralgia"],
+  "source_doi": "10.1503/cmaj.080183",
+  "evidence_level": "Systematic Review",
+  "source_description": "Ma L, Cranney A, Holroyd-Leduc JM. Acute monoarthritis: What is the cause of my patient's painful swollen joint? CMAJ 2009;180(1):59-65.",
+  "diagnoses": [
+    {
+      "name": "Septic Arthritis",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Joint pain (85% of patients) with swelling (78%)",
+        "Acute onset over hours to days",
+        "Warm, erythematous joint with restricted range of motion",
+        "Fever may be absent in immunocompromised patients"
+      ],
+      "red_flags": [
+        "Recent joint surgery or prosthetic joint",
+        "Overlying skin infection",
+        "Bacteremia or sepsis signs",
+        "Risk factors: age >80, diabetes, rheumatoid arthritis, immunosuppression"
+      ],
+      "recommended_tests": [
+        "Synovial fluid aspiration with Gram stain and culture",
+        "Synovial fluid leukocyte count (>50,000/uL suggests infection)",
+        "Blood cultures",
+        "CBC with differential, ESR, CRP"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_80",
+      "sex_modifier": null
+    },
+    {
+      "name": "Disseminated Gonococcal Infection",
+      "likelihood": "must_not_miss",
+      "key_features": [
+        "Most common nontraumatic acute monoarthritis in young sexually active adults",
+        "Migratory polyarthralgia preceding monoarthritis",
+        "Dermatitis-arthritis syndrome with vesiculopustular skin lesions",
+        "Tenosynovitis especially of wrists and hands"
+      ],
+      "red_flags": [
+        "Sexually active young adult with acute joint pain",
+        "Skin lesions with migratory joint pain",
+        "Positive urogenital or pharyngeal gonococcal testing"
+      ],
+      "recommended_tests": [
+        "Synovial fluid culture (often negative)",
+        "Urogenital and pharyngeal NAAT for Neisseria gonorrhoeae",
+        "Blood cultures",
+        "Synovial fluid leukocyte count and differential"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_in_young_adults_15_to_40",
+      "sex_modifier": null
+    },
+    {
+      "name": "Gout (Crystal Arthropathy)",
+      "likelihood": "common",
+      "key_features": [
+        "Rapid onset of severe joint pain, often nocturnal",
+        "First MTP joint involvement (podagra) classic but not universal",
+        "15-27% of acute monoarthritis cases",
+        "History of hyperuricemia, diuretic use, alcohol consumption"
+      ],
+      "red_flags": [
+        "Concurrent septic arthritis (gout and infection may coexist)",
+        "Tophi suggesting chronic tophaceous gout",
+        "Renal impairment"
+      ],
+      "recommended_tests": [
+        "Synovial fluid polarized microscopy (negatively birefringent MSU crystals)",
+        "Serum uric acid level",
+        "Joint radiography",
+        "Renal function panel"
+      ],
+      "related_guidelines": ["acr_gout_2020"],
+      "age_modifier": "risk_increases_over_40_in_males",
+      "sex_modifier": "more_common_in_male_until_postmenopausal"
+    },
+    {
+      "name": "Calcium Pyrophosphate Deposition (Pseudogout)",
+      "likelihood": "common",
+      "key_features": [
+        "Acute onset mimicking gout",
+        "Knee and wrist most commonly affected",
+        "Associated with hemochromatosis, hyperparathyroidism, hypomagnesemia",
+        "Chondrocalcinosis on radiography"
+      ],
+      "red_flags": [
+        "Young patient with CPPD suggesting metabolic disease",
+        "Concurrent septic arthritis"
+      ],
+      "recommended_tests": [
+        "Synovial fluid polarized microscopy (weakly positive birefringent CPPD crystals)",
+        "Joint radiography for chondrocalcinosis",
+        "Calcium, phosphate, magnesium, ferritin, TSH if metabolic cause suspected"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_60",
+      "sex_modifier": null
+    },
+    {
+      "name": "Osteoarthritis (Acute Flare)",
+      "likelihood": "common",
+      "key_features": [
+        "5-17% of acute monoarthritis cases",
+        "Pain worsened by activity, relieved by rest",
+        "Morning stiffness lasting less than 30 minutes",
+        "Crepitus, bony enlargement, and tenderness on examination"
+      ],
+      "red_flags": [
+        "Rapid joint destruction on imaging",
+        "Effusion with inflammatory synovial fluid (consider alternative diagnosis)"
+      ],
+      "recommended_tests": [
+        "Joint radiography (osteophytes, joint space narrowing)",
+        "Synovial fluid analysis (noninflammatory: clear, viscous, WBC <2000/uL)",
+        "ESR and CRP to exclude inflammatory cause"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "risk_increases_over_50",
+      "sex_modifier": "more_common_in_female_after_age_50"
+    },
+    {
+      "name": "Rheumatoid Arthritis",
+      "likelihood": "less_common",
+      "key_features": [
+        "11-16% of acute monoarthritis presentations",
+        "Symmetric polyarthritis of MCP and PIP joints",
+        "Morning stiffness lasting more than 60 minutes",
+        "May initially present as monoarthritis before progressing"
+      ],
+      "red_flags": [
+        "Extra-articular manifestations (rheumatoid nodules, interstitial lung disease)",
+        "Rapidly progressive joint erosions"
+      ],
+      "recommended_tests": [
+        "Rheumatoid factor and anti-CCP antibodies",
+        "ESR and CRP",
+        "Joint radiography of hands and feet",
+        "calculate_das28"
+      ],
+      "related_guidelines": ["acr_ra_2021"],
+      "age_modifier": "peak_onset_30_to_50",
+      "sex_modifier": "two_to_three_times_more_common_in_female"
+    },
+    {
+      "name": "Reactive Arthritis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Asymmetric oligoarthritis following genitourinary or GI infection",
+        "Onset typically within one month of preceding infection",
+        "Lower extremity predominance",
+        "Associated conjunctivitis, urethritis, mucocutaneous lesions"
+      ],
+      "red_flags": [
+        "Severe systemic symptoms",
+        "Cardiac involvement (aortitis)"
+      ],
+      "recommended_tests": [
+        "ESR and CRP",
+        "HLA-B27 testing",
+        "Urinalysis and STI screening",
+        "Synovial fluid analysis (inflammatory, sterile)"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "most_common_in_young_adults_20_to_40",
+      "sex_modifier": "more_common_in_male"
+    },
+    {
+      "name": "Psoriatic Arthritis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Develops in approximately 24% of psoriasis patients",
+        "Asymmetric oligoarthritis or polyarthritis",
+        "Dactylitis (sausage digits) and enthesitis",
+        "DIP joint involvement distinguishes from RA"
+      ],
+      "red_flags": [
+        "Arthritis mutilans (severe destructive form)",
+        "Rapidly progressive joint damage"
+      ],
+      "recommended_tests": [
+        "Joint radiography (pencil-in-cup deformity, periostitis)",
+        "ESR and CRP",
+        "Rheumatoid factor (typically negative)",
+        "Skin and nail examination for psoriasis"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "peak_onset_30_to_50",
+      "sex_modifier": null
+    },
+    {
+      "name": "Systemic Lupus Erythematosus",
+      "likelihood": "less_common",
+      "key_features": [
+        "Non-erosive symmetric polyarthritis",
+        "Arthritis of PIP joints and knees common",
+        "Associated malar rash, photosensitivity, serositis",
+        "Multisystem involvement"
+      ],
+      "red_flags": [
+        "Nephritis (proteinuria, hematuria)",
+        "Cytopenias",
+        "Serositis (pleuritis, pericarditis)"
+      ],
+      "recommended_tests": [
+        "ANA and anti-dsDNA antibodies",
+        "Complement levels (C3, C4)",
+        "CBC, urinalysis, renal function",
+        "ESR and CRP"
+      ],
+      "related_guidelines": [],
+      "age_modifier": "peak_onset_15_to_45",
+      "sex_modifier": "nine_times_more_common_in_female"
+    },
+    {
+      "name": "Traumatic Arthritis / Hemarthrosis",
+      "likelihood": "common",
+      "key_features": [
+        "History of recent trauma or injury",
+        "Joint effusion with or without bloody aspirate",
+        "Mechanical symptoms (locking, instability) suggest internal derangement",
+        "Periarticular tenderness and ecchymosis"
+      ],
+      "red_flags": [
+        "Hemarthrosis without trauma (consider coagulopathy or tumor)",
+        "Joint instability suggesting ligamentous injury",
+        "Fat droplets in aspirate suggesting intra-articular fracture"
+      ],
+      "recommended_tests": [
+        "Joint radiography",
+        "Synovial fluid analysis (hemorrhagic fluid)",
+        "MRI if internal derangement suspected",
+        "Coagulation studies if no trauma history"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    },
+    {
+      "name": "Lyme Arthritis",
+      "likelihood": "less_common",
+      "key_features": [
+        "Late manifestation of Borrelia burgdorferi infection",
+        "Intermittent monoarthritis, especially of the knee",
+        "History of tick exposure or erythema migrans rash",
+        "Endemic geographic area exposure"
+      ],
+      "red_flags": [
+        "Neurological symptoms (facial palsy, meningitis)",
+        "Cardiac conduction abnormalities"
+      ],
+      "recommended_tests": [
+        "Two-tier Lyme serology (ELISA followed by Western blot)",
+        "Synovial fluid analysis (inflammatory)",
+        "Synovial fluid PCR for Borrelia if serology equivocal"
+      ],
+      "related_guidelines": [],
+      "age_modifier": null,
+      "sex_modifier": null
+    }
+  ],
+  "also_consider": [
+    {
+      "name": "Polymyalgia Rheumatica",
+      "rationale": "Bilateral shoulder and hip girdle pain with marked morning stiffness in adults over 50; dramatically responsive to low-dose corticosteroids"
+    },
+    {
+      "name": "Viral Arthritis (Parvovirus B19, Hepatitis B/C, HIV)",
+      "rationale": "Symmetric polyarthritis with viral prodrome; parvovirus causes RA-like presentation, hepatitis B causes PAN-associated arthritis"
+    },
+    {
+      "name": "Avascular Necrosis (Osteonecrosis)",
+      "rationale": "Insidious hip or knee pain worsened by weight-bearing; risk factors include corticosteroid use, alcohol, sickle cell disease"
+    },
+    {
+      "name": "Sarcoid Arthropathy",
+      "rationale": "Acute polyarthritis with erythema nodosum and bilateral hilar lymphadenopathy (Lofgren syndrome); or chronic granulomatous arthritis"
+    },
+    {
+      "name": "Hemochromatosis-Associated Arthropathy",
+      "rationale": "Second and third MCP joint involvement with hook-like osteophytes; associated with CPPD; check ferritin and transferrin saturation"
+    },
+    {
+      "name": "Inflammatory Bowel Disease-Associated Arthritis",
+      "rationale": "Peripheral oligoarthritis correlating with bowel disease activity; axial disease independent of GI flares"
+    },
+    {
+      "name": "Behcet Disease",
+      "rationale": "Recurrent monoarthritis or oligoarthritis with oral/genital ulcers and uveitis; more common in Mediterranean and East Asian populations"
+    },
+    {
+      "name": "Familial Mediterranean Fever",
+      "rationale": "Recurrent monoarthritis episodes lasting 24-72 hours with serositis; Mediterranean descent; colchicine-responsive"
+    },
+    {
+      "name": "Pigmented Villonodular Synovitis",
+      "rationale": "Chronic monoarticular swelling with hemorrhagic effusion; MRI shows characteristic hemosiderin deposits"
+    },
+    {
+      "name": "Synovial Chondromatosis",
+      "rationale": "Monoarticular pain with locking and catching; radiography shows calcified loose bodies within the joint"
+    },
+    {
+      "name": "Tumor (Synovial Sarcoma or Metastatic Disease)",
+      "rationale": "Persistent monoarticular pain unresponsive to treatment; consider imaging if pain is disproportionate to exam findings"
+    },
+    {
+      "name": "Whipple Disease",
+      "rationale": "Migratory polyarthritis preceding GI symptoms by years; diagnosis by duodenal biopsy showing PAS-positive macrophages"
+    }
+  ],
+  "clinical_reasoning_prompt": "This is an evidence-based reference set, not an exhaustive differential. The most critical diagnostic step in acute monoarthritis is arthrocentesis with synovial fluid analysis -- crystal examination and culture are essential to distinguish crystal arthropathy from septic arthritis. Gout and septic arthritis may coexist. In polyarticular presentations, consider the pattern (symmetric vs asymmetric, small vs large joints) and duration (<6 weeks acute, >6 weeks chronic) to narrow the differential. Always assess for extra-articular features that may point to a systemic disease."
+}
