@@ -1,0 +1,62 @@
+{
+  "Dyspnea": {
+    "id": "snomed:267036007",
+    "snomed_code": "267036007",
+    "aliases": ["shortness of breath", "breathlessness", "SOB", "dyspnea"]
+  },
+  "Chest Pain": {
+    "id": "snomed:29857009",
+    "snomed_code": "29857009",
+    "aliases": ["chest discomfort", "angina", "chest pain"]
+  },
+  "Palpitations": {
+    "id": "snomed:80313002",
+    "snomed_code": "80313002",
+    "aliases": ["heart palpitations", "palpitations"]
+  },
+  "Edema": {
+    "id": "snomed:423666004",
+    "snomed_code": "423666004",
+    "aliases": ["peripheral edema", "leg swelling", "ankle swelling", "edema"]
+  },
+  "Fatigue": {
+    "id": "snomed:84229001",
+    "snomed_code": "84229001",
+    "aliases": ["tiredness", "exhaustion", "fatigue"]
+  },
+  "Syncope": {
+    "id": "snomed:271594007",
+    "snomed_code": "271594007",
+    "aliases": ["fainting", "loss of consciousness", "syncope"]
+  },
+  "Orthopnea": {
+    "id": "snomed:62744007",
+    "snomed_code": "62744007",
+    "aliases": ["orthopnea"]
+  },
+  "Paroxysmal Nocturnal Dyspnea": {
+    "id": "snomed:55442000",
+    "snomed_code": "55442000",
+    "aliases": ["PND", "paroxysmal nocturnal dyspnea"]
+  },
+  "Dizziness": {
+    "id": "snomed:404640003",
+    "snomed_code": "404640003",
+    "aliases": ["lightheadedness", "vertigo", "dizziness"]
+  },
+  "Cough": {
+    "id": "snomed:49727002",
+    "snomed_code": "49727002",
+    "aliases": ["dry cough", "ACE inhibitor cough", "cough"]
+  },
+  "Nausea": {
+    "id": "snomed:422587007",
+    "snomed_code": "422587007",
+    "aliases": ["nausea"]
+  },
+  "Weight Gain": {
+    "id": "snomed:161832001",
+    "snomed_code": "161832001",
+    "aliases": ["rapid weight gain", "fluid retention", "weight gain"]
+  }
+}

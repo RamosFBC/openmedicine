@@ -1,0 +1,219 @@
+{
+  "Apixaban": {
+    "id": "rxnorm:1364430",
+    "rxnorm_code": "1364430",
+    "snomed_code": "703899003",
+    "atc_code": "B01AF02",
+    "aliases": ["Eliquis", "apixaban"]
+  },
+  "Rivaroxaban": {
+    "id": "rxnorm:1114195",
+    "rxnorm_code": "1114195",
+    "snomed_code": "703901006",
+    "atc_code": "B01AF01",
+    "aliases": ["Xarelto", "rivaroxaban"]
+  },
+  "Warfarin": {
+    "id": "rxnorm:11289",
+    "rxnorm_code": "11289",
+    "snomed_code": "372756006",
+    "atc_code": "B01AA03",
+    "aliases": ["Coumadin", "warfarin"]
+  },
+  "Dabigatran": {
+    "id": "rxnorm:1037042",
+    "rxnorm_code": "1037042",
+    "snomed_code": "700029008",
+    "atc_code": "B01AE07",
+    "aliases": ["Pradaxa", "dabigatran"]
+  },
+  "Edoxaban": {
+    "id": "rxnorm:1599538",
+    "rxnorm_code": "1599538",
+    "snomed_code": "712519002",
+    "atc_code": "B01AF03",
+    "aliases": ["Savaysa", "edoxaban"]
+  },
+  "Lisinopril": {
+    "id": "rxnorm:29046",
+    "rxnorm_code": "29046",
+    "snomed_code": "386873009",
+    "atc_code": "C09AA03",
+    "aliases": ["Zestril", "Prinivil", "lisinopril"]
+  },
+  "Enalapril": {
+    "id": "rxnorm:3827",
+    "rxnorm_code": "3827",
+    "snomed_code": "372658000",
+    "atc_code": "C09AA02",
+    "aliases": ["Vasotec", "enalapril"]
+  },
+  "Ramipril": {
+    "id": "rxnorm:35296",
+    "rxnorm_code": "35296",
+    "snomed_code": "386872004",
+    "atc_code": "C09AA05",
+    "aliases": ["Altace", "ramipril"]
+  },
+  "Captopril": {
+    "id": "rxnorm:1998",
+    "rxnorm_code": "1998",
+    "snomed_code": "387160004",
+    "atc_code": "C09AA01",
+    "aliases": ["Capoten", "captopril"]
+  },
+  "Losartan": {
+    "id": "rxnorm:52175",
+    "rxnorm_code": "52175",
+    "snomed_code": "373567002",
+    "atc_code": "C09CA01",
+    "aliases": ["Cozaar", "losartan"]
+  },
+  "Valsartan": {
+    "id": "rxnorm:69749",
+    "rxnorm_code": "69749",
+    "snomed_code": "386876001",
+    "atc_code": "C09CA03",
+    "aliases": ["Diovan", "valsartan"]
+  },
+  "Sacubitril/Valsartan": {
+    "id": "rxnorm:1656354",
+    "rxnorm_code": "1656354",
+    "snomed_code": "716083005",
+    "atc_code": "C09DX04",
+    "aliases": ["Entresto", "ARNi", "sacubitril-valsartan", "sacubitril/valsartan"]
+  },
+  "Metoprolol Succinate": {
+    "id": "rxnorm:6918",
+    "rxnorm_code": "6918",
+    "snomed_code": "372826007",
+    "atc_code": "C07AB02",
+    "aliases": ["Toprol XL", "metoprolol succinate", "metoprolol"]
+  },
+  "Carvedilol": {
+    "id": "rxnorm:20352",
+    "rxnorm_code": "20352",
+    "snomed_code": "386870007",
+    "atc_code": "C07AG02",
+    "aliases": ["Coreg", "carvedilol"]
+  },
+  "Bisoprolol": {
+    "id": "rxnorm:19484",
+    "rxnorm_code": "19484",
+    "snomed_code": "386868003",
+    "atc_code": "C07AB07",
+    "aliases": ["Zebeta", "bisoprolol"]
+  },
+  "Amiodarone": {
+    "id": "rxnorm:703",
+    "rxnorm_code": "703",
+    "snomed_code": "372821002",
+    "atc_code": "C01BD01",
+    "aliases": ["Pacerone", "Cordarone", "amiodarone"]
+  },
+  "Digoxin": {
+    "id": "rxnorm:3407",
+    "rxnorm_code": "3407",
+    "snomed_code": "387461009",
+    "atc_code": "C01AA05",
+    "aliases": ["Lanoxin", "digoxin"]
+  },
+  "Atorvastatin": {
+    "id": "rxnorm:83367",
+    "rxnorm_code": "83367",
+    "snomed_code": "373444002",
+    "atc_code": "C10AA05",
+    "aliases": ["Lipitor", "atorvastatin"]
+  },
+  "Rosuvastatin": {
+    "id": "rxnorm:301542",
+    "rxnorm_code": "301542",
+    "snomed_code": "412295007",
+    "atc_code": "C10AA07",
+    "aliases": ["Crestor", "rosuvastatin"]
+  },
+  "Heparin": {
+    "id": "rxnorm:5224",
+    "rxnorm_code": "5224",
+    "snomed_code": "372877000",
+    "atc_code": "B01AB01",
+    "aliases": ["heparin"]
+  },
+  "Furosemide": {
+    "id": "rxnorm:4603",
+    "rxnorm_code": "4603",
+    "snomed_code": "387475002",
+    "atc_code": "C03CA01",
+    "aliases": ["Lasix", "furosemide"]
+  },
+  "Spironolactone": {
+    "id": "rxnorm:9997",
+    "rxnorm_code": "9997",
+    "snomed_code": "387078006",
+    "atc_code": "C03DA01",
+    "aliases": ["Aldactone", "spironolactone"]
+  },
+  "Eplerenone": {
+    "id": "rxnorm:298869",
+    "rxnorm_code": "298869",
+    "snomed_code": "407010008",
+    "atc_code": "C03DA04",
+    "aliases": ["Inspra", "eplerenone"]
+  },
+  "Dapagliflozin": {
+    "id": "rxnorm:1488564",
+    "rxnorm_code": "1488564",
+    "snomed_code": "703674005",
+    "atc_code": "A10BK01",
+    "aliases": ["Farxiga", "dapagliflozin"]
+  },
+  "Empagliflozin": {
+    "id": "rxnorm:1545653",
+    "rxnorm_code": "1545653",
+    "snomed_code": "703894007",
+    "atc_code": "A10BK03",
+    "aliases": ["Jardiance", "empagliflozin"]
+  },
+  "Hydralazine": {
+    "id": "rxnorm:5470",
+    "rxnorm_code": "5470",
+    "snomed_code": "387160004",
+    "atc_code": "C02DB02",
+    "aliases": ["Apresoline", "hydralazine"]
+  },
+  "Isosorbide Dinitrate": {
+    "id": "rxnorm:6058",
+    "rxnorm_code": "6058",
+    "snomed_code": "387332007",
+    "atc_code": "C01DA08",
+    "aliases": ["Isordil", "isosorbide dinitrate", "ISDN"]
+  },
+  "Ivabradine": {
+    "id": "rxnorm:1649480",
+    "rxnorm_code": "1649480",
+    "snomed_code": "421228002",
+    "atc_code": "C01EB17",
+    "aliases": ["Corlanor", "ivabradine"]
+  },
+  "Amoxicillin": {
+    "id": "rxnorm:723",
+    "rxnorm_code": "723",
+    "snomed_code": "372687004",
+    "atc_code": "J01CA04",
+    "aliases": ["Amoxil", "amoxicillin"]
+  },
+  "Azithromycin": {
+    "id": "rxnorm:18631",
+    "rxnorm_code": "18631",
+    "snomed_code": "387531004",
+    "atc_code": "J01FA10",
+    "aliases": ["Zithromax", "Z-Pack", "azithromycin"]
+  },
+  "Ceftriaxone": {
+    "id": "rxnorm:2193",
+    "rxnorm_code": "2193",
+    "snomed_code": "372670001",
+    "atc_code": "J01DD04",
+    "aliases": ["Rocephin", "ceftriaxone"]
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "eGFR": {
+    "id": "loinc:77147-7",
+    "loinc_code": "77147-7",
+    "snomed_code": "80274001",
+    "unit": "mL/min/1.73m²",
+    "reference_range": ">60",
+    "aliases": ["estimated glomerular filtration rate", "GFR", "egfr"]
+  },
+  "Creatinine": {
+    "id": "loinc:2160-0",
+    "loinc_code": "2160-0",
+    "snomed_code": "113075003",
+    "unit": "mg/dL",
+    "reference_range": "0.6-1.2",
+    "aliases": ["serum creatinine", "SCr", "creatinine"]
+  },
+  "Potassium": {
+    "id": "loinc:2823-3",
+    "loinc_code": "2823-3",
+    "snomed_code": "88480006",
+    "unit": "mEq/L",
+    "reference_range": "3.5-5.0",
+    "aliases": ["serum potassium", "K+", "potassium"]
+  },
+  "Sodium": {
+    "id": "loinc:2951-2",
+    "loinc_code": "2951-2",
+    "snomed_code": "39972003",
+    "unit": "mEq/L",
+    "reference_range": "136-145",
+    "aliases": ["serum sodium", "Na+", "sodium"]
+  },
+  "BNP": {
+    "id": "loinc:42637-9",
+    "loinc_code": "42637-9",
+    "snomed_code": "390917008",
+    "unit": "pg/mL",
+    "reference_range": "<100",
+    "aliases": ["brain natriuretic peptide", "B-type natriuretic peptide", "bnp"]
+  },
+  "NT-proBNP": {
+    "id": "loinc:33762-6",
+    "loinc_code": "33762-6",
+    "snomed_code": "390918003",
+    "unit": "pg/mL",
+    "reference_range": "<125 (age <75), <450 (age ≥75)",
+    "aliases": ["N-terminal proBNP", "NT-pro-BNP", "nt-probnp"]
+  },
+  "Troponin": {
+    "id": "loinc:6598-7",
+    "loinc_code": "6598-7",
+    "snomed_code": "105000003",
+    "unit": "ng/mL",
+    "reference_range": "<0.04",
+    "aliases": ["troponin I", "troponin T", "cTnI", "cTnT", "troponin"]
+  },
+  "INR": {
+    "id": "loinc:6301-6",
+    "loinc_code": "6301-6",
+    "snomed_code": "165581004",
+    "unit": "",
+    "reference_range": "0.8-1.2 (normal), 2.0-3.0 (therapeutic)",
+    "aliases": ["international normalized ratio", "PT/INR", "inr"]
+  },
+  "LDL Cholesterol": {
+    "id": "loinc:13457-7",
+    "loinc_code": "13457-7",
+    "snomed_code": "113079009",
+    "unit": "mg/dL",
+    "reference_range": "<100 (optimal)",
+    "aliases": ["LDL-C", "LDL", "low-density lipoprotein", "ldl"]
+  },
+  "HDL Cholesterol": {
+    "id": "loinc:2085-9",
+    "loinc_code": "2085-9",
+    "snomed_code": "102737005",
+    "unit": "mg/dL",
+    "reference_range": ">40 (men), >50 (women)",
+    "aliases": ["HDL-C", "HDL", "high-density lipoprotein", "hdl"]
+  },
+  "Total Cholesterol": {
+    "id": "loinc:2093-3",
+    "loinc_code": "2093-3",
+    "snomed_code": "77068002",
+    "unit": "mg/dL",
+    "reference_range": "<200",
+    "aliases": ["total cholesterol", "TC"]
+  },
+  "ALT": {
+    "id": "loinc:1742-6",
+    "loinc_code": "1742-6",
+    "snomed_code": "250637003",
+    "unit": "U/L",
+    "reference_range": "7-56",
+    "aliases": ["alanine aminotransferase", "SGPT", "alt"]
+  },
+  "AST": {
+    "id": "loinc:1920-8",
+    "loinc_code": "1920-8",
+    "snomed_code": "250641004",
+    "unit": "U/L",
+    "reference_range": "10-40",
+    "aliases": ["aspartate aminotransferase", "SGOT", "ast"]
+  },
+  "Hemoglobin": {
+    "id": "loinc:718-7",
+    "loinc_code": "718-7",
+    "snomed_code": "104141003",
+    "unit": "g/dL",
+    "reference_range": "12-16 (women), 14-18 (men)",
+    "aliases": ["Hgb", "Hb", "hemoglobin"]
+  },
+  "HbA1c": {
+    "id": "loinc:4548-4",
+    "loinc_code": "4548-4",
+    "snomed_code": "43396009",
+    "unit": "%",
+    "reference_range": "<5.7 (normal), <7.0 (diabetic target)",
+    "aliases": ["glycated hemoglobin", "A1C", "glycosylated hemoglobin", "hba1c"]
+  },
+  "Albumin": {
+    "id": "loinc:1751-7",
+    "loinc_code": "1751-7",
+    "snomed_code": "26988003",
+    "unit": "g/dL",
+    "reference_range": "3.5-5.5",
+    "aliases": ["serum albumin", "albumin"]
+  },
+  "QTc Interval": {
+    "id": "loinc:8897-1",
+    "loinc_code": "8897-1",
+    "snomed_code": "251237002",
+    "unit": "ms",
+    "reference_range": "<440 (men), <460 (women)",
+    "aliases": ["corrected QT interval", "QTc", "qtc"]
+  },
+  "Creatinine Clearance": {
+    "id": "loinc:2164-2",
+    "loinc_code": "2164-2",
+    "snomed_code": "102811001",
+    "unit": "mL/min",
+    "reference_range": ">90",
+    "aliases": ["CrCl", "creatinine clearance", "crcl"]
+  },
+  "LVEF": {
+    "id": "loinc:10230-1",
+    "loinc_code": "10230-1",
+    "snomed_code": "250908004",
+    "unit": "%",
+    "reference_range": "55-70",
+    "aliases": ["left ventricular ejection fraction", "ejection fraction", "EF", "lvef"]
+  }
+}
