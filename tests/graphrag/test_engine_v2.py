@@ -712,3 +712,70 @@ class TestLayer2Expansion:
         drug1_matches = [m for m in result.semantic_matches if m.entity_id == "drug_1"]
         assert len(drug1_matches) == 1
         assert drug1_matches[0].source_layer == "direct"
+
+
+class TestLayer3VectorFallback:
+    """Layer 3: Vector search over EvidenceChunks when Layers 1+2 return nothing."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_vector_fallback_when_graph_empty(self, mock_link, mock_embed):
+        """When Layers 1+2 return 0, try vector search."""
+        mock_link.return_value = None  # Entity not found → no Layer 1/2 results
+        mock_embed.return_value = [0.1] * 1024
+
+        engine, conn = _make_engine()
+        # Vector search returns entities via chunk traversal
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_1", "entity_name": "SomeDrug",
+                "entity_type": "Drug", "strength": "strong_for",
+                "evidence_quality": "high", "conditions": None,
+                "score": 0.92,
+            }
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["SomeRareCondition"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert len(result.semantic_matches) >= 1
+        assert result.semantic_matches[0].source_layer == "vector"
+        assert "vector" in result.retrieval_layers_used
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_vector_fallback_skipped_when_layer1_has_results(self, mock_link, mock_embed):
+        """Vector fallback should NOT run if Layer 1 has results."""
+        linked = MagicMock()
+        linked.node_id = "disease_hfref"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_1", "entity_name": "Drug1",
+                "entity_type": "Drug", "strength": "strong_for",
+                "evidence_quality": "high", "conditions": None,
+            }
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["HFrEF"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        mock_embed.assert_not_called()
+        assert "vector" not in result.retrieval_layers_used
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("No API key"))
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_vector_fallback_graceful_on_embed_error(self, mock_link, mock_embed):
+        """If embedding fails (no API key), skip Layer 3 gracefully."""
+        engine, conn = _make_engine()
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["Unknown"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        # Should not crash, just return empty
+        assert result.confidence == "low"

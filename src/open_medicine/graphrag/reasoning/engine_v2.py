@@ -14,9 +14,11 @@ from __future__ import annotations
 import json
 import logging
 import operator
+import os
 from typing import TYPE_CHECKING, Any
 
 from open_medicine.graphrag.graph.queries_v2 import ReasoningQueries
+from open_medicine.graphrag.ingestion.embeddings import embed_query
 from open_medicine.graphrag.ingestion.linker_v2 import get_drug_class_members, link_entity
 from open_medicine.graphrag.reasoning.types_v2 import (
     ClinicalQuery,
@@ -122,6 +124,11 @@ class ReasoningEngine:
                     entity.node_id, "treatment_selection", q,
                 )
                 semantic_matches.extend(expanded)
+
+        # Layer 3: vector fallback if still empty
+        if len(semantic_matches) == 0:
+            vector_matches = self._vector_fallback(q)
+            semantic_matches.extend(vector_matches)
 
         semantic_matches = self._deduplicate(semantic_matches)
 
@@ -385,6 +392,60 @@ class ReasoningEngine:
                 )
 
         return matches
+
+    # ----- Layer 3: Vector fallback -----
+
+    # Intent → rec_type mapping for vector search filtering
+    _INTENT_TO_REC_TYPE = {
+        "treatment_selection": "treatment_selection",
+        "contraindication": "contraindication",
+        "interaction": "interaction",
+        "dosing": "dosing",
+        "monitoring": "monitoring",
+    }
+
+    def _vector_fallback(self, q: ClinicalQuery) -> list[SemanticMatch]:
+        """Layer 3: Vector search over EvidenceChunks → entity traversal."""
+        api_key = os.environ.get("VOYAGE_API_KEY", "")
+        try:
+            query_text = f"{q.intent} {' '.join(q.concepts)}"
+            embedding = embed_query(query_text, api_key=api_key)
+        except Exception:
+            logger.debug("Vector fallback skipped: embedding failed")
+            return []
+
+        rec_type = self._INTENT_TO_REC_TYPE.get(q.intent)
+        cypher, params = ReasoningQueries.vector_entity_search(
+            embedding, rec_type=rec_type, limit=10
+        )
+        rows = self._conn.execute_read(cypher, params)
+
+        matches: list[SemanticMatch] = []
+        for row in rows:
+            matches.append(
+                SemanticMatch(
+                    entity_id=row.get("entity_id", ""),
+                    entity_name=row.get("entity_name", ""),
+                    entity_type=row.get("entity_type", ""),
+                    edge_type=self._infer_edge_type(q.intent),
+                    strength=row.get("strength", ""),
+                    evidence_quality=row.get("evidence_quality", ""),
+                    conditions_json=row.get("conditions"),
+                    source_layer="vector",
+                )
+            )
+        return matches
+
+    @staticmethod
+    def _infer_edge_type(intent: str) -> str:
+        """Map intent to the expected semantic edge type."""
+        return {
+            "treatment_selection": "INDICATED_FOR",
+            "contraindication": "CONTRAINDICATED_IN",
+            "interaction": "INTERACTS_WITH",
+            "dosing": "DOSED_FOR",
+            "monitoring": "MONITORED_BY",
+        }.get(intent, "RECOMMENDS")
 
     # ----- Helpers -----
 
