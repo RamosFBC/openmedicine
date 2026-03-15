@@ -84,8 +84,12 @@ _EDGE_DERIVATION: dict[tuple[str, str, str], str] = {
     ("dosing", "drug", "disease"): "DOSED_FOR",
     # Monitoring → MONITORED_BY
     ("monitoring", "drug", "lab"): "MONITORED_BY",
+    ("monitoring", "drug_class", "lab"): "MONITORED_BY",
     # Interaction → INTERACTS_WITH
     ("interaction", "drug", "drug"): "INTERACTS_WITH",
+    ("interaction", "drug", "drug_class"): "INTERACTS_WITH",
+    ("interaction", "drug_class", "drug"): "INTERACTS_WITH",
+    ("interaction", "drug_class", "drug_class"): "INTERACTS_WITH",
     # Diagnostic → DIAGNOSED_BY
     ("diagnostic_criteria", "disease", "procedure"): "DIAGNOSED_BY",
     ("diagnostic_criteria", "disease", "lab"): "DIAGNOSED_BY",
@@ -420,7 +424,16 @@ def _derive_semantic_edges(
     extraction: ExtractionResult,
     entity_map: dict[str, LinkedEntity],
 ) -> None:
-    """Derive Layer 1 semantic edges from rec_type + entity type combinations."""
+    """Derive Layer 1 semantic edges from rec_type + entity type combinations.
+
+    Safety warnings only get Layer 2 (RECOMMENDS) edges — no Layer 1
+    semantic edges, to avoid false CONTRAINDICATED_IN signals for drugs
+    that are actually indicated.
+    """
+    # safety_warning: no Layer 1 edges — only Layer 2 RECOMMENDS (already created)
+    if extraction.rec_type == "safety_warning":
+        return
+
     # Separate entities by role
     subjects = [
         e for key, e in entity_map.items() if key.startswith("subject:")
@@ -428,6 +441,24 @@ def _derive_semantic_edges(
     targets = [
         e for key, e in entity_map.items() if key.startswith("target:")
     ]
+    # Labs with role "monitor" — always create MONITORED_BY edges for monitoring recs,
+    # even when disease targets also exist (disease targets get INDICATED_FOR separately)
+    monitors = [
+        e for key, e in entity_map.items() if key.startswith("monitor:")
+    ]
+    if monitors and extraction.rec_type == "monitoring":
+        # Create MONITORED_BY edges directly: each drug subject → each monitor lab
+        drug_subjects = [
+            e for key, e in entity_map.items()
+            if key.startswith("subject:") and e.entity_type in ("drug", "drug_class")
+        ]
+        for drug in drug_subjects:
+            for lab in monitors:
+                _create_semantic_edge(
+                    queries, "MONITORED_BY", drug, lab, extraction
+                )
+        # Still add monitors to targets so they can match other derivation rules
+        targets.extend(monitors)
 
     # If no explicit roles, try to infer from entity types and rec_type
     if not targets:
@@ -456,11 +487,21 @@ def _derive_semantic_edges(
             if new_subjects:
                 subjects = new_subjects
         elif extraction.rec_type == "interaction":
-            # All drugs are both subjects and targets
+            # Separate drugs/drug_classes into two groups by entity type
+            # to pair drugs with interacting drug_classes (and vice versa)
             drugs = [e for e in subjects if e.entity_type == "drug"]
-            if len(drugs) >= 2:
-                for i, d1 in enumerate(drugs):
-                    for d2 in drugs[i + 1 :]:
+            drug_classes = [e for e in subjects if e.entity_type == "drug_class"]
+            # If we have both drugs and drug_classes, pair across groups
+            if drugs and drug_classes:
+                for d in drugs:
+                    for dc in drug_classes:
+                        _create_interacts_with(queries, d, dc, extraction)
+                return
+            # If only drugs (2+), fall back to all-pairs
+            all_interactors = drugs + drug_classes
+            if len(all_interactors) >= 2:
+                for i, d1 in enumerate(all_interactors):
+                    for d2 in all_interactors[i + 1 :]:
                         _create_interacts_with(queries, d1, d2, extraction)
                 return
 
@@ -537,10 +578,16 @@ def _create_interacts_with(
     drug_b: LinkedEntity,
     extraction: ExtractionResult,
 ) -> None:
-    """Create INTERACTS_WITH edge between two drugs."""
+    """Create INTERACTS_WITH edge between two drugs/drug classes."""
     props = InteractsWithProps(severity=InteractionSeverity.MODERATE)
     queries.append(
-        LoaderQueries.create_interacts_with(drug_a.node_id, drug_b.node_id, props)
+        LoaderQueries.create_interacts_with(
+            drug_a.node_id,
+            drug_b.node_id,
+            props,
+            source_label=drug_a.node_label,
+            target_label=drug_b.node_label,
+        )
     )
 
 

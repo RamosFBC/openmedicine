@@ -63,6 +63,7 @@ _INTENT_TO_QUERY = {
     "interaction": "_query_interactions",
     "dosing": "_query_dosing",
     "monitoring": "_query_monitoring",
+    "diagnostic_criteria": "_query_diagnostic_criteria",
 }
 
 
@@ -188,22 +189,55 @@ class ReasoningEngine:
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
             if entity is None:
+                entity = link_entity(concept, "drug_class")
+            if entity is None:
                 continue
 
-            cypher, params = ReasoningQueries.find_interactions(entity.node_id)
+            cypher, params = ReasoningQueries.find_interactions(
+                entity.node_id, entity_label=entity.node_label
+            )
             rows = self._conn.execute_read(cypher, params)
 
             for row in rows:
                 semantic_matches.append(
                     SemanticMatch(
-                        entity_id=row.get("drug_id", ""),
-                        entity_name=row.get("drug_name", ""),
-                        entity_type="Drug",
+                        entity_id=row.get("entity_id", ""),
+                        entity_name=row.get("entity_name", ""),
+                        entity_type=row.get("entity_type", "Drug"),
                         edge_type="INTERACTS_WITH",
                         strength="",
                         evidence_quality="",
                     )
                 )
+
+        return self._build_result(semantic_matches, [], q)
+
+    def _query_diagnostic_criteria(self, q: ClinicalQuery) -> GraphRAGResult:
+        """Find diagnostic criteria via DIAGNOSED_BY edges."""
+        semantic_matches: list[SemanticMatch] = []
+
+        for concept in q.concepts:
+            entity = link_entity(concept, "disease")
+            if entity is None:
+                continue
+
+            cypher, params = ReasoningQueries.find_diagnostic_criteria(entity.node_id)
+            rows = self._conn.execute_read(cypher, params)
+
+            for row in rows:
+                semantic_matches.append(
+                    SemanticMatch(
+                        entity_id=row.get("entity_id", ""),
+                        entity_name=row.get("entity_name", ""),
+                        entity_type=row.get("entity_type", ""),
+                        edge_type="DIAGNOSED_BY",
+                        strength="",
+                        evidence_quality="",
+                    )
+                )
+
+        if not semantic_matches:
+            return self._query_generic(q)
 
         return self._build_result(semantic_matches, [], q)
 
@@ -512,18 +546,20 @@ class ReasoningEngine:
         if not isinstance(conditions, list):
             return
 
+        # Normalize patient variable keys to lowercase for case-insensitive matching
+        norm_vars = {k.lower(): v for k, v in patient_vars.items()}
+
         missing: list[str] = []
-        all_met = True
+        any_failed = False
 
         for cond in conditions:
-            result = self._evaluate_condition(cond, patient_vars)
+            result = self._evaluate_condition(cond, norm_vars)
             if result is None:
                 missing.append(cond.get("variable", ""))
-                all_met = False
             elif not result:
-                all_met = False
+                any_failed = True
 
-        match.conditions_met = all_met and len(missing) == 0
+        match.conditions_met = not any_failed
         match.missing_variables = missing
 
     @staticmethod
@@ -532,15 +568,16 @@ class ReasoningEngine:
     ) -> bool | None:
         """Evaluate a single condition. Returns None if variable missing."""
         var = cond.get("variable", "")
-        if var not in patient_vars:
+        var_lower = var.lower()
+        if var_lower not in patient_vars:
             return None
         op_fn = OPS.get(cond.get("operator", ""))
         if not op_fn:
             return None
         try:
-            return op_fn(float(patient_vars[var]), float(cond["threshold"]))
+            return op_fn(float(patient_vars[var_lower]), float(cond["threshold"]))
         except (ValueError, TypeError):
-            return op_fn(str(patient_vars[var]), str(cond["threshold"]))
+            return op_fn(str(patient_vars[var_lower]), str(cond["threshold"]))
 
     def _fetch_evidence_for_matches(
         self,

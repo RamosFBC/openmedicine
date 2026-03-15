@@ -182,17 +182,51 @@ class TestQueryInteractions:
     def test_returns_interactions(self, mock_link):
         linked = MagicMock()
         linked.node_id = "drug_warfarin"
+        linked.node_label = "Drug"
         mock_link.return_value = linked
 
         engine, conn = _make_engine()
         conn.execute_read.return_value = [
-            {"drug_id": "drug_aspirin", "drug_name": "Aspirin"}
+            {"entity_id": "drug_aspirin", "entity_name": "Aspirin", "entity_type": "Drug"}
         ]
         q = ClinicalQuery(intent="interaction", concepts=["Warfarin"])
         result = engine.query(q)
         assert len(result.semantic_matches) == 1
         assert result.semantic_matches[0].edge_type == "INTERACTS_WITH"
         assert result.semantic_matches[0].entity_type == "Drug"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_tries_drug_class_when_drug_not_found(self, mock_link):
+        """If concept is not a drug, try drug_class (e.g., 'ACE Inhibitor')."""
+        drug_class = MagicMock()
+        drug_class.node_id = "atc:C09A"
+        drug_class.node_label = "DrugClass"
+        # First call (drug) → None, second call (drug_class) → match
+        mock_link.side_effect = [None, drug_class]
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"entity_id": "atc:C09DX", "entity_name": "ARNi", "entity_type": "DrugClass"}
+        ]
+        q = ClinicalQuery(intent="interaction", concepts=["ACE Inhibitor"])
+        result = engine.query(q)
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "ARNi"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_drug_found_skips_drug_class(self, mock_link):
+        """When drug is found, don't try drug_class."""
+        drug = MagicMock()
+        drug.node_id = "rxnorm:11289"
+        drug.node_label = "Drug"
+        mock_link.return_value = drug
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+        q = ClinicalQuery(intent="interaction", concepts=["Warfarin"])
+        engine.query(q)
+        # link_entity called once (drug found), not twice
+        mock_link.assert_called_once_with("Warfarin", "drug")
 
 
 class TestQueryDosing:
@@ -314,6 +348,87 @@ class TestQueryGeneric:
         assert result.recommendation_matches == []
 
 
+class TestQueryDiagnosticCriteria:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_diagnostic_criteria_routed(self, mock_link):
+        """diagnostic_criteria intent should route to dedicated method."""
+        disease = MagicMock()
+        disease.node_id = "snomed:84114007"
+        disease.node_label = "Disease"
+        mock_link.return_value = disease
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "loinc:10230-1",
+                "entity_name": "LVEF",
+                "entity_type": "Lab",
+            }
+        ]
+        q = ClinicalQuery(intent="diagnostic_criteria", concepts=["Heart Failure"])
+        result = engine.query(q)
+        assert len(result.semantic_matches) >= 1
+        assert result.semantic_matches[0].edge_type == "DIAGNOSED_BY"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_diagnostic_criteria_returns_labs_and_procedures(self, mock_link):
+        disease = MagicMock()
+        disease.node_id = "snomed:84114007"
+        disease.node_label = "Disease"
+        mock_link.return_value = disease
+
+        engine, conn = _make_engine()
+        conn.execute_read.side_effect = [
+            [  # Layer 1: DIAGNOSED_BY
+                {"entity_id": "loinc:1", "entity_name": "LVEF", "entity_type": "Lab"},
+                {"entity_id": "snomed:2", "entity_name": "Echo", "entity_type": "Procedure"},
+            ],
+        ]
+        q = ClinicalQuery(
+            intent="diagnostic_criteria", concepts=["Heart Failure"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        types = {m.entity_type for m in result.semantic_matches}
+        assert "Lab" in types or "Procedure" in types
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_diagnostic_criteria_no_results_falls_to_generic(self, mock_link):
+        """If no DIAGNOSED_BY edges, fall back to generic recommendation search."""
+        disease = MagicMock()
+        disease.node_id = "snomed:84114007"
+        disease.node_label = "Disease"
+        # First call for diagnostic method, then subsequent for generic fallback
+        mock_link.side_effect = [disease, None, None, disease, None, None]
+
+        engine, conn = _make_engine()
+        conn.execute_read.side_effect = [
+            [],  # Layer 1: no DIAGNOSED_BY edges
+            [    # Generic: recommendation search
+                {
+                    "rec_id": "rec_001", "rec_type": "diagnostic_criteria",
+                    "action": "classify_as_HFrEF",
+                    "detail": "Classify as HFrEF if LVEF ≤40%",
+                    "strength": "strong_for", "evidence_quality": "high",
+                    "source_text": "LVEF ≤40% = HFrEF",
+                    "guideline": "AHA", "doi": "10.1234", "section": "Dx",
+                }
+            ],
+        ]
+        q = ClinicalQuery(intent="diagnostic_criteria", concepts=["Heart Failure"])
+        result = engine.query(q)
+        # Should have recommendation matches from generic fallback
+        assert len(result.recommendation_matches) >= 1
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_diagnostic_criteria_no_entity_match(self, mock_link):
+        mock_link.return_value = None
+        engine, _ = _make_engine()
+        q = ClinicalQuery(intent="diagnostic_criteria", concepts=["Unknown"])
+        result = engine.query(q)
+        assert result.confidence == "low"
+
+
 class TestEvaluateConditions:
     def test_no_conditions(self):
         engine, _ = _make_engine()
@@ -380,7 +495,8 @@ class TestEvaluateConditions:
             conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {})
-        assert match.conditions_met is False
+        # L4 fix: missing vars ≠ failed conditions — conditions_met=True
+        assert match.conditions_met is True
         assert "eGFR" in match.missing_variables
 
     def test_invalid_json_ignored(self):
@@ -413,10 +529,90 @@ class TestEvaluateConditions:
         assert match.conditions_met is True
 
 
+    # --- L3: Case-insensitive variable matching ---
+
+    def test_condition_evaluation_case_insensitive(self):
+        """egfr in patient_vars should match eGFR in condition."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "eGFR", "operator": ">=", "threshold": 30}
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"egfr": 35})
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_condition_evaluation_mixed_case(self):
+        """LVEF should match lvef and vice versa."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "lvef", "operator": "<=", "threshold": 40}
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 30})
+        assert match.conditions_met is True
+
+    # --- L4: Missing vars vs failed conditions ---
+
+    def test_missing_vars_only_does_not_fail_conditions(self):
+        """Missing vars but no failed condition → conditions_met=True."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "eGFR", "operator": ">=", "threshold": 30}
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {})
+        assert match.conditions_met is True
+        assert "eGFR" in match.missing_variables
+
+    def test_failed_condition_sets_conditions_met_false(self):
+        """Explicit failure (value doesn't meet threshold) → conditions_met=False."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40}
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 55})
+        assert match.conditions_met is False
+
+    def test_mixed_missing_and_met_conditions(self):
+        """One met condition + one missing var → conditions_met=True."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+            {"variable": "eGFR", "operator": ">=", "threshold": 30},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 30})
+        assert match.conditions_met is True
+        assert "eGFR" in match.missing_variables
+
+
 class TestEvaluateCondition:
     def test_numeric_comparison(self):
+        # _evaluate_condition receives pre-normalized (lowercase) patient vars
         assert ReasoningEngine._evaluate_condition(
-            {"variable": "LVEF", "operator": "<=", "threshold": 40}, {"LVEF": 30}
+            {"variable": "LVEF", "operator": "<=", "threshold": 40}, {"lvef": 30}
         ) is True
 
     def test_missing_variable_returns_none(self):
@@ -426,7 +622,7 @@ class TestEvaluateCondition:
 
     def test_unknown_operator_returns_none(self):
         assert ReasoningEngine._evaluate_condition(
-            {"variable": "LVEF", "operator": "~", "threshold": 40}, {"LVEF": 30}
+            {"variable": "LVEF", "operator": "~", "threshold": 40}, {"lvef": 30}
         ) is None
 
     def test_string_comparison_fallback(self):

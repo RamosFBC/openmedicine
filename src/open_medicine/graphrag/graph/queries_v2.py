@@ -398,10 +398,12 @@ class LoaderQueries:
         drug_a_id: str,
         drug_b_id: str,
         props: InteractsWithProps,
+        source_label: str = "Drug",
+        target_label: str = "Drug",
     ) -> CypherStatement:
-        """Create INTERACTS_WITH edge: Drug → Drug."""
+        """Create INTERACTS_WITH edge: Drug/DrugClass → Drug/DrugClass."""
         return (
-            "MATCH (a:Drug {id: $aid}), (b:Drug {id: $bid}) "
+            f"MATCH (a:{source_label} {{id: $aid}}), (b:{target_label} {{id: $bid}}) "
             "MERGE (a)-[r:INTERACTS_WITH]->(b) "
             "ON CREATE SET r.severity = $severity, r.mechanism = $mechanism, "
             "r.clinical_effect = $effect",
@@ -711,14 +713,29 @@ class ReasoningQueries:
         )
 
     @staticmethod
-    def find_interactions(drug_id: str) -> CypherStatement:
-        """What interacts with drug X?"""
+    def find_interactions(
+        entity_id: str, entity_label: str = "Drug"
+    ) -> CypherStatement:
+        """What interacts with drug/drug class X?"""
         return (
-            "MATCH (d:Drug {id: $did})-[r:INTERACTS_WITH]-(other:Drug) "
-            "RETURN other.id AS drug_id, other.name AS drug_name, "
+            f"MATCH (d:{entity_label} {{id: $did}})-[r:INTERACTS_WITH]-(other) "
+            "WHERE other:Drug OR other:DrugClass "
+            "RETURN other.id AS entity_id, other.name AS entity_name, "
+            "labels(other)[0] AS entity_type, "
             "r.severity AS severity, r.mechanism AS mechanism, "
             "r.clinical_effect AS clinical_effect",
-            {"did": drug_id},
+            {"did": entity_id},
+        )
+
+    @staticmethod
+    def find_diagnostic_criteria(disease_id: str) -> CypherStatement:
+        """What diagnostic criteria (labs/procedures) are used for disease X?"""
+        return (
+            "MATCH (dis:Disease {id: $did})-[:DIAGNOSED_BY]->(tgt) "
+            "WHERE tgt:Lab OR tgt:Procedure "
+            "RETURN labels(tgt)[0] AS entity_type, tgt.id AS entity_id, "
+            "tgt.name AS entity_name",
+            {"did": disease_id},
         )
 
     @staticmethod

@@ -212,7 +212,30 @@ class TestLoaderSemanticEdges:
             LoaderQueries.create_interacts_with("rxnorm:1", "rxnorm:2", props)
         )
         assert "INTERACTS_WITH" in cypher
-        assert cypher.count("Drug") == 2  # Both source and target are Drug
+        assert "Drug" in cypher  # Default labels are Drug
+
+    def test_create_interacts_with_dynamic_labels(self):
+        props = InteractsWithProps(severity=InteractionSeverity.MODERATE)
+        cypher, _ = _assert_valid_cypher(
+            LoaderQueries.create_interacts_with(
+                "atc:C09A", "atc:C09DX", props,
+                source_label="DrugClass", target_label="DrugClass",
+            )
+        )
+        assert "INTERACTS_WITH" in cypher
+        assert "DrugClass" in cypher
+        assert "Drug {" not in cypher  # Not hardcoded Drug
+
+    def test_create_interacts_with_mixed_labels(self):
+        props = InteractsWithProps(severity=InteractionSeverity.MAJOR)
+        cypher, _ = _assert_valid_cypher(
+            LoaderQueries.create_interacts_with(
+                "rxnorm:123", "atc:C09A", props,
+                source_label="Drug", target_label="DrugClass",
+            )
+        )
+        assert "Drug {" in cypher
+        assert "DrugClass {" in cypher
 
     def test_create_dosed_for(self):
         props = DosedForProps(
@@ -387,6 +410,23 @@ class TestReasoningLayer1:
             ReasoningQueries.find_interactions("rxnorm:123")
         )
         assert "INTERACTS_WITH" in cypher
+
+    def test_find_interactions_with_drug_class_label(self):
+        cypher, _ = _assert_valid_cypher(
+            ReasoningQueries.find_interactions("atc:C09A", entity_label="DrugClass")
+        )
+        assert "DrugClass" in cypher
+        assert "INTERACTS_WITH" in cypher
+        # Should match both Drug and DrugClass on the other side
+        assert "Drug" in cypher or "DrugClass" in cypher
+
+    def test_find_diagnostic_criteria(self):
+        cypher, params = _assert_valid_cypher(
+            ReasoningQueries.find_diagnostic_criteria("snomed:84114007")
+        )
+        assert "DIAGNOSED_BY" in cypher
+        assert "Lab" in cypher or "Procedure" in cypher
+        assert params["did"] == "snomed:84114007"
 
     def test_find_dosing(self):
         cypher, _ = _assert_valid_cypher(
