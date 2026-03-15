@@ -53,6 +53,9 @@ OPS = {
     "!=": operator.ne,
 }
 
+# Layer priority for sort ordering (lower = higher priority)
+_LAYER_RANK = {"direct": 0, "expanded": 1, "vector": 2}
+
 # Maps query intents to Layer 1 query methods
 _INTENT_TO_QUERY = {
     "treatment_selection": "_query_treatments",
@@ -577,9 +580,10 @@ class ReasoningEngine:
         q: ClinicalQuery,
     ) -> GraphRAGResult:
         """Build final result with ranking and conflict detection."""
-        # Sort by conditions_met (met first), then strength
+        # Sort by: layer priority, conditions_met (met first), then strength
         semantic_matches.sort(
             key=lambda m: (
+                _LAYER_RANK.get(m.source_layer, 99),
                 not m.conditions_met,
                 STRENGTH_RANK.get(m.strength, 99),
             )

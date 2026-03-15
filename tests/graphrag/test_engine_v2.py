@@ -827,3 +827,50 @@ class TestLayer4Hints:
         )
         result = engine.query(q)
         assert result.hints == []
+
+
+class TestSourceLayerSorting:
+    def _make_match(self, source_layer, strength="strong_for", conditions_met=True):
+        return SemanticMatch(
+            entity_id=f"id_{source_layer}_{strength}", entity_name=f"Name_{source_layer}",
+            entity_type="Drug", edge_type="INDICATED_FOR",
+            strength=strength, evidence_quality="high",
+            conditions_met=conditions_met, source_layer=source_layer,
+        )
+
+    def test_direct_ranks_before_expanded(self):
+        engine, _ = _make_engine()
+        matches = [
+            self._make_match("expanded"),
+            self._make_match("direct"),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.semantic_matches[0].source_layer == "direct"
+        assert result.semantic_matches[1].source_layer == "expanded"
+
+    def test_expanded_ranks_before_vector(self):
+        engine, _ = _make_engine()
+        matches = [
+            self._make_match("vector"),
+            self._make_match("expanded"),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.semantic_matches[0].source_layer == "expanded"
+        assert result.semantic_matches[1].source_layer == "vector"
+
+    def test_full_sort_order(self):
+        engine, _ = _make_engine()
+        matches = [
+            self._make_match("vector", "weak_for", conditions_met=False),
+            self._make_match("direct", "moderate_for", conditions_met=True),
+            self._make_match("expanded", "strong_for", conditions_met=True),
+            self._make_match("direct", "strong_for", conditions_met=True),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        layers = [m.source_layer for m in result.semantic_matches]
+        # direct+met first (sorted by strength), then expanded+met, then vector+unmet
+        assert layers[0] == "direct"
+        assert layers[-1] == "vector"
