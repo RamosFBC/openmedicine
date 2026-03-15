@@ -171,6 +171,144 @@ The graph has good data (944 nodes, 4367 edges) but the engine can't reach it. T
 
 ---
 
+## Fix 7: Incremental Graph Updates (Patch Mode)
+
+**Problem**: Every improvement requires a full `migrate` (wipe + reload). This is destructive, slow, and loses any manual corrections or edges added outside the extraction pipeline. As the graph grows with multiple guidelines, wiping everything to fix one guideline's edges is unacceptable.
+
+**Current behavior**:
+- `migrate` = `MATCH (n) DETACH DELETE n` + full reload — nuclear option
+- `load` = `delete_guideline(id)` + reload that guideline — per-guideline idempotent, but still deletes ALL of that guideline's edges before recreating
+- No way to add a single edge, patch a node property, or add a new relationship type without re-running the entire extraction+link+load pipeline
+
+**What we need**: Three levels of incremental update:
+
+### Level 1: Patch Operations (CLI commands)
+
+Add individual nodes, edges, or properties without touching existing data.
+
+**Files**: `src/open_medicine/graphrag/ingest_v2.py`, `src/open_medicine/graphrag/graph/queries_v2.py`
+
+**New CLI commands**:
+```bash
+# Add a single edge between existing nodes
+ingest_v2 add-edge --source "rxnorm:9997" --target "loinc:2823-3" \
+  --type MONITORED_BY --props '{"frequency": "weekly"}'
+
+# Add a node
+ingest_v2 add-node --label Drug --id "rxnorm:12345" --name "NewDrug" \
+  --props '{"rxnorm_code": "12345"}'
+
+# Patch node properties (MERGE + SET, not destructive)
+ingest_v2 patch-node --id "rxnorm:9997" --set '{"aliases": ["Aldactone", "spironolactone", "MRA"]}'
+
+# Add edges from a JSONL patch file (batch)
+ingest_v2 apply-patch --file patches/2025-03-15-add-monitoring-edges.jsonl
+```
+
+**Implementation**:
+- Add `PatchQueries` static class with:
+  ```python
+  @staticmethod
+  def add_edge(source_id: str, source_label: str, target_id: str, target_label: str,
+               edge_type: str, props: dict) -> CypherStatement:
+      return (
+          f"MATCH (a:{source_label} {{id: $sid}}), (b:{target_label} {{id: $tid}}) "
+          f"MERGE (a)-[r:{edge_type}]->(b) "
+          "SET r += $props",
+          {"sid": source_id, "tid": target_id, "props": props},
+      )
+
+  @staticmethod
+  def patch_node(node_id: str, label: str, props: dict) -> CypherStatement:
+      return (
+          f"MATCH (n:{label} {{id: $id}}) SET n += $props",
+          {"id": node_id, "props": props},
+      )
+  ```
+- Patch file format (JSONL):
+  ```json
+  {"op": "add_edge", "source": "rxnorm:9997", "source_label": "Drug", "target": "loinc:2823-3", "target_label": "Lab", "edge_type": "MONITORED_BY", "props": {"frequency": "weekly"}}
+  {"op": "add_node", "label": "DrugClass", "id": "atc:M01A", "name": "NSAIDs", "props": {"atc_code": "M01A", "aliases": ["NSAID", "non-steroidal anti-inflammatory"]}}
+  {"op": "patch_node", "id": "drug_class:nsaid", "label": "DrugClass", "props": {"atc_code": "M01A"}}
+  ```
+- Validate: each op checks that referenced nodes exist before creating edges. Fail loudly if source/target missing.
+
+### Level 2: Guideline-Scoped Reload (existing, improved)
+
+The current `load` command already does per-guideline idempotent reload (delete_guideline + recreate). This is correct for re-ingesting a guideline after improving the extraction pipeline.
+
+**Improvement needed**: Change `delete_guideline()` to preserve shared clinical nodes (Drug, Disease, Lab, etc.) — only delete Recommendation, EvidenceChunk, and guideline-scoped edges. Currently it deletes recommendations scoped by `guideline_id` which is correct, but the clinical nodes created by one guideline may be reused by another. This already works because nodes use MERGE, but we should verify edge preservation.
+
+**Add a `--dry-run` flag** to `load` that shows what would be deleted/created without executing:
+```bash
+ingest_v2 load --jsonl ... --file ... --id aha_hf_2022 --dry-run
+# Output: Would delete 537 Recommendations, 200 EvidenceChunks
+#         Would create 537 Recommendations, 200 EvidenceChunks, 4367 edges
+#         Would preserve: 150 Drug nodes, 50 Disease nodes (shared)
+```
+
+### Level 3: Diff-Based Update
+
+For the case where we improve the extraction pipeline and want to re-ingest without losing manual patches.
+
+**Files**: New file `src/open_medicine/graphrag/ingestion/differ.py`
+
+**Implementation**:
+- Before deleting, snapshot current graph state for the guideline:
+  ```python
+  def snapshot_guideline(conn, guideline_id) -> GuidelineSnapshot:
+      """Capture current nodes + edges scoped to a guideline."""
+      nodes = conn.execute_read(
+          "MATCH (rec:Recommendation {guideline_id: $gid})-[*1..2]-(n) "
+          "RETURN DISTINCT n.id, labels(n), properties(n)", {"gid": guideline_id}
+      )
+      edges = conn.execute_read(
+          "MATCH (rec:Recommendation {guideline_id: $gid})-[*1..2]-(a)-[r]-(b) "
+          "RETURN a.id, type(r), b.id, properties(r)", {"gid": guideline_id}
+      )
+      return GuidelineSnapshot(nodes=nodes, edges=edges)
+  ```
+- After reload, diff against snapshot:
+  ```python
+  def diff_snapshots(before: GuidelineSnapshot, after: GuidelineSnapshot) -> GraphDiff:
+      """Find edges/nodes that were in before but not in after (lost patches)."""
+      lost_edges = before.edges - after.edges
+      new_edges = after.edges - before.edges
+      return GraphDiff(lost=lost_edges, added=new_edges)
+  ```
+- Report lost edges so the user can decide whether to re-apply patches:
+  ```
+  Reload complete. Diff:
+    +120 new edges (from improved extraction)
+    -3 edges lost (manual patches):
+      Drug:rxnorm:9997 --MONITORED_BY--> Lab:loinc:6298-4 (manual)
+      Drug:rxnorm:9997 --MONITORED_BY--> Lab:loinc:2823-3 (manual)
+      DrugClass:nsaid --INTERACTS_WITH--> DrugClass:loop_diuretic (manual)
+    Re-apply lost patches? [y/n]
+  ```
+
+### Patch Tracking
+
+Add a `_source` property to edges created via patch operations:
+```cypher
+MERGE (a)-[r:MONITORED_BY]->(b) SET r += $props, r._source = 'patch', r._patch_date = $date
+```
+
+This allows:
+- Distinguishing extraction-derived edges from manual patches
+- Preserving patches during guideline reload (don't delete edges where `_source = 'patch'`)
+- Auditing what was manually added vs. auto-generated
+
+**Tests**:
+- `test_add_edge_creates_relationship`: Patch op creates edge between existing nodes
+- `test_add_edge_fails_for_missing_node`: Patch op errors if source/target doesn't exist
+- `test_patch_preserves_existing_properties`: SET += doesn't overwrite existing props
+- `test_reload_preserves_patch_edges`: After guideline reload, edges with `_source=patch` survive
+- `test_dry_run_shows_diff`: `--dry-run` outputs correct counts without modifying graph
+- `test_diff_detects_lost_patches`: Diff correctly identifies edges lost during reload
+
+---
+
 ## Implementation Order
 
 | Priority | Fix | Effort | Safety Impact |
@@ -180,9 +318,12 @@ The graph has good data (944 nodes, 4367 edges) but the engine can't reach it. T
 | P0 | Fix 3: Variable aliases | Small | High — fixes false "CONDITIONS NOT MET" flags |
 | P1 | Fix 4: DIAGNOSED_BY edges | Medium | High — enables diagnostic criteria intent |
 | P1 | Fix 6: Fuzzy auto-retry | Small | Medium — handles entity resolution edge cases |
+| P1 | Fix 7a: Patch operations (Level 1) | Medium | High — enables adding edges without full reload |
 | P2 | Fix 5: Post-ingestion validation | Medium | Preventive — catches future gaps automatically |
+| P2 | Fix 7b: Dry-run + diff (Levels 2-3) | Large | Operational — prevents data loss during upgrades |
 
 **P0 fixes first** — these are the ones that cause silent clinical safety failures.
+**P1 Fix 7a is high priority** — without patch mode, every fix to the graph requires a full re-ingestion cycle (extract → link → load), which is slow, expensive (LLM calls), and destructive.
 
 ## Verification
 
