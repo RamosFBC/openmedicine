@@ -129,9 +129,9 @@ class TestQueryTreatments:
             include_evidence=False,
         )
         engine.query(q)
-        # Check the params passed to execute_read include guideline filter
-        call_args = conn.execute_read.call_args
-        cypher, params = call_args[0]
+        # Check the first call (Layer 1 treatment query) includes guideline filter
+        first_call = conn.execute_read.call_args_list[0]
+        cypher, params = first_call[0]
         assert "gfilter" in params
         assert params["gfilter"] == "acc_aha_hf_2022"
 
@@ -596,3 +596,119 @@ class TestNewTypeFields:
         q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
         evidence = engine._fetch_evidence_for_matches(matches, q)
         assert len(evidence) == 1
+
+
+class TestLayer2Expansion:
+    """Layer 2: DrugClass↔member and Disease↔stage expansion."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_treatment_expands_disease_to_parent(self, mock_link, mock_members):
+        """If HFrEF returns 0 results, expand to parent Heart Failure."""
+        disease = MagicMock()
+        disease.node_id = "snomed:703272007"
+        disease.node_label = "Disease"
+        disease.entity_type = "disease"
+
+        mock_link.return_value = disease
+        mock_members.return_value = []
+
+        engine, conn = _make_engine()
+        # Layer 1 returns empty, Layer 2 (parent disease) returns result
+        conn.execute_read.side_effect = [
+            [],  # Layer 1: find_treatments for HFrEF
+            [{"parent_id": "snomed:84114007", "parent_name": "Heart Failure"}],  # find_disease_parents
+            [    # Layer 2: find_treatments for parent
+                {
+                    "entity_id": "drug_x", "entity_name": "DrugX",
+                    "entity_type": "Drug", "strength": "strong_for",
+                    "evidence_quality": "high", "conditions": None,
+                }
+            ],
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["HFrEF"],
+            include_evidence=False, min_results_threshold=1,
+        )
+        result = engine.query(q)
+        assert len(result.semantic_matches) >= 1
+        assert "expanded" in result.retrieval_layers_used
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_monitoring_expands_class_to_members(self, mock_link, mock_members):
+        """If MRA class has no MONITORED_BY, expand to member drugs."""
+        # First call: link_entity("MRA", "drug") returns None
+        # Second call: link_entity("Spironolactone", "drug") returns a drug
+        member_drug = MagicMock()
+        member_drug.node_id = "rxnorm:35827"
+        member_drug.node_label = "Drug"
+        member_drug.entity_type = "drug"
+
+        mock_link.side_effect = [None, member_drug]
+        mock_members.return_value = ["Spironolactone"]
+
+        engine, conn = _make_engine()
+        conn.execute_read.side_effect = [
+            [    # Layer 2: monitoring for Spironolactone
+                {"lab_id": "loinc:2823-3", "lab_name": "Potassium"}
+            ],
+        ]
+        q = ClinicalQuery(
+            intent="monitoring", concepts=["MRA"],
+            include_evidence=False, min_results_threshold=1,
+        )
+        result = engine.query(q)
+        assert len(result.semantic_matches) >= 1
+        assert result.semantic_matches[0].source_layer == "expanded"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_expansion_when_layer1_sufficient(self, mock_link):
+        """Layer 2 should NOT run if Layer 1 meets threshold."""
+        linked = MagicMock()
+        linked.node_id = "disease_hfref"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_1", "entity_name": "Drug1",
+                "entity_type": "Drug", "strength": "strong_for",
+                "evidence_quality": "high", "conditions": None,
+            }
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["HFrEF"],
+            include_evidence=False, min_results_threshold=1,
+        )
+        result = engine.query(q)
+        # Only 1 execute_read call (Layer 1), no expansion
+        assert conn.execute_read.call_count == 1
+        assert "expanded" not in result.retrieval_layers_used
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_deduplication_across_layers(self, mock_link):
+        """Same entity from Layer 1 and Layer 2 — keep Layer 1 version."""
+        linked = MagicMock()
+        linked.node_id = "disease_hfref"
+        linked.entity_type = "disease"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        same_row = {
+            "entity_id": "drug_1", "entity_name": "Drug1",
+            "entity_type": "Drug", "strength": "strong_for",
+            "evidence_quality": "high", "conditions": None,
+        }
+        conn.execute_read.return_value = [same_row]
+
+        # Simulate: Layer 1 returns 1 result, Layer 2 returns same entity
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["HFrEF"],
+            include_evidence=False, min_results_threshold=1,
+        )
+        result = engine.query(q)
+        # Should have exactly 1, not 2
+        drug1_matches = [m for m in result.semantic_matches if m.entity_id == "drug_1"]
+        assert len(drug1_matches) == 1
+        assert drug1_matches[0].source_layer == "direct"

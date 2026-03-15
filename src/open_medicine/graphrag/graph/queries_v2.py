@@ -861,6 +861,26 @@ class ReasoningQueries:
             {"embedding": query_embedding, "limit": limit},
         )
 
+    # -- Disease hierarchy traversal -------------------------------------------
+
+    @staticmethod
+    def find_disease_parents(disease_id: str) -> CypherStatement:
+        """Find parent diseases via STAGE_OF."""
+        return (
+            "MATCH (child:Disease {id: $did})-[:STAGE_OF]->(parent:Disease) "
+            "RETURN parent.id AS parent_id, parent.name AS parent_name",
+            {"did": disease_id},
+        )
+
+    @staticmethod
+    def find_disease_children(disease_id: str) -> CypherStatement:
+        """Find child diseases (stages/subtypes) via STAGE_OF."""
+        return (
+            "MATCH (child:Disease)-[:STAGE_OF]->(parent:Disease {id: $did}) "
+            "RETURN child.id AS child_id, child.name AS child_name",
+            {"did": disease_id},
+        )
+
     # -- Vector → entity traversal ---------------------------------------------
 
     @staticmethod

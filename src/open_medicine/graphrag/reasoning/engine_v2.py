@@ -3,16 +3,21 @@
 Supersedes engine.py. Uses typed semantic edges for one-hop clinical queries
 (Layer 1) and falls back to recommendation traversal (Layer 2) for full
 evidence chains.
+
+Retrieval layers:
+  Layer 1 (direct)   — One-hop semantic edge traversal
+  Layer 2 (expanded) — Multi-hop: DrugClass→members, Disease→parent/children
 """
 
 from __future__ import annotations
 
 import json
+import logging
 import operator
 from typing import TYPE_CHECKING, Any
 
 from open_medicine.graphrag.graph.queries_v2 import ReasoningQueries
-from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+from open_medicine.graphrag.ingestion.linker_v2 import get_drug_class_members, link_entity
 from open_medicine.graphrag.reasoning.types_v2 import (
     ClinicalQuery,
     EvidenceCitation,
@@ -24,6 +29,7 @@ from open_medicine.graphrag.reasoning.types_v2 import (
 if TYPE_CHECKING:
     from open_medicine.graphrag.graph.connection import GraphConnection
 
+logger = logging.getLogger(__name__)
 
 # Strength ranking (lower = stronger)
 STRENGTH_RANK = {
@@ -64,9 +70,9 @@ class ReasoningEngine:
         """Execute a clinical query using the dual-layer graph.
 
         1. Try Layer 1 semantic edge traversal (one-hop)
-        2. If include_evidence, enrich with Layer 2 recommendation data
-        3. Evaluate patient conditions
-        4. Detect conflicts
+        2. If below threshold, try Layer 2 expansion (multi-hop)
+        3. If include_evidence, enrich with recommendation data
+        4. Evaluate patient conditions
         5. Return ranked results
         """
         # Route to intent-specific query
@@ -80,7 +86,7 @@ class ReasoningEngine:
 
         return result
 
-    # ----- Intent-specific queries (Layer 1) -----
+    # ----- Intent-specific queries (Layer 1 + Layer 2 expansion) -----
 
     def _query_treatments(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find treatments for a disease via INDICATED_FOR edges."""
@@ -109,6 +115,15 @@ class ReasoningEngine:
                 )
                 self._evaluate_match_conditions(match, q.patient_vars)
                 semantic_matches.append(match)
+
+            # Layer 2 expansion: if insufficient results, try parent diseases
+            if len(semantic_matches) < q.min_results_threshold:
+                expanded = self._expand_disease_hierarchy(
+                    entity.node_id, "treatment_selection", q,
+                )
+                semantic_matches.extend(expanded)
+
+        semantic_matches = self._deduplicate(semantic_matches)
 
         # Enrich with evidence if requested
         if q.include_evidence and semantic_matches:
@@ -232,6 +247,9 @@ class ReasoningEngine:
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
             if entity is None:
+                # Layer 2: concept might be a drug class — expand to members
+                expanded = self._expand_drug_class_to_monitoring(concept)
+                semantic_matches.extend(expanded)
                 continue
 
             cypher, params = ReasoningQueries.find_monitoring(entity.node_id)
@@ -249,6 +267,7 @@ class ReasoningEngine:
                     )
                 )
 
+        semantic_matches = self._deduplicate(semantic_matches)
         return self._build_result(semantic_matches, [], q)
 
     def _query_generic(self, q: ClinicalQuery) -> GraphRAGResult:
@@ -301,7 +320,85 @@ class ReasoningEngine:
             confidence=confidence,
         )
 
+    # ----- Layer 2: Multi-hop expansion -----
+
+    def _expand_disease_hierarchy(
+        self, disease_id: str, intent: str, q: ClinicalQuery,
+    ) -> list[SemanticMatch]:
+        """Expand disease to parent diseases and query treatments for each."""
+        cypher, params = ReasoningQueries.find_disease_parents(disease_id)
+        rows = self._conn.execute_read(cypher, params)
+
+        matches: list[SemanticMatch] = []
+        for row in rows:
+            parent_id = row.get("parent_id")
+            if not parent_id:
+                continue
+
+            if intent == "treatment_selection":
+                t_cypher, t_params = ReasoningQueries.find_treatments(
+                    parent_id, q.guideline_filter
+                )
+                t_rows = self._conn.execute_read(t_cypher, t_params)
+                for t_row in t_rows:
+                    match = SemanticMatch(
+                        entity_id=t_row.get("entity_id", ""),
+                        entity_name=t_row.get("entity_name", ""),
+                        entity_type=t_row.get("entity_type", ""),
+                        edge_type="INDICATED_FOR",
+                        strength=t_row.get("strength", ""),
+                        evidence_quality=t_row.get("evidence_quality", ""),
+                        conditions_json=t_row.get("conditions"),
+                        source_layer="expanded",
+                    )
+                    self._evaluate_match_conditions(match, q.patient_vars)
+                    matches.append(match)
+
+        return matches
+
+    def _expand_drug_class_to_monitoring(
+        self, class_name: str,
+    ) -> list[SemanticMatch]:
+        """Expand a drug class to member drugs and find monitoring for each."""
+        members = get_drug_class_members(class_name)
+        matches: list[SemanticMatch] = []
+
+        for member_name in members:
+            entity = link_entity(member_name, "drug")
+            if entity is None:
+                continue
+
+            cypher, params = ReasoningQueries.find_monitoring(entity.node_id)
+            rows = self._conn.execute_read(cypher, params)
+
+            for row in rows:
+                matches.append(
+                    SemanticMatch(
+                        entity_id=row.get("lab_id", ""),
+                        entity_name=row.get("lab_name", ""),
+                        entity_type="Lab",
+                        edge_type="MONITORED_BY",
+                        strength="",
+                        evidence_quality="",
+                        source_layer="expanded",
+                    )
+                )
+
+        return matches
+
     # ----- Helpers -----
+
+    @staticmethod
+    def _deduplicate(matches: list[SemanticMatch]) -> list[SemanticMatch]:
+        """Deduplicate by (entity_id, edge_type), keeping first occurrence."""
+        seen: set[tuple[str, str]] = set()
+        result: list[SemanticMatch] = []
+        for m in matches:
+            key = (m.entity_id, m.edge_type)
+            if key not in seen:
+                seen.add(key)
+                result.append(m)
+        return result
 
     def _evaluate_match_conditions(
         self, match: SemanticMatch, patient_vars: dict[str, Any]
@@ -394,12 +491,12 @@ class ReasoningEngine:
             )
         )
 
-        # Detect conflicts among recommendation matches
-        # (done at Layer 2 level if we have recommendation data)
+        # Track which layers contributed
+        layers = sorted({m.source_layer for m in semantic_matches})
 
         # Determine confidence
         full_matches = [m for m in semantic_matches if m.conditions_met]
-        all_missing = []
+        all_missing: list[str] = []
         for m in semantic_matches:
             all_missing.extend(m.missing_variables)
 
@@ -416,6 +513,7 @@ class ReasoningEngine:
             evidence=evidence,
             confidence=confidence,
             missing_variables=list(set(all_missing)),
+            retrieval_layers_used=layers,
         )
 
     @staticmethod
