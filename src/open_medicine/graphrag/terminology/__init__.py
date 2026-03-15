@@ -50,3 +50,49 @@ def lookup(filename: str, name: str) -> dict | None:
             return entry
 
     return None
+
+
+_FILE_TO_TYPE: dict[str, str] = {
+    "drugs": "drug",
+    "drug_classes": "drug_class",
+    "diseases": "disease",
+    "labs": "lab",
+    "procedures": "procedure",
+    "devices": "device",
+    "symptoms": "symptom",
+}
+
+
+def fuzzy_match(query: str, max_results: int = 5) -> list[tuple[str, str]]:
+    """Find terminology entries matching a query by prefix or substring.
+
+    Returns list of (canonical_name, entity_type) tuples, sorted by match quality:
+    prefix matches first, then substring matches.
+    """
+    q = query.lower()
+    prefix_matches: list[tuple[str, str]] = []
+    substring_matches: list[tuple[str, str]] = []
+
+    for file_name, entity_type in _FILE_TO_TYPE.items():
+        data = load_terminology(file_name)
+        for canonical, entry in data.items():
+            names = [canonical] + entry.get("aliases", [])
+            for name in names:
+                nl = name.lower()
+                if nl.startswith(q):
+                    prefix_matches.append((canonical, entity_type))
+                    break
+                if q in nl:
+                    substring_matches.append((canonical, entity_type))
+                    break
+
+    # Deduplicate preserving order
+    seen: set[str] = set()
+    results: list[tuple[str, str]] = []
+    for item in prefix_matches + substring_matches:
+        key = f"{item[0]}:{item[1]}"
+        if key not in seen:
+            seen.add(key)
+            results.append(item)
+
+    return results[:max_results]
