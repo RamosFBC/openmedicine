@@ -779,3 +779,51 @@ class TestLayer3VectorFallback:
         result = engine.query(q)
         # Should not crash, just return empty
         assert result.confidence == "low"
+
+
+class TestLayer4Hints:
+    """Layer 4: Actionable hints when all layers return nothing."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("skip"))
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_unknown_concept_suggests_similar(self, mock_link, mock_embed):
+        engine, conn = _make_engine()
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["Carvedilo"],  # typo
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert len(result.hints) > 0
+        assert any("Carvedilol" in h for h in result.hints)
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("skip"))
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_unsupported_intent_suggests_alternatives(self, mock_link, mock_embed):
+        engine, conn = _make_engine()
+        q = ClinicalQuery(
+            intent="surgery_planning", concepts=["CABG"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert any("treatment_selection" in h for h in result.hints)
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_hints_when_results_exist(self, mock_link):
+        linked = MagicMock()
+        linked.node_id = "disease_hfref"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_1", "entity_name": "Drug1",
+                "entity_type": "Drug", "strength": "strong_for",
+                "evidence_quality": "high", "conditions": None,
+            }
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection", concepts=["HFrEF"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert result.hints == []

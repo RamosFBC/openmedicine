@@ -20,6 +20,7 @@ from typing import TYPE_CHECKING, Any
 from open_medicine.graphrag.graph.queries_v2 import ReasoningQueries
 from open_medicine.graphrag.ingestion.embeddings import embed_query
 from open_medicine.graphrag.ingestion.linker_v2 import get_drug_class_members, link_entity
+from open_medicine.graphrag.terminology import fuzzy_match
 from open_medicine.graphrag.reasoning.types_v2 import (
     ClinicalQuery,
     EvidenceCitation,
@@ -320,11 +321,13 @@ class ReasoningEngine:
                     break
 
         confidence = "high" if rec_matches else "low"
+        hints = self._generate_hints(q) if not rec_matches else []
         return GraphRAGResult(
             source="graph_traversal",
             recommendation_matches=rec_matches,
             evidence=all_evidence,
             confidence=confidence,
+            hints=hints,
         )
 
     # ----- Layer 2: Multi-hop expansion -----
@@ -447,6 +450,36 @@ class ReasoningEngine:
             "monitoring": "MONITORED_BY",
         }.get(intent, "RECOMMENDS")
 
+    # ----- Layer 4: Hint generation -----
+
+    def _generate_hints(self, q: ClinicalQuery) -> list[str]:
+        """Generate actionable reformulation hints when results are empty."""
+        hints: list[str] = []
+
+        # Hint 1: unsupported intent
+        if q.intent not in _INTENT_TO_QUERY:
+            supported = ", ".join(sorted(_INTENT_TO_QUERY.keys()))
+            hints.append(
+                f"Intent '{q.intent}' is not directly routed. "
+                f"Supported intents: {supported}"
+            )
+
+        # Hint 2: concept not found — suggest similar
+        for concept in q.concepts:
+            similar = fuzzy_match(concept, max_results=3)
+            if similar:
+                suggestions = ", ".join(
+                    f"{name} ({etype})" for name, etype in similar
+                )
+                hints.append(
+                    f"Concept '{concept}' not found in graph. "
+                    f"Similar: {suggestions}"
+                )
+            else:
+                hints.append(f"Concept '{concept}' not found in terminology.")
+
+        return hints
+
     # ----- Helpers -----
 
     @staticmethod
@@ -568,6 +601,11 @@ class ReasoningEngine:
         else:
             confidence = "low"
 
+        # Layer 4: hints when results are empty
+        hints: list[str] = []
+        if not semantic_matches:
+            hints = self._generate_hints(q)
+
         return GraphRAGResult(
             source="graph_traversal",
             semantic_matches=semantic_matches,
@@ -575,6 +613,7 @@ class ReasoningEngine:
             confidence=confidence,
             missing_variables=list(set(all_missing)),
             retrieval_layers_used=layers,
+            hints=hints,
         )
 
     @staticmethod
