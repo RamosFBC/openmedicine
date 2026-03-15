@@ -861,6 +861,41 @@ class ReasoningQueries:
             {"embedding": query_embedding, "limit": limit},
         )
 
+    # -- Vector → entity traversal ---------------------------------------------
+
+    @staticmethod
+    def vector_entity_search(
+        query_embedding: list[float],
+        rec_type: str | None = None,
+        limit: int = 10,
+    ) -> CypherStatement:
+        """Vector search → traverse to connected clinical entities.
+
+        Finds EvidenceChunks by embedding similarity, then follows
+        SOURCED_FROM and RECOMMENDS edges to return the entities
+        (drugs, diseases, etc.) with their recommendation metadata.
+        """
+        cypher = (
+            "CALL db.index.vector.queryNodes('evidence_embedding', $limit, $embedding) "
+            "YIELD node, score "
+            "MATCH (rec:Recommendation)-[:SOURCED_FROM]->(node) "
+            "MATCH (rec)-[:RECOMMENDS]->(entity) "
+        )
+        params: dict = {"embedding": query_embedding, "limit": limit}
+
+        if rec_type:
+            cypher += "WHERE rec.type = $rec_type "
+            params["rec_type"] = rec_type
+
+        cypher += (
+            "RETURN DISTINCT labels(entity)[0] AS entity_type, "
+            "entity.id AS entity_id, entity.name AS entity_name, "
+            "rec.strength AS strength, rec.evidence_quality AS evidence_quality, "
+            "rec.conditions_json AS conditions, score "
+            "ORDER BY score DESC"
+        )
+        return (cypher, params)
+
     # -- Conflict detection ----------------------------------------------------
 
     @staticmethod

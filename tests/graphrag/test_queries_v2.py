@@ -503,3 +503,25 @@ class TestReasoningUtilities:
         cypher, _ = _assert_valid_cypher(ReasoningQueries.list_drug_classes())
         assert "DrugClass" in cypher
         assert "MEMBER_OF" in cypher
+
+
+class TestVectorEntitySearch:
+    def test_returns_cypher_and_params(self):
+        embedding = [0.1] * 10
+        cypher, params = ReasoningQueries.vector_entity_search(embedding, rec_type="treatment_selection")
+        assert "db.index.vector.queryNodes" in cypher
+        assert "RECOMMENDS" in cypher
+        assert params["embedding"] == embedding
+        assert params["rec_type"] == "treatment_selection"
+        assert params["limit"] == 10
+
+    def test_custom_limit(self):
+        embedding = [0.1] * 10
+        cypher, params = ReasoningQueries.vector_entity_search(embedding, rec_type="dosing", limit=5)
+        assert params["limit"] == 5
+
+    def test_no_rec_type_filter(self):
+        embedding = [0.1] * 10
+        cypher, params = ReasoningQueries.vector_entity_search(embedding)
+        assert "rec.type" not in cypher
+        assert "rec_type" not in params
