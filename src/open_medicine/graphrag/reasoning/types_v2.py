@@ -31,6 +31,10 @@ class ClinicalQuery(BaseModel):
     include_evidence: bool = Field(
         default=True, description="Include Layer 2 evidence chain in response"
     )
+    min_results_threshold: int = Field(
+        default=1,
+        description="Minimum results before triggering fallback layers",
+    )
 
 
 class SemanticMatch(BaseModel):
@@ -50,6 +54,10 @@ class SemanticMatch(BaseModel):
     )
     missing_variables: list[str] = Field(
         default_factory=list, description="Variables needed but not provided"
+    )
+    source_layer: str = Field(
+        default="direct",
+        description="Retrieval layer: direct, expanded, or vector",
     )
 
 
@@ -90,3 +98,11 @@ class GraphRAGResult(BaseModel):
     evidence: list[EvidenceCitation] = Field(default_factory=list)
     confidence: Literal["high", "medium", "low"] = "low"
     missing_variables: list[str] = Field(default_factory=list)
+    retrieval_layers_used: list[str] = Field(
+        default_factory=list,
+        description="Layers that contributed results: direct, expanded, vector",
+    )
+    hints: list[str] = Field(
+        default_factory=list,
+        description="Reformulation suggestions when results are empty",
+    )

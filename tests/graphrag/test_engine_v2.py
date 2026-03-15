@@ -10,6 +10,7 @@ from open_medicine.graphrag.reasoning.engine_v2 import (
 )
 from open_medicine.graphrag.reasoning.types_v2 import (
     ClinicalQuery,
+    GraphRAGResult,
     SemanticMatch,
 )
 
@@ -539,6 +540,40 @@ class TestFetchEvidence:
         result = engine.query(q)
         assert len(result.evidence) == 1
         assert result.evidence[0].text == "ARNi recommended for HFrEF..."
+
+class TestNewTypeFields:
+    def test_semantic_match_source_layer_default(self):
+        m = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for", evidence_quality="high",
+        )
+        assert m.source_layer == "direct"
+
+    def test_semantic_match_source_layer_custom(self):
+        m = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for", evidence_quality="high",
+            source_layer="expanded",
+        )
+        assert m.source_layer == "expanded"
+
+    def test_graphrag_result_new_fields_default(self):
+        r = GraphRAGResult()
+        assert r.retrieval_layers_used == []
+        assert r.hints == []
+
+    def test_graphrag_result_hints_populated(self):
+        r = GraphRAGResult(hints=["Try intent='dosing'"])
+        assert len(r.hints) == 1
+
+    def test_clinical_query_min_threshold_default(self):
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        assert q.min_results_threshold == 1
+
+    def test_clinical_query_min_threshold_custom(self):
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"], min_results_threshold=5)
+        assert q.min_results_threshold == 5
+
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
     def test_deduplicates_evidence(self, mock_link):
