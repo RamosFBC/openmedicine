@@ -1,0 +1,1998 @@
+[
+  {
+    "name": "HFrEF treatments",
+    "description": "Treatments indicated for HFrEF",
+    "intent": "treatment_selection",
+    "concepts": [
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "Sacubitril/Valsartan",
+      "Bisoprolol",
+      "Carvedilol",
+      "Metoprolol Succinate"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Heart Failure treatments",
+    "description": "Treatments indicated for Heart Failure",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Dapagliflozin",
+      "Empagliflozin",
+      "Canagliflozin",
+      "Sotagliflozin"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Atrial Fibrillation treatments",
+    "description": "Treatments indicated for Atrial Fibrillation",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Atrial Fibrillation"
+    ],
+    "expect_entities": [
+      "Warfarin",
+      "Apixaban",
+      "Rivaroxaban",
+      "Edoxaban"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Cardiogenic Shock treatments",
+    "description": "Treatments indicated for Cardiogenic Shock",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Cardiogenic Shock"
+    ],
+    "expect_entities": [
+      "Dobutamine",
+      "Milrinone",
+      "Inotrope",
+      "Mechanical Circulatory Support"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "HFpEF treatments",
+    "description": "Treatments indicated for HFpEF",
+    "intent": "treatment_selection",
+    "concepts": [
+      "HFpEF"
+    ],
+    "expect_entities": [
+      "Sacubitril/Valsartan",
+      "ACE Inhibitor",
+      "ARB",
+      "MRA"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Cancer Therapy-Related Cardiomyopathy treatments",
+    "description": "Treatments indicated for Cancer Therapy-Related Cardiomyopathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Cancer Therapy-Related Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "ARB",
+      "ACE Inhibitor",
+      "Beta Blocker",
+      "Carvedilol"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Advanced Heart Failure treatments",
+    "description": "Treatments indicated for Advanced Heart Failure",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Advanced Heart Failure"
+    ],
+    "expect_entities": [
+      "Cardiac Transplantation",
+      "Palliative Care",
+      "LVAD",
+      "Inotrope"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "HFmrEF treatments",
+    "description": "Treatments indicated for HFmrEF",
+    "intent": "treatment_selection",
+    "concepts": [
+      "HFmrEF"
+    ],
+    "expect_entities": [
+      "Empagliflozin",
+      "SGLT2 Inhibitor",
+      "Sacubitril/Valsartan",
+      "Candesartan"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Type 2 Diabetes treatments",
+    "description": "Treatments indicated for Type 2 Diabetes",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Type 2 Diabetes"
+    ],
+    "expect_entities": [
+      "Dapagliflozin",
+      "Empagliflozin",
+      "Canagliflozin",
+      "Sotagliflozin"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Mitral Regurgitation treatments",
+    "description": "Treatments indicated for Mitral Regurgitation",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Mitral Regurgitation"
+    ],
+    "expect_entities": [
+      "RAAS Inhibitor",
+      "Beta Blocker",
+      "Transcatheter Edge-to-Edge Repair",
+      "Echocardiography"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Coronary Artery Disease treatments",
+    "description": "Treatments indicated for Coronary Artery Disease",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Coronary Artery Disease"
+    ],
+    "expect_entities": [
+      "Coronary Artery Bypass Grafting",
+      "Stress Echocardiography",
+      "Cardiac Catheterization",
+      "SPECT Scan"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Hypertension treatments",
+    "description": "Treatments indicated for Hypertension",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Hypertension"
+    ],
+    "expect_entities": [
+      "Sacubitril/Valsartan",
+      "ACE Inhibitor",
+      "ARB",
+      "MRA"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Sudden Cardiac Death treatments",
+    "description": "Treatments indicated for Sudden Cardiac Death",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Sudden Cardiac Death"
+    ],
+    "expect_entities": [
+      "ICD",
+      "Cardiac Resynchronization Therapy"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Myocardial Infarction treatments",
+    "description": "Treatments indicated for Myocardial Infarction",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Myocardial Infarction"
+    ],
+    "expect_entities": [
+      "Statin",
+      "ARB",
+      "ACE Inhibitor",
+      "Beta Blocker"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Myocarditis treatments",
+    "description": "Treatments indicated for Myocarditis",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Myocarditis"
+    ],
+    "expect_entities": [
+      "Cardiac MRI",
+      "Nivolumab",
+      "Ipilimumab",
+      "Pembrolizumab"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Angioedema treatments",
+    "description": "Treatments indicated for Angioedema",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Angioedema"
+    ],
+    "expect_entities": [
+      "ARB",
+      "ACE Inhibitor",
+      "ARNi"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Transthyretin Cardiac Amyloidosis treatments",
+    "description": "Treatments indicated for Transthyretin Cardiac Amyloidosis",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Transthyretin Cardiac Amyloidosis"
+    ],
+    "expect_entities": [
+      "Tafamidis",
+      "ARNi",
+      "ACE Inhibitor",
+      "ARB"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Left Bundle Branch Block treatments",
+    "description": "Treatments indicated for Left Bundle Branch Block",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Left Bundle Branch Block"
+    ],
+    "expect_entities": [
+      "Cardiac Resynchronization Therapy"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Peripartum Cardiomyopathy treatments",
+    "description": "Treatments indicated for Peripartum Cardiomyopathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Peripartum Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "Anticoagulant",
+      "Bromocriptine"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Atrioventricular Block treatments",
+    "description": "Treatments indicated for Atrioventricular Block",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Atrioventricular Block"
+    ],
+    "expect_entities": [
+      "Cardiac Resynchronization Therapy",
+      "Right Ventricular Pacing"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Aortic Stenosis treatments",
+    "description": "Treatments indicated for Aortic Stenosis",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Aortic Stenosis"
+    ],
+    "expect_entities": [
+      "Transcatheter Aortic Valve Replacement",
+      "Surgical Aortic Valve Replacement",
+      "Echocardiography"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Cardiac Amyloidosis treatments",
+    "description": "Treatments indicated for Cardiac Amyloidosis",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Cardiac Amyloidosis"
+    ],
+    "expect_entities": [
+      "Warfarin",
+      "Anticoagulant",
+      "DOAC"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 3
+  },
+  {
+    "name": "Stroke treatments",
+    "description": "Treatments indicated for Stroke",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Stroke"
+    ],
+    "expect_entities": [
+      "Warfarin",
+      "DOAC"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Iron Deficiency treatments",
+    "description": "Treatments indicated for Iron Deficiency",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Iron Deficiency"
+    ],
+    "expect_entities": [
+      "Ferric Carboxymaltose"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Sleep Apnea treatments",
+    "description": "Treatments indicated for Sleep Apnea",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Sleep Apnea"
+    ],
+    "expect_entities": [
+      "CPAP"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Acute Coronary Syndrome treatments",
+    "description": "Treatments indicated for Acute Coronary Syndrome",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Acute Coronary Syndrome"
+    ],
+    "expect_entities": [
+      "Statin",
+      "Beta Blocker"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Arrhythmogenic Cardiomyopathy treatments",
+    "description": "Treatments indicated for Arrhythmogenic Cardiomyopathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Arrhythmogenic Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "ICD"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Ischemic Cardiomyopathy treatments",
+    "description": "Treatments indicated for Ischemic Cardiomyopathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Ischemic Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "Coronary Artery Bypass Grafting",
+      "Cardiac Resynchronization Therapy"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Variant Transthyretin Amyloidosis treatments",
+    "description": "Treatments indicated for Variant Transthyretin Amyloidosis",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Variant Transthyretin Amyloidosis"
+    ],
+    "expect_entities": [
+      "Inotersen",
+      "Patisiran"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Polyneuropathy treatments",
+    "description": "Treatments indicated for Polyneuropathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Polyneuropathy"
+    ],
+    "expect_entities": [
+      "Inotersen",
+      "Patisiran"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Arrhythmia treatments",
+    "description": "Treatments indicated for Arrhythmia",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Arrhythmia"
+    ],
+    "expect_entities": [
+      "Inotrope",
+      "ICD"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Pulmonary Hypertension treatments",
+    "description": "Treatments indicated for Pulmonary Hypertension",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Pulmonary Hypertension"
+    ],
+    "expect_entities": [
+      "Mechanical Circulatory Support",
+      "Cardiac Transplantation"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Venous Thromboembolism treatments",
+    "description": "Treatments indicated for Venous Thromboembolism",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Venous Thromboembolism"
+    ],
+    "expect_entities": [
+      "Heparin",
+      "Anticoagulant"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "Nonischemic Dilated Cardiomyopathy treatments",
+    "description": "Treatments indicated for Nonischemic Dilated Cardiomyopathy",
+    "intent": "treatment_selection",
+    "concepts": [
+      "Nonischemic Dilated Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "Cardiac Resynchronization Therapy",
+      "ICD"
+    ],
+    "expect_edge": "INDICATED_FOR",
+    "expect_min_results": 2
+  },
+  {
+    "name": "ACE Inhibitor contraindications",
+    "description": "ACE Inhibitor contraindicated in: Angioedema",
+    "intent": "contraindication",
+    "concepts": [
+      "ACE Inhibitor"
+    ],
+    "expect_entities": [
+      "Angioedema"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "ARB contraindications",
+    "description": "ARB contraindicated in: Angioedema",
+    "intent": "contraindication",
+    "concepts": [
+      "ARB"
+    ],
+    "expect_entities": [
+      "Angioedema"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "ARNi contraindications",
+    "description": "ARNi contraindicated in: Angioedema",
+    "intent": "contraindication",
+    "concepts": [
+      "ARNi"
+    ],
+    "expect_entities": [
+      "Angioedema"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Alogliptin contraindications",
+    "description": "Alogliptin contraindicated in: Heart Failure, Type 2 Diabetes",
+    "intent": "contraindication",
+    "concepts": [
+      "Alogliptin"
+    ],
+    "expect_entities": [
+      "Heart Failure",
+      "Type 2 Diabetes"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Amlodipine contraindications",
+    "description": "Amlodipine contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Amlodipine"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "COX-2 Inhibitor contraindications",
+    "description": "COX-2 Inhibitor contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "COX-2 Inhibitor"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Class IA Antiarrhythmic contraindications",
+    "description": "Class IA Antiarrhythmic contraindicated in: Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Class IA Antiarrhythmic"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Class IC Antiarrhythmic contraindications",
+    "description": "Class IC Antiarrhythmic contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Class IC Antiarrhythmic"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Class III Antiarrhythmic contraindications",
+    "description": "Class III Antiarrhythmic contraindicated in: HFrEF, Myocardial Infarction",
+    "intent": "contraindication",
+    "concepts": [
+      "Class III Antiarrhythmic"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Myocardial Infarction"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Coenzyme Q10 contraindications",
+    "description": "Coenzyme Q10 contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Coenzyme Q10"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "DPP-4 Inhibitor contraindications",
+    "description": "DPP-4 Inhibitor contraindicated in: Heart Failure, Type 2 Diabetes",
+    "intent": "contraindication",
+    "concepts": [
+      "DPP-4 Inhibitor"
+    ],
+    "expect_entities": [
+      "Heart Failure",
+      "Type 2 Diabetes"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Darbepoetin Alfa contraindications",
+    "description": "Darbepoetin Alfa contraindicated in: Anemia, Heart Failure, Iron Deficiency",
+    "intent": "contraindication",
+    "concepts": [
+      "Darbepoetin Alfa"
+    ],
+    "expect_entities": [
+      "Anemia",
+      "Heart Failure",
+      "Iron Deficiency"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Dihydropyridine Calcium Channel Blocker contraindications",
+    "description": "Dihydropyridine Calcium Channel Blocker contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Dihydropyridine Calcium Channel Blocker"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Diltiazem contraindications",
+    "description": "Diltiazem contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Diltiazem"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Disopyramide contraindications",
+    "description": "Disopyramide contraindicated in: Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Disopyramide"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Dobutamine contraindications",
+    "description": "Dobutamine contraindicated in: Sulfite Allergy",
+    "intent": "contraindication",
+    "concepts": [
+      "Dobutamine"
+    ],
+    "expect_entities": [
+      "Sulfite Allergy"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Doxazosin contraindications",
+    "description": "Doxazosin contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Doxazosin"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Dronedarone contraindications",
+    "description": "Dronedarone contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Dronedarone"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Encainide contraindications",
+    "description": "Encainide contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Encainide"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Erythropoietin-Stimulating Agent contraindications",
+    "description": "Erythropoietin-Stimulating Agent contraindicated in: Anemia, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Erythropoietin-Stimulating Agent"
+    ],
+    "expect_entities": [
+      "Anemia",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Felodipine contraindications",
+    "description": "Felodipine contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Felodipine"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Flecainide contraindications",
+    "description": "Flecainide contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Flecainide"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Inotrope contraindications",
+    "description": "Inotrope contraindicated in: Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Inotrope"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Isosorbide Dinitrate contraindications",
+    "description": "Isosorbide Dinitrate contraindicated in: HFpEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Isosorbide Dinitrate"
+    ],
+    "expect_entities": [
+      "HFpEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "MRA contraindications",
+    "description": "MRA contraindicated in: Hyperkalemia",
+    "intent": "contraindication",
+    "concepts": [
+      "MRA"
+    ],
+    "expect_entities": [
+      "Hyperkalemia"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "NSAID contraindications",
+    "description": "NSAID contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "NSAID"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Nifedipine contraindications",
+    "description": "Nifedipine contraindicated in: Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Nifedipine"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Nitroglycerin contraindications",
+    "description": "Nitroglycerin contraindicated in: Hypotension",
+    "intent": "contraindication",
+    "concepts": [
+      "Nitroglycerin"
+    ],
+    "expect_entities": [
+      "Hypotension"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Nitroprusside contraindications",
+    "description": "Nitroprusside contraindicated in: Hypotension, Renal Insufficiency, Hepatic Disease",
+    "intent": "contraindication",
+    "concepts": [
+      "Nitroprusside"
+    ],
+    "expect_entities": [
+      "Hypotension",
+      "Renal Insufficiency",
+      "Hepatic Disease"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Nondihydropyridine Calcium Channel Blocker contraindications",
+    "description": "Nondihydropyridine Calcium Channel Blocker contraindicated in: Heart Failure, HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Nondihydropyridine Calcium Channel Blocker"
+    ],
+    "expect_entities": [
+      "Heart Failure",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Nutritional Supplement contraindications",
+    "description": "Nutritional Supplement contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Nutritional Supplement"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Oral Iron contraindications",
+    "description": "Oral Iron contraindicated in: Iron Deficiency, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Oral Iron"
+    ],
+    "expect_entities": [
+      "Iron Deficiency",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "SGLT2 Inhibitor contraindications",
+    "description": "SGLT2 Inhibitor contraindicated in: Chronic Kidney Disease, Type 1 Diabetes",
+    "intent": "contraindication",
+    "concepts": [
+      "SGLT2 Inhibitor"
+    ],
+    "expect_entities": [
+      "Chronic Kidney Disease",
+      "Type 1 Diabetes"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Sacubitril/Valsartan contraindications",
+    "description": "Sacubitril/Valsartan contraindicated in: Angioedema",
+    "intent": "contraindication",
+    "concepts": [
+      "Sacubitril/Valsartan"
+    ],
+    "expect_entities": [
+      "Angioedema"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Saxagliptin contraindications",
+    "description": "Saxagliptin contraindicated in: Heart Failure, Type 2 Diabetes",
+    "intent": "contraindication",
+    "concepts": [
+      "Saxagliptin"
+    ],
+    "expect_entities": [
+      "Heart Failure",
+      "Type 2 Diabetes"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Sildenafil contraindications",
+    "description": "Sildenafil contraindicated in: HFpEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Sildenafil"
+    ],
+    "expect_entities": [
+      "HFpEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Sotalol contraindications",
+    "description": "Sotalol contraindicated in: HFrEF, Ventricular Arrhythmia, Myocardial Infarction",
+    "intent": "contraindication",
+    "concepts": [
+      "Sotalol"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Ventricular Arrhythmia",
+      "Myocardial Infarction"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Thiazolidinedione contraindications",
+    "description": "Thiazolidinedione contraindicated in: Heart Failure, HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Thiazolidinedione"
+    ],
+    "expect_entities": [
+      "Heart Failure",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Verapamil contraindications",
+    "description": "Verapamil contraindicated in: HFrEF, Heart Failure",
+    "intent": "contraindication",
+    "concepts": [
+      "Verapamil"
+    ],
+    "expect_entities": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Vericiguat contraindications",
+    "description": "Vericiguat contraindicated in: Hypotension, Chronic Kidney Disease",
+    "intent": "contraindication",
+    "concepts": [
+      "Vericiguat"
+    ],
+    "expect_entities": [
+      "Hypotension",
+      "Chronic Kidney Disease"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Vitamin D contraindications",
+    "description": "Vitamin D contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Vitamin D"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Vitamin E contraindications",
+    "description": "Vitamin E contraindicated in: HFrEF",
+    "intent": "contraindication",
+    "concepts": [
+      "Vitamin E"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Dapagliflozin monitoring",
+    "description": "Dapagliflozin monitored by: eGFR",
+    "intent": "monitoring",
+    "concepts": [
+      "Dapagliflozin"
+    ],
+    "expect_entities": [
+      "eGFR"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Digoxin monitoring",
+    "description": "Digoxin monitored by: Digoxin Level",
+    "intent": "monitoring",
+    "concepts": [
+      "Digoxin"
+    ],
+    "expect_entities": [
+      "Digoxin Level"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Empagliflozin monitoring",
+    "description": "Empagliflozin monitored by: eGFR",
+    "intent": "monitoring",
+    "concepts": [
+      "Empagliflozin"
+    ],
+    "expect_entities": [
+      "eGFR"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Metolazone monitoring",
+    "description": "Metolazone monitored by: Potassium, Sodium, Creatinine",
+    "intent": "monitoring",
+    "concepts": [
+      "Metolazone"
+    ],
+    "expect_entities": [
+      "Potassium",
+      "Sodium",
+      "Creatinine"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Milrinone monitoring",
+    "description": "Milrinone monitored by: eGFR, Liver Function Tests",
+    "intent": "monitoring",
+    "concepts": [
+      "Milrinone"
+    ],
+    "expect_entities": [
+      "eGFR",
+      "Liver Function Tests"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Sacubitril/Valsartan monitoring",
+    "description": "Sacubitril/Valsartan monitored by: NT-proBNP",
+    "intent": "monitoring",
+    "concepts": [
+      "Sacubitril/Valsartan"
+    ],
+    "expect_entities": [
+      "NT-proBNP"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Spironolactone monitoring",
+    "description": "Spironolactone monitored by: Potassium, Creatinine, eGFR",
+    "intent": "monitoring",
+    "concepts": [
+      "Spironolactone"
+    ],
+    "expect_entities": [
+      "Potassium",
+      "Creatinine",
+      "eGFR"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Vericiguat monitoring",
+    "description": "Vericiguat monitored by: NT-proBNP",
+    "intent": "monitoring",
+    "concepts": [
+      "Vericiguat"
+    ],
+    "expect_entities": [
+      "NT-proBNP"
+    ],
+    "expect_edge": "MONITORED_BY",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Enalapril dosing for Cancer Therapy-Related Cardiomyopathy",
+    "description": "Enalapril has dosing info for Cancer Therapy-Related Cardiomyopathy",
+    "intent": "dosing",
+    "concepts": [
+      "Enalapril",
+      "Cancer Therapy-Related Cardiomyopathy"
+    ],
+    "expect_entities": [
+      "Cancer Therapy-Related Cardiomyopathy"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Bumetanide dosing for Heart Failure",
+    "description": "Bumetanide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Bumetanide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Furosemide dosing for Heart Failure",
+    "description": "Furosemide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Furosemide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Torsemide dosing for Heart Failure",
+    "description": "Torsemide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Torsemide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Chlorothiazide dosing for Heart Failure",
+    "description": "Chlorothiazide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Chlorothiazide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Chlorthalidone dosing for Heart Failure",
+    "description": "Chlorthalidone has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Chlorthalidone",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Hydrochlorothiazide dosing for Heart Failure",
+    "description": "Hydrochlorothiazide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Hydrochlorothiazide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Indapamide dosing for Heart Failure",
+    "description": "Indapamide has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Indapamide",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Metolazone dosing for Heart Failure",
+    "description": "Metolazone has dosing info for Heart Failure",
+    "intent": "dosing",
+    "concepts": [
+      "Metolazone",
+      "Heart Failure"
+    ],
+    "expect_entities": [
+      "Heart Failure"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Spironolactone dosing for HFrEF",
+    "description": "Spironolactone has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Spironolactone",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Eplerenone dosing for HFrEF",
+    "description": "Eplerenone has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Eplerenone",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Captopril dosing for HFrEF",
+    "description": "Captopril has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Captopril",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Enalapril dosing for HFrEF",
+    "description": "Enalapril has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Enalapril",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Fosinopril dosing for HFrEF",
+    "description": "Fosinopril has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Fosinopril",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "Lisinopril dosing for HFrEF",
+    "description": "Lisinopril has dosing info for HFrEF",
+    "intent": "dosing",
+    "concepts": [
+      "Lisinopril",
+      "HFrEF"
+    ],
+    "expect_entities": [
+      "HFrEF"
+    ],
+    "expect_edge": "DOSED_FOR",
+    "expect_min_results": 1
+  },
+  {
+    "name": "SGLT2 Inhibitor NOT contraindicated in Cardiovascular Disease",
+    "description": "SGLT2 Inhibitor is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "SGLT2 Inhibitor"
+    ],
+    "expect_absent": [
+      "Cardiovascular Disease",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Dapagliflozin NOT contraindicated in HFrEF",
+    "description": "Dapagliflozin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Dapagliflozin"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Empagliflozin NOT contraindicated in HFrEF",
+    "description": "Empagliflozin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Empagliflozin"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Canagliflozin NOT contraindicated in Heart Failure",
+    "description": "Canagliflozin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Canagliflozin"
+    ],
+    "expect_absent": [
+      "Heart Failure",
+      "Type 2 Diabetes"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Sotagliflozin NOT contraindicated in HFrEF",
+    "description": "Sotagliflozin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Sotagliflozin"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Anticoagulant NOT contraindicated in Atrial Fibrillation",
+    "description": "Anticoagulant is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Anticoagulant"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "DOAC NOT contraindicated in Atrial Fibrillation",
+    "description": "DOAC is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "DOAC"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Warfarin NOT contraindicated in Atrial Fibrillation",
+    "description": "Warfarin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Warfarin"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Apixaban NOT contraindicated in Atrial Fibrillation",
+    "description": "Apixaban is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Apixaban"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Rivaroxaban NOT contraindicated in Atrial Fibrillation",
+    "description": "Rivaroxaban is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Rivaroxaban"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Edoxaban NOT contraindicated in Atrial Fibrillation",
+    "description": "Edoxaban is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Edoxaban"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Dabigatran NOT contraindicated in Atrial Fibrillation",
+    "description": "Dabigatran is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Dabigatran"
+    ],
+    "expect_absent": [
+      "Atrial Fibrillation",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Cardiac Resynchronization Therapy NOT contraindicated in HFrEF",
+    "description": "Cardiac Resynchronization Therapy is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Cardiac Resynchronization Therapy"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Left Bundle Branch Block"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Beta Blocker NOT contraindicated in Acute Coronary Syndrome",
+    "description": "Beta Blocker is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Beta Blocker"
+    ],
+    "expect_absent": [
+      "Acute Coronary Syndrome",
+      "Atrial Fibrillation"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Carvedilol NOT contraindicated in HFrEF",
+    "description": "Carvedilol is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Carvedilol"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Spironolactone NOT contraindicated in HFrEF",
+    "description": "Spironolactone is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Spironolactone"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Metoprolol Succinate NOT contraindicated in HFrEF",
+    "description": "Metoprolol Succinate is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Metoprolol Succinate"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Hydralazine NOT contraindicated in HFrEF",
+    "description": "Hydralazine is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Hydralazine"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Furosemide NOT contraindicated in Heart Failure",
+    "description": "Furosemide is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Furosemide"
+    ],
+    "expect_absent": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Echocardiography NOT contraindicated in HFrEF",
+    "description": "Echocardiography is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Echocardiography"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Mitral Regurgitation"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Cardiopulmonary Exercise Testing NOT contraindicated in Heart Failure",
+    "description": "Cardiopulmonary Exercise Testing is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Cardiopulmonary Exercise Testing"
+    ],
+    "expect_absent": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "LVAD NOT contraindicated in Advanced Heart Failure",
+    "description": "LVAD is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "LVAD"
+    ],
+    "expect_absent": [
+      "Advanced Heart Failure",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Cardiac Transplantation NOT contraindicated in Advanced Heart Failure",
+    "description": "Cardiac Transplantation is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Cardiac Transplantation"
+    ],
+    "expect_absent": [
+      "Advanced Heart Failure",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Statin NOT contraindicated in Acute Coronary Syndrome",
+    "description": "Statin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Statin"
+    ],
+    "expect_absent": [
+      "Acute Coronary Syndrome",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "ICD NOT contraindicated in Dilated Cardiomyopathy",
+    "description": "ICD is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "ICD"
+    ],
+    "expect_absent": [
+      "Dilated Cardiomyopathy",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Loop Diuretic NOT contraindicated in Acute Kidney Injury",
+    "description": "Loop Diuretic is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Loop Diuretic"
+    ],
+    "expect_absent": [
+      "Acute Kidney Injury",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Thiazide Diuretic NOT contraindicated in Heart Failure",
+    "description": "Thiazide Diuretic is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Thiazide Diuretic"
+    ],
+    "expect_absent": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Metolazone NOT contraindicated in Heart Failure",
+    "description": "Metolazone is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Metolazone"
+    ],
+    "expect_absent": [
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "MRA NOT contraindicated in HFpEF",
+    "description": "MRA is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "MRA"
+    ],
+    "expect_absent": [
+      "HFpEF",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Sacubitril/Valsartan NOT contraindicated in HFpEF",
+    "description": "Sacubitril/Valsartan is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Sacubitril/Valsartan"
+    ],
+    "expect_absent": [
+      "HFpEF",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Bisoprolol NOT contraindicated in HFrEF",
+    "description": "Bisoprolol is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Bisoprolol"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Eplerenone NOT contraindicated in HFrEF",
+    "description": "Eplerenone is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Eplerenone"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Isosorbide Dinitrate NOT contraindicated in HFrEF",
+    "description": "Isosorbide Dinitrate is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Isosorbide Dinitrate"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Coronary Artery Bypass Grafting NOT contraindicated in Coronary Artery Disease",
+    "description": "Coronary Artery Bypass Grafting is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Coronary Artery Bypass Grafting"
+    ],
+    "expect_absent": [
+      "Coronary Artery Disease",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Transcatheter Edge-to-Edge Repair NOT contraindicated in HFrEF",
+    "description": "Transcatheter Edge-to-Edge Repair is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Transcatheter Edge-to-Edge Repair"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Mitral Regurgitation"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "RAAS Inhibitor NOT contraindicated in HFrEF",
+    "description": "RAAS Inhibitor is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "RAAS Inhibitor"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Mitral Regurgitation"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Tafamidis NOT contraindicated in HFrEF",
+    "description": "Tafamidis is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Tafamidis"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Transthyretin Cardiac Amyloidosis"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Palliative Care NOT contraindicated in Advanced Heart Failure",
+    "description": "Palliative Care is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Palliative Care"
+    ],
+    "expect_absent": [
+      "Advanced Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Inotrope NOT contraindicated in Cardiogenic Shock",
+    "description": "Inotrope is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Inotrope"
+    ],
+    "expect_absent": [
+      "Cardiogenic Shock",
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Mechanical Circulatory Support NOT contraindicated in HFrEF",
+    "description": "Mechanical Circulatory Support is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Mechanical Circulatory Support"
+    ],
+    "expect_absent": [
+      "HFrEF"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "HF Disease Management Program NOT contraindicated in HFrEF",
+    "description": "HF Disease Management Program is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "HF Disease Management Program"
+    ],
+    "expect_absent": [
+      "HFrEF",
+      "Heart Failure"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Heparin NOT contraindicated in Heart Failure",
+    "description": "Heparin is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Heparin"
+    ],
+    "expect_absent": [
+      "Heart Failure",
+      "Venous Thromboembolism"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Dobutamine NOT contraindicated in Cardiogenic Shock",
+    "description": "Dobutamine is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Dobutamine"
+    ],
+    "expect_absent": [
+      "Cardiogenic Shock"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  },
+  {
+    "name": "Milrinone NOT contraindicated in Cardiogenic Shock",
+    "description": "Milrinone is first-line — must NOT appear as contraindicated",
+    "intent": "contraindication",
+    "concepts": [
+      "Milrinone"
+    ],
+    "expect_absent": [
+      "Cardiogenic Shock"
+    ],
+    "expect_edge": "CONTRAINDICATED_IN",
+    "expect_min_results": 0
+  }
+]
