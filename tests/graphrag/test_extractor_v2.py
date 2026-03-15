@@ -85,6 +85,7 @@ class TestValidTypes:
             "treatment_selection", "dosing", "contraindication", "interaction",
             "monitoring", "diagnostic_criteria", "prevention", "referral",
             "device_therapy", "lifestyle", "discharge", "follow_up",
+            "safety_warning",
         }
         assert VALID_REC_TYPES == expected
 

@@ -330,7 +330,9 @@ def load_guideline(conn: GraphConnection, data: LoadableGuideline) -> None:
             LoaderQueries.create_conflicts_with(winner_id, loser_id, resolution)
         )
 
+    logger.info("Executing %d Cypher statements in batches...", len(queries))
     conn.execute_write_tx(queries)
+    logger.info("All statements executed.")
 
 
 def _ensure_entity_node(

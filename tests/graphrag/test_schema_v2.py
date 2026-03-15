@@ -53,6 +53,7 @@ class TestRecommendationType:
             "treatment_selection", "dosing", "contraindication", "interaction",
             "monitoring", "diagnostic_criteria", "prevention", "referral",
             "device_therapy", "lifestyle", "discharge", "follow_up",
+            "safety_warning",
         }
         assert {v.value for v in RecommendationType} == expected
 
@@ -71,6 +72,7 @@ class TestRecommendationStrength:
     def test_all_values(self):
         assert {v.value for v in RecommendationStrength} == {
             "strong_for", "moderate_for", "weak_for", "strong_against", "no_benefit",
+            "expert_opinion",
         }
 
 

@@ -182,13 +182,26 @@ class ReasoningEngine:
         )
         return self._build_result(semantic_matches, all_evidence, q)
 
+    @staticmethod
+    def _is_known_entity(entity: Any) -> bool:
+        """Check if entity was resolved from terminology (not synthetic)."""
+        if entity is None:
+            return False
+        # Synthetic entities have generic IDs like "drug:ace_inhibitors"
+        # Real entities have coded IDs like "rxnorm:123", "atc:C09A", "snomed:456"
+        return any([
+            entity.snomed_code, entity.rxnorm_code, entity.atc_code,
+            entity.loinc_code, entity.icd10_code, entity.cpt_code,
+            entity.gmdn_code,
+        ])
+
     def _query_interactions(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find drug interactions via INTERACTS_WITH edges."""
         semantic_matches: list[SemanticMatch] = []
 
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
-            if entity is None:
+            if not self._is_known_entity(entity):
                 entity = link_entity(concept, "drug_class")
             if entity is None:
                 continue

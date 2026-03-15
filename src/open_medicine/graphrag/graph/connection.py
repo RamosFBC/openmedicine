@@ -28,9 +28,15 @@ class GraphConnection:
                 lambda tx: tx.run(query, parameters or {}).data()
             )
 
-    def execute_write_tx(self, queries: list[tuple[str, dict[str, Any]]]) -> None:
-        def _work(tx: Any) -> None:
-            for query, params in queries:
-                tx.run(query, params)
-        with self._driver.session() as session:
-            session.execute_write(_work)
+    def execute_write_tx(
+        self, queries: list[tuple[str, dict[str, Any]]], batch_size: int = 200
+    ) -> None:
+        for i in range(0, len(queries), batch_size):
+            batch = queries[i : i + batch_size]
+
+            def _work(tx: Any, stmts: list = batch) -> None:
+                for query, params in stmts:
+                    tx.run(query, params)
+
+            with self._driver.session() as session:
+                session.execute_write(_work)

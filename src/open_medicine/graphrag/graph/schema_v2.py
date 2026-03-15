@@ -33,6 +33,7 @@ class RecommendationType(StrEnum):
     LIFESTYLE = "lifestyle"
     DISCHARGE = "discharge"
     FOLLOW_UP = "follow_up"
+    SAFETY_WARNING = "safety_warning"
 
 
 class EvidenceQuality(StrEnum):
@@ -53,6 +54,7 @@ class RecommendationStrength(StrEnum):
     WEAK_FOR = "weak_for"  # Class IIb — Benefit >= Risk
     STRONG_AGAINST = "strong_against"  # Class III (Harm)
     NO_BENEFIT = "no_benefit"  # Class III (No Benefit)
+    EXPERT_OPINION = "expert_opinion"  # Expert consensus (no formal class)
 
 
 class TemporalType(StrEnum):
