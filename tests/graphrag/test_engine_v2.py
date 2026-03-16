@@ -81,6 +81,78 @@ class TestSemanticMatchEdgeProperties:
         assert data["edge_properties"] == {"starting_dose": "10 mg"}
 
 
+class TestInteractionEdgeProperties:
+    """Verify interaction queries surface severity/mechanism/effect."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_interaction_severity_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "atc:C09C",
+                "entity_name": "ARB",
+                "entity_type": "DrugClass",
+                "severity": "MAJOR",
+                "evidence_quality": "moderate",
+                "mechanism": "additive hyperkalemia risk",
+                "clinical_effect": "life-threatening hyperkalemia",
+            }
+        ]
+
+        q = ClinicalQuery(intent="interaction", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["severity"] == "MAJOR"
+        assert match.edge_properties["mechanism"] == "additive hyperkalemia risk"
+        assert match.edge_properties["clinical_effect"] == "life-threatening hyperkalemia"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_interaction_missing_severity_is_none(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:x"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug:y",
+                "entity_name": "Y",
+                "entity_type": "Drug",
+                "severity": None,
+                "evidence_quality": "low",
+                "mechanism": None,
+                "clinical_effect": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="interaction", concepts=["x"])
+        result = engine.query(q)
+        match = result.semantic_matches[0]
+        assert match.edge_properties.get("severity") is None
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]

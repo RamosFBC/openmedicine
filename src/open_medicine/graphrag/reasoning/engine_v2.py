@@ -383,6 +383,10 @@ class ReasoningEngine:
                         edge_type="INTERACTS_WITH",
                         strength="",
                         evidence_quality=row.get("evidence_quality") or "",
+                        edge_properties={
+                            k: row.get(k)
+                            for k in ("severity", "mechanism", "clinical_effect")
+                        },
                     )
                 )
 
@@ -403,6 +407,10 @@ class ReasoningEngine:
                                 strength="",
                                 evidence_quality=row.get("evidence_quality") or "",
                                 source_layer="expanded",
+                                edge_properties={
+                                    k: row.get(k)
+                                    for k in ("severity", "mechanism", "clinical_effect")
+                                },
                             )
                         )
 
