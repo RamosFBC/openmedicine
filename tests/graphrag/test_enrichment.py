@@ -390,3 +390,36 @@ class TestParsersRegistry:
         for name, parser in PARSERS.items():
             result = parser("")
             assert result == {}, f"{name} parser failed on empty string"
+
+
+class TestMonitoringThresholdStop:
+    """Verify threshold_stop extraction from monitoring text."""
+
+    def test_stop_potassium_6(self):
+        text = (
+            "Monitor potassium within 1 week. Alert if K+ >= 5.5 mEq/L. "
+            "Stop if K+ >= 6.0 mEq/L or creatinine > 2.5 mg/dL."
+        )
+        props = parse_monitoring_properties(text)
+        assert "threshold_stop" in props
+        assert "6.0" in props["threshold_stop"]
+
+    def test_stop_discontinue_pattern(self):
+        text = (
+            "Discontinue if potassium >= 6.0 mEq/L or eGFR < 15 mL/min."
+        )
+        props = parse_monitoring_properties(text)
+        assert "threshold_stop" in props
+
+    def test_stop_hold_pattern(self):
+        text = (
+            "Hold spironolactone if K+ > 5.5 mEq/L. Resume at lower dose "
+            "when K+ < 5.0 mEq/L."
+        )
+        props = parse_monitoring_properties(text)
+        assert "threshold_stop" in props
+
+    def test_no_stop_threshold(self):
+        text = "Monitor electrolytes periodically."
+        props = parse_monitoring_properties(text)
+        assert "threshold_stop" not in props

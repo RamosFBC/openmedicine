@@ -27,6 +27,369 @@ def _make_engine():
     return ReasoningEngine(conn), conn
 
 
+class TestSemanticMatchEdgeProperties:
+    """Verify SemanticMatch carries edge properties."""
+
+    def test_edge_properties_default_empty(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+        )
+        assert m.edge_properties == {}
+
+    def test_edge_properties_carries_dosing(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+            edge_properties={
+                "starting_dose": "12.5 mg",
+                "target_dose": "50 mg",
+                "max_dose": "50 mg",
+                "frequency": "once daily",
+            },
+        )
+        assert m.edge_properties["starting_dose"] == "12.5 mg"
+        assert m.edge_properties["frequency"] == "once daily"
+
+    def test_edge_properties_carries_severity(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="INTERACTS_WITH", strength="", evidence_quality="",
+            edge_properties={"severity": "MAJOR", "mechanism": "hyperkalemia"},
+        )
+        assert m.edge_properties["severity"] == "MAJOR"
+
+    def test_edge_properties_carries_monitoring(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Lab",
+            edge_type="MONITORED_BY", strength="", evidence_quality="",
+            edge_properties={
+                "frequency": "within 1 week, then monthly",
+                "threshold_alert": "K+ >= 5.5 mEq/L",
+                "threshold_stop": "K+ >= 6.0 mEq/L",
+            },
+        )
+        assert m.edge_properties["threshold_stop"] == "K+ >= 6.0 mEq/L"
+
+    def test_edge_properties_serializes_to_json(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+            edge_properties={"starting_dose": "10 mg"},
+        )
+        data = m.model_dump()
+        assert data["edge_properties"] == {"starting_dose": "10 mg"}
+
+
+class TestInteractionEdgeProperties:
+    """Verify interaction queries surface severity/mechanism/effect."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_interaction_severity_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "atc:C09C",
+                "entity_name": "ARB",
+                "entity_type": "DrugClass",
+                "severity": "MAJOR",
+                "evidence_quality": "moderate",
+                "mechanism": "additive hyperkalemia risk",
+                "clinical_effect": "life-threatening hyperkalemia",
+            }
+        ]
+
+        q = ClinicalQuery(intent="interaction", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["severity"] == "MAJOR"
+        assert match.edge_properties["mechanism"] == "additive hyperkalemia risk"
+        assert match.edge_properties["clinical_effect"] == "life-threatening hyperkalemia"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_interaction_missing_severity_is_none(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:x"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug:y",
+                "entity_name": "Y",
+                "entity_type": "Drug",
+                "severity": None,
+                "evidence_quality": "low",
+                "mechanism": None,
+                "clinical_effect": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="interaction", concepts=["x"])
+        result = engine.query(q)
+        match = result.semantic_matches[0]
+        assert match.edge_properties.get("severity") is None
+
+
+class TestContraindicationEdgeProperties:
+    """Verify contraindication queries surface severity."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_contraindication_severity_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="contraindication", concepts=["sacubitril_valsartan"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["severity"] == "ABSOLUTE"
+
+
+class TestDosingEdgeProperties:
+    """Verify dosing queries surface dose properties."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_dosing_properties_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:703272007",
+                "disease": "HFrEF",
+                "starting_dose": "12.5 mg",
+                "target_dose": "50 mg",
+                "max_dose": "50 mg",
+                "route": "oral",
+                "frequency": "once daily",
+                "titration": "double every 2 weeks",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="dosing", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["starting_dose"] == "12.5 mg"
+        assert match.edge_properties["target_dose"] == "50 mg"
+        assert match.edge_properties["max_dose"] == "50 mg"
+        assert match.edge_properties["frequency"] == "once daily"
+        assert match.edge_properties["route"] == "oral"
+        assert match.edge_properties["titration_schedule"] == "double every 2 weeks"
+
+
+class TestMonitoringEdgeProperties:
+    """Verify monitoring queries surface threshold properties."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_monitoring_thresholds_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "lab_id": "loinc:2823-3",
+                "lab_name": "Potassium",
+                "frequency": "within 1 week, then monthly",
+                "threshold_alert": "K+ >= 5.5 mEq/L",
+                "threshold_stop": "K+ >= 6.0 mEq/L",
+            }
+        ]
+
+        q = ClinicalQuery(intent="monitoring", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["frequency"] == "within 1 week, then monthly"
+        assert match.edge_properties["threshold_alert"] == "K+ >= 5.5 mEq/L"
+        assert match.edge_properties["threshold_stop"] == "K+ >= 6.0 mEq/L"
+
+
+class TestContraindicationPatientVarEvaluation:
+    """Verify contraindication respects patient_vars like history_of_angioedema."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_angioedema_false_suppresses_match(self, mock_link):
+        """When patient has no angioedema history, the contraindication should not fire."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={"history_of_angioedema": False},
+        )
+        result = engine.query(q)
+
+        # The match should still be returned (for awareness) but conditions_met=False
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.conditions_met is False
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_angioedema_true_fires_match(self, mock_link):
+        """When patient HAS angioedema history, conditions_met should be True."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={"history_of_angioedema": True},
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.conditions_met is True
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_patient_var_leaves_conditions_met_true(self, mock_link):
+        """When no patient vars provided, default conditions_met stays True."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={},
+        )
+        result = engine.query(q)
+        match = result.semantic_matches[0]
+        assert match.conditions_met is True
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]
@@ -2173,3 +2536,102 @@ class TestVectorSimilarityThreshold:
     def test_threshold_is_module_constant(self):
         """VECTOR_SIMILARITY_THRESHOLD should be 0.7."""
         assert VECTOR_SIMILARITY_THRESHOLD == 0.7
+
+
+class TestVectorOnlyConfidenceDowngrade:
+    """C5: Vector-only results should be capped at 'medium' confidence.
+
+    When all results come exclusively from the vector fallback layer,
+    confidence must not be 'high' — vector matches are semantically
+    approximate and may be clinically incorrect.
+    """
+
+    def test_vector_only_high_downgraded_to_medium(self):
+        """If _build_result would assign 'high' but all matches are vector-sourced,
+        confidence should be downgraded to 'medium'."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="vector",
+                similarity_score=0.85,
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"
+
+    def test_direct_layer_keeps_high_confidence(self):
+        """Results from direct layer should keep 'high' confidence."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="direct",
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
+
+    def test_mixed_layers_keep_high_confidence(self):
+        """When results come from both direct and vector, keep 'high'."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_a",
+                entity_name="DrugA",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="direct",
+            ),
+            SemanticMatch(
+                entity_id="drug_b",
+                entity_name="DrugB",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="moderate_for",
+                evidence_quality="moderate",
+                conditions_met=True,
+                source_layer="vector",
+                similarity_score=0.8,
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
+
+    def test_vector_only_medium_stays_medium(self):
+        """If confidence is already 'medium', vector-only doesn't change it."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=False,
+                source_layer="vector",
+                similarity_score=0.85,
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"
