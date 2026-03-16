@@ -2998,3 +2998,32 @@ class TestGenericHandlerConditionEvaluation:
         )
         result = engine.query(q)
         assert result.semantic_matches[0].conditions_met is True
+
+
+class TestVariableNormalization:
+    """Verify _normalize_var_name handles all common patient variable forms."""
+
+    def test_lowercase_underscore(self):
+        assert ReasoningEngine._normalize_var_name("nyha_class") == "nyha_class"
+
+    def test_mixed_case_underscore(self):
+        assert ReasoningEngine._normalize_var_name("NYHA_class") == "nyha_class"
+
+    def test_title_case_space(self):
+        assert ReasoningEngine._normalize_var_name("NYHA Class") == "nyha_class"
+
+    def test_all_caps(self):
+        assert ReasoningEngine._normalize_var_name("NYHA_CLASS") == "nyha_class"
+
+    def test_egfr_variants(self):
+        assert ReasoningEngine._normalize_var_name("eGFR") == "egfr"
+        assert ReasoningEngine._normalize_var_name("GFR") == "egfr"
+        assert ReasoningEngine._normalize_var_name("estimated_gfr") == "egfr"
+
+    def test_potassium_variants(self):
+        assert ReasoningEngine._normalize_var_name("K+") == "potassium"
+        assert ReasoningEngine._normalize_var_name("K") == "potassium"
+        assert ReasoningEngine._normalize_var_name("potassium") == "potassium"
+
+    def test_unknown_passes_through(self):
+        assert ReasoningEngine._normalize_var_name("weight_kg") == "weight_kg"
