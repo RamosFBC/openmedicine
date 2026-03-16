@@ -22,6 +22,12 @@ class TestGraphRAGToolsAvailability:
 
 
 class TestGraphRAGEngineInit:
+    def test_engine_unavailable_when_graphrag_not_installed(self):
+        from open_medicine.mcp.graphrag_tools import get_graph_engine
+        with patch("open_medicine.mcp.graphrag_tools._try_import_graphrag", return_value=False):
+            engine = get_graph_engine(force_reinit=True)
+            assert engine is None
+
     def test_unavailable_message_returned_when_no_engine(self):
         from open_medicine.mcp.graphrag_tools import handle_graph_tool_call
         with patch("open_medicine.mcp.graphrag_tools.get_graph_engine", return_value=None):

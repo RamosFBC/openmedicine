@@ -220,6 +220,7 @@ _INTENT_MAP: dict[str, tuple[str, Callable[[dict], list[str]]]] = {
 
 _engine_singleton: Any = None
 _conn_singleton: Any = None
+_init_attempted: bool = False
 
 
 def _try_import_graphrag() -> bool:
@@ -238,7 +239,7 @@ def _try_import_graphrag() -> bool:
         ReasoningQueries = _RQ
         ClinicalQuery = _CQ
         return True
-    except (ImportError, Exception):
+    except ImportError:
         return False
 
 
@@ -249,14 +250,17 @@ def get_graph_engine(force_reinit: bool = False) -> Any | None:
     Uses lazy initialization -- engine is created on first call.
     Pass force_reinit=True to reset and recreate the engine.
     """
-    global _engine_singleton, _conn_singleton
+    global _engine_singleton, _conn_singleton, _init_attempted
 
     if force_reinit:
         _engine_singleton = None
         _conn_singleton = None
+        _init_attempted = False
 
-    if _engine_singleton is not None:
+    if _init_attempted:
         return _engine_singleton
+
+    _init_attempted = True
 
     if not _try_import_graphrag():
         return None
