@@ -747,7 +747,7 @@ class TestQueryGeneric:
         ]
         q = ClinicalQuery(intent="diagnostic_criteria", concepts=["HF"])
         result = engine.query(q)
-        assert len(result.recommendation_matches) == 1
+        assert len(result.semantic_matches) == 1
         assert len(result.evidence) == 1
         assert result.confidence == "high"
 
@@ -758,7 +758,7 @@ class TestQueryGeneric:
         q = ClinicalQuery(intent="unknown_type", concepts=["X"])
         result = engine.query(q)
         assert result.confidence == "low"
-        assert result.recommendation_matches == []
+        assert result.semantic_matches == []
 
 
 class TestQueryDiagnosticCriteria:
@@ -830,8 +830,8 @@ class TestQueryDiagnosticCriteria:
         ]
         q = ClinicalQuery(intent="diagnostic_criteria", concepts=["Heart Failure"])
         result = engine.query(q)
-        # Should have recommendation matches from generic fallback
-        assert len(result.recommendation_matches) >= 1
+        # Should have semantic matches from generic fallback
+        assert len(result.semantic_matches) >= 1
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
     def test_diagnostic_criteria_no_entity_match(self, mock_link):
@@ -2901,3 +2901,100 @@ class TestInteractionSeverityPropagation:
 
         arni_matches = [m for m in result.semantic_matches if m.entity_id == "atc:C09DX"]
         assert len(arni_matches) == 1, f"Expected 1 deduplicated match, got {len(arni_matches)}"
+
+
+class TestGenericHandlerConditionEvaluation:
+    """Generic query handler must evaluate conditions and flag missing variables."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_device_therapy_flags_missing_variables(self, mock_link):
+        """Device therapy recs with conditions should flag missing patient vars."""
+        engine, conn = _make_engine()
+
+        mock_device = MagicMock()
+        mock_device.node_id = "snomed:ICD"
+        mock_device.node_label = "Device"
+        mock_device.snomed_code = "snomed:ICD"
+        mock_device.rxnorm_code = None
+        mock_device.atc_code = None
+        mock_device.loinc_code = None
+        mock_device.icd10_code = None
+        mock_device.cpt_code = None
+        mock_device.gmdn_code = None
+        mock_link.return_value = mock_device
+
+        rows = [
+            {
+                "rec_id": "rec_001",
+                "rec_type": "device_therapy",
+                "action": "ICD implantation",
+                "detail": "ICD for primary prevention in LVEF <=35%",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "source_text": "Guideline text...",
+                "guideline": "AHA/ACC HF 2022",
+                "doi": "10.1161/CIR.0000000000001063",
+                "section": "7.4",
+                "conditions_json": json.dumps([
+                    {"variable": "LVEF", "operator": "<=", "threshold": 35},
+                    {"variable": "QRS_duration", "operator": ">=", "threshold": 150},
+                ]),
+            }
+        ]
+        conn.execute_read.return_value = rows
+
+        q = ClinicalQuery(
+            intent="device_therapy",
+            concepts=["ICD"],
+            patient_vars={"lvef": 32},  # QRS_duration missing
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) > 0
+        match = result.semantic_matches[0]
+        assert match.conditions_met is None, "Should be None when variables are missing"
+        assert "qrs_duration" in [v.lower() for v in match.missing_variables]
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_device_therapy_conditions_met_true(self, mock_link):
+        """When all conditions pass, conditions_met should be True."""
+        engine, conn = _make_engine()
+
+        mock_device = MagicMock()
+        mock_device.node_id = "snomed:ICD"
+        mock_device.node_label = "Device"
+        mock_device.snomed_code = "snomed:ICD"
+        mock_device.rxnorm_code = None
+        mock_device.atc_code = None
+        mock_device.loinc_code = None
+        mock_device.icd10_code = None
+        mock_device.cpt_code = None
+        mock_device.gmdn_code = None
+        mock_link.return_value = mock_device
+
+        rows = [
+            {
+                "rec_id": "rec_001",
+                "rec_type": "device_therapy",
+                "action": "ICD implantation",
+                "detail": "ICD for primary prevention",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "source_text": "",
+                "guideline": "",
+                "doi": "",
+                "section": "",
+                "conditions_json": json.dumps([
+                    {"variable": "LVEF", "operator": "<=", "threshold": 35},
+                ]),
+            }
+        ]
+        conn.execute_read.return_value = rows
+
+        q = ClinicalQuery(
+            intent="device_therapy",
+            concepts=["ICD"],
+            patient_vars={"lvef": 32},
+        )
+        result = engine.query(q)
+        assert result.semantic_matches[0].conditions_met is True

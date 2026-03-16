@@ -870,6 +870,7 @@ class ReasoningQueries:
             "RETURN rec.id AS rec_id, rec.type AS rec_type, "
             "rec.action AS action, rec.action_detail AS detail, "
             "rec.strength AS strength, rec.evidence_quality AS evidence_quality, "
+            "rec.conditions_json AS conditions_json, "
             "ec.id AS chunk_id, ec.text AS source_text, ec.section AS section, "
             "g.title AS guideline, g.doi AS doi, g.year AS year "
             "ORDER BY g.year DESC"

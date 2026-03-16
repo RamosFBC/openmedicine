@@ -702,7 +702,7 @@ class ReasoningEngine:
 
     def _query_generic(self, q: ClinicalQuery) -> GraphRAGResult:
         """Generic query — search recommendations by entity + type."""
-        rec_matches: list[RecommendationMatch] = []
+        semantic_matches: list[SemanticMatch] = []
         all_evidence: list[EvidenceCitation] = []
 
         for concept in q.concepts:
@@ -718,16 +718,23 @@ class ReasoningEngine:
                 rows = self._conn.execute_read(cypher, params)
 
                 for row in rows:
-                    rec_matches.append(
-                        RecommendationMatch(
-                            rec_id=row.get("rec_id", ""),
-                            rec_type=row.get("rec_type", ""),
-                            action=row.get("action", ""),
-                            action_detail=row.get("detail", ""),
-                            strength=row.get("strength", ""),
-                            evidence_quality=row.get("evidence_quality") or "",
-                        )
+                    match = SemanticMatch(
+                        entity_id=row.get("rec_id", ""),
+                        entity_name=row.get("action", ""),
+                        entity_type=entity.node_label,
+                        edge_type=q.intent or "generic",
+                        strength=row.get("strength", ""),
+                        evidence_quality=row.get("evidence_quality") or "",
+                        conditions_json=row.get("conditions_json"),
+                        edge_properties={
+                            "rec_type": row.get("rec_type", ""),
+                            "action_detail": row.get("detail", ""),
+                        },
                     )
+                    if q.patient_vars:
+                        self._evaluate_match_conditions(match, q.patient_vars)
+                    semantic_matches.append(match)
+
                     if row.get("source_text"):
                         all_evidence.append(
                             EvidenceCitation(
@@ -742,11 +749,11 @@ class ReasoningEngine:
                 if rows:
                     break
 
-        confidence = "high" if rec_matches else "low"
-        hints = self._generate_hints(q) if not rec_matches else []
+        confidence = "high" if semantic_matches else "low"
+        hints = self._generate_hints(q) if not semantic_matches else []
         return GraphRAGResult(
             source="graph_traversal",
-            recommendation_matches=rec_matches,
+            semantic_matches=semantic_matches,
             evidence=all_evidence,
             confidence=confidence,
             hints=hints,
