@@ -1,9 +1,22 @@
+import importlib
 import json
+import warnings
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from open_medicine.graphrag.server.mcp_server import TOOL_DEFINITIONS
+
+
+class TestDeprecationNotice:
+    def test_module_emits_deprecation_warning(self):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+            import open_medicine.graphrag.server.mcp_server as mod
+            importlib.reload(mod)
+            deprecation_warnings = [x for x in w if issubclass(x.category, DeprecationWarning)]
+            assert len(deprecation_warnings) >= 1
+            assert "open-medicine-mcp" in str(deprecation_warnings[0].message)
 
 
 class TestMCPToolDefinitions:

@@ -2,6 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import json
+import warnings
+
+warnings.warn(
+    "open-medicine-graphrag is deprecated. Use open-medicine-mcp instead, "
+    "which includes all graph tools. This entry point will be removed in v1.0.",
+    DeprecationWarning,
+    stacklevel=2,
+)
 
 from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
