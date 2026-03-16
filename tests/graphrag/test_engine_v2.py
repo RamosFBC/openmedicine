@@ -27,6 +27,60 @@ def _make_engine():
     return ReasoningEngine(conn), conn
 
 
+class TestSemanticMatchEdgeProperties:
+    """Verify SemanticMatch carries edge properties."""
+
+    def test_edge_properties_default_empty(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+        )
+        assert m.edge_properties == {}
+
+    def test_edge_properties_carries_dosing(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+            edge_properties={
+                "starting_dose": "12.5 mg",
+                "target_dose": "50 mg",
+                "max_dose": "50 mg",
+                "frequency": "once daily",
+            },
+        )
+        assert m.edge_properties["starting_dose"] == "12.5 mg"
+        assert m.edge_properties["frequency"] == "once daily"
+
+    def test_edge_properties_carries_severity(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="INTERACTS_WITH", strength="", evidence_quality="",
+            edge_properties={"severity": "MAJOR", "mechanism": "hyperkalemia"},
+        )
+        assert m.edge_properties["severity"] == "MAJOR"
+
+    def test_edge_properties_carries_monitoring(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Lab",
+            edge_type="MONITORED_BY", strength="", evidence_quality="",
+            edge_properties={
+                "frequency": "within 1 week, then monthly",
+                "threshold_alert": "K+ >= 5.5 mEq/L",
+                "threshold_stop": "K+ >= 6.0 mEq/L",
+            },
+        )
+        assert m.edge_properties["threshold_stop"] == "K+ >= 6.0 mEq/L"
+
+    def test_edge_properties_serializes_to_json(self):
+        m = SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug",
+            edge_type="DOSED_FOR", strength="", evidence_quality="",
+            edge_properties={"starting_dose": "10 mg"},
+        )
+        data = m.model_dump()
+        assert data["edge_properties"] == {"starting_dose": "10 mg"}
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]
@@ -2173,3 +2227,102 @@ class TestVectorSimilarityThreshold:
     def test_threshold_is_module_constant(self):
         """VECTOR_SIMILARITY_THRESHOLD should be 0.7."""
         assert VECTOR_SIMILARITY_THRESHOLD == 0.7
+
+
+class TestVectorOnlyConfidenceDowngrade:
+    """C5: Vector-only results should be capped at 'medium' confidence.
+
+    When all results come exclusively from the vector fallback layer,
+    confidence must not be 'high' — vector matches are semantically
+    approximate and may be clinically incorrect.
+    """
+
+    def test_vector_only_high_downgraded_to_medium(self):
+        """If _build_result would assign 'high' but all matches are vector-sourced,
+        confidence should be downgraded to 'medium'."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="vector",
+                similarity_score=0.85,
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"
+
+    def test_direct_layer_keeps_high_confidence(self):
+        """Results from direct layer should keep 'high' confidence."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="direct",
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
+
+    def test_mixed_layers_keep_high_confidence(self):
+        """When results come from both direct and vector, keep 'high'."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_a",
+                entity_name="DrugA",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=True,
+                source_layer="direct",
+            ),
+            SemanticMatch(
+                entity_id="drug_b",
+                entity_name="DrugB",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="moderate_for",
+                evidence_quality="moderate",
+                conditions_met=True,
+                source_layer="vector",
+                similarity_score=0.8,
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
+
+    def test_vector_only_medium_stays_medium(self):
+        """If confidence is already 'medium', vector-only doesn't change it."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="drug_x",
+                entity_name="DrugX",
+                entity_type="Drug",
+                edge_type="INDICATED_FOR",
+                strength="strong_for",
+                evidence_quality="high",
+                conditions_met=False,
+                source_layer="vector",
+                similarity_score=0.85,
+            )
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"

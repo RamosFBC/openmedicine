@@ -65,6 +65,11 @@ class SemanticMatch(BaseModel):
         default=None,
         description="Cosine similarity score (0-1) for vector-sourced matches",
     )
+    edge_properties: dict[str, str | None] = Field(
+        default_factory=dict,
+        description="Edge-specific properties (severity, starting_dose, frequency, "
+        "threshold_alert, threshold_stop, mechanism, clinical_effect, etc.)",
+    )
 
 
 class RecommendationMatch(BaseModel):
