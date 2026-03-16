@@ -177,3 +177,9 @@ local_docs
 
 # Comparative-validation generated data
 tests/comparative_validation/data/
+
+# Maintenance workflow generated files
+data/cache/doi_check.json
+data/health-reports/*.md
+data/benchmarks/*.json
+data/backups/graphrag/**/*.jsonl
