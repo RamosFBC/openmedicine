@@ -1833,3 +1833,182 @@ class TestVectorDeduplication:
         assert len(result.semantic_matches) == 2
         names = {m.entity_name for m in result.semantic_matches}
         assert names == {"HFrEF", "MRA"}
+
+
+# ---------------------------------------------------------------------------
+# C7: data_coverage — distinguish "no data" from "no contraindications"
+# ---------------------------------------------------------------------------
+
+
+def _make_unknown_entity():
+    """Create a mock entity that is NOT in terminology (no coded IDs)."""
+    entity = MagicMock()
+    entity.node_id = "drug:unknowndrug123"
+    entity.node_label = "Drug"
+    entity.snomed_code = None
+    entity.rxnorm_code = None
+    entity.atc_code = None
+    entity.loinc_code = None
+    entity.icd10_code = None
+    entity.cpt_code = None
+    entity.gmdn_code = None
+    return entity
+
+
+def _make_known_entity(node_id="rxnorm:12345", label="Drug"):
+    """Create a mock entity that IS in terminology (has coded IDs)."""
+    entity = MagicMock()
+    entity.node_id = node_id
+    entity.node_label = label
+    entity.snomed_code = None
+    entity.rxnorm_code = "12345"
+    entity.atc_code = None
+    entity.loinc_code = None
+    entity.icd10_code = None
+    entity.cpt_code = None
+    entity.gmdn_code = None
+    return entity
+
+
+class TestDataCoverageContraindications:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_drug_returns_coverage_none(self, mock_link):
+        """Unknown drug -> data_coverage='none' (cannot confirm safety)."""
+        unknown = _make_unknown_entity()
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="contraindication", concepts=["FakeDrugXYZ"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_drug_no_results_returns_coverage_full(self, mock_link):
+        """Known drug with no contraindications -> data_coverage='full'."""
+        known = _make_known_entity()
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="contraindication", concepts=["Metoprolol"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_mixed_concepts_returns_coverage_partial(self, mock_link):
+        """One known + one unknown concept -> data_coverage='partial'."""
+        known = _make_known_entity()
+        unknown = _make_unknown_entity()
+
+        # contraindications: tries ("drug", "drug_class") per concept
+        # Concept 1 "Metoprolol": drug -> known, finds rows -> found=True, break
+        # Concept 2 "FakeDrug": drug -> unknown (not None but no codes),
+        #   no CI rows, then parent classes (empty), then drug_class -> unknown, no CI rows
+        mock_link.side_effect = [known, unknown, unknown]
+
+        engine, conn = _make_engine()
+        # Call 1: find_contraindications for known drug -> results, break
+        # Call 2: find_contraindications for unknown as drug -> empty
+        # Call 3: _get_parent_classes for unknown drug -> empty
+        # Call 4: find_contraindications for unknown as drug_class -> empty
+        conn.execute_read.side_effect = [
+            [{"disease_id": "d1", "disease_name": "Asthma",
+              "strength": "strong_against", "evidence_quality": "",
+              "conditions": None}],
+            [],  # CI for FakeDrug as drug
+            [],  # parent classes for FakeDrug
+            [],  # CI for FakeDrug as drug_class
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication", concepts=["Metoprolol", "FakeDrug"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert result.data_coverage == "partial"
+
+
+class TestDataCoverageTreatments:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_disease_returns_coverage_none(self, mock_link):
+        """Unknown disease -> data_coverage='none'."""
+        unknown = _make_unknown_entity()
+        unknown.node_label = "Disease"
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="treatment_selection", concepts=["FakeDisease"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_disease_returns_coverage_full(self, mock_link):
+        """Known disease -> data_coverage='full'."""
+        known = _make_known_entity(node_id="snomed:42343007", label="Disease")
+        known.snomed_code = "42343007"
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="treatment_selection", concepts=["Heart Failure"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"
+
+
+class TestDataCoverageInteractions:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_drug_interactions_coverage_none(self, mock_link):
+        """Unknown drug in interaction query -> data_coverage='none'."""
+        unknown = _make_unknown_entity()
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="interaction", concepts=["UnknownDrug"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+
+class TestDataCoverageMonitoring:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members", return_value=[])
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_fully_unknown_monitoring_coverage_none(self, _mock_link, _mock_members):
+        """Completely unknown concept -> data_coverage='none'."""
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="monitoring", concepts=["TotallyUnknown"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+
+class TestDataCoverageDosing:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_drug_dosing_coverage_full(self, mock_link):
+        """Known drug in dosing query -> data_coverage='full'."""
+        known = _make_known_entity()
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"disease_id": "d1", "disease": "HFrEF", "conditions": None}
+        ]
+
+        q = ClinicalQuery(intent="dosing", concepts=["Metoprolol"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"

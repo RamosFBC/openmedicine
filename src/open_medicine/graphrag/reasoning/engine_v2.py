@@ -179,11 +179,14 @@ class ReasoningEngine:
         """Find treatments for a disease via INDICATED_FOR edges."""
         semantic_matches: list[SemanticMatch] = []
         all_evidence: list[EvidenceCitation] = []
+        resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
             entity = link_entity(concept, "disease")
             if entity is None:
                 continue
+            if self._is_known_entity(entity):
+                resolved_concepts.add(concept)
 
             cypher, params = ReasoningQueries.find_treatments(
                 entity.node_id, q.guideline_filter
@@ -221,11 +224,15 @@ class ReasoningEngine:
         if q.include_evidence and semantic_matches:
             all_evidence = self._fetch_evidence_for_matches(semantic_matches, q)
 
-        return self._build_result(semantic_matches, all_evidence, q)
+        return self._build_result(
+            semantic_matches, all_evidence, q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     def _query_contraindications(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find contraindications via CONTRAINDICATED_IN edges."""
         semantic_matches: list[SemanticMatch] = []
+        resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
             # Try drug first, then drug_class
@@ -234,6 +241,8 @@ class ReasoningEngine:
                 entity = link_entity(concept, entity_type)
                 if entity is None:
                     continue
+                if self._is_known_entity(entity):
+                    resolved_concepts.add(concept)
 
                 cypher, params = ReasoningQueries.find_contraindications(
                     entity.node_id, entity.node_label
@@ -295,7 +304,10 @@ class ReasoningEngine:
             if q.include_evidence and semantic_matches
             else []
         )
-        return self._build_result(semantic_matches, all_evidence, q)
+        return self._build_result(
+            semantic_matches, all_evidence, q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     @staticmethod
     def _is_known_entity(entity: Any) -> bool:
@@ -313,6 +325,7 @@ class ReasoningEngine:
     def _query_interactions(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find drug interactions via INTERACTS_WITH edges."""
         semantic_matches: list[SemanticMatch] = []
+        resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
@@ -320,6 +333,8 @@ class ReasoningEngine:
                 entity = link_entity(concept, "drug_class")
             if entity is None:
                 continue
+            if self._is_known_entity(entity):
+                resolved_concepts.add(concept)
 
             cypher, params = ReasoningQueries.find_interactions(
                 entity.node_id, entity_label=entity.node_label
@@ -369,16 +384,22 @@ class ReasoningEngine:
             if q.include_evidence and semantic_matches
             else []
         )
-        return self._build_result(semantic_matches, all_evidence, q)
+        return self._build_result(
+            semantic_matches, all_evidence, q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     def _query_diagnostic_criteria(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find diagnostic criteria via DIAGNOSED_BY edges."""
         semantic_matches: list[SemanticMatch] = []
+        resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
             entity = link_entity(concept, "disease")
             if entity is None:
                 continue
+            if self._is_known_entity(entity):
+                resolved_concepts.add(concept)
 
             cypher, params = ReasoningQueries.find_diagnostic_criteria(entity.node_id)
             rows = self._conn.execute_read(cypher, params)
@@ -404,11 +425,15 @@ class ReasoningEngine:
         if not semantic_matches:
             return self._query_generic(q)
 
-        return self._build_result(semantic_matches, [], q)
+        return self._build_result(
+            semantic_matches, [], q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     def _query_dosing(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find dosing info via DOSED_FOR edges."""
         semantic_matches: list[SemanticMatch] = []
+        resolved_concepts: set[str] = set()
 
         # First concept is the drug, second (if present) is the disease
         drug_name = q.concepts[0] if q.concepts else None
@@ -422,12 +447,16 @@ class ReasoningEngine:
             entity = link_entity(drug_name, "drug_class")
         if entity is None:
             return self._empty_result()
+        if self._is_known_entity(entity):
+            resolved_concepts.add(drug_name)
 
         disease_id = None
         if disease_name:
             disease_entity = link_entity(disease_name, "disease")
             if disease_entity:
                 disease_id = disease_entity.node_id
+                if self._is_known_entity(disease_entity):
+                    resolved_concepts.add(disease_name)
 
         cypher, params = ReasoningQueries.find_dosing(entity.node_id, disease_id)
         rows = self._conn.execute_read(cypher, params)
@@ -475,11 +504,15 @@ class ReasoningEngine:
             if q.include_evidence and semantic_matches
             else []
         )
-        return self._build_result(semantic_matches, all_evidence, q)
+        return self._build_result(
+            semantic_matches, all_evidence, q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     def _query_monitoring(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find monitoring requirements via MONITORED_BY edges."""
         semantic_matches: list[SemanticMatch] = []
+        resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
@@ -491,6 +524,8 @@ class ReasoningEngine:
                 expanded = self._expand_drug_class_to_monitoring(concept)
                 semantic_matches.extend(expanded)
                 continue
+            if self._is_known_entity(entity):
+                resolved_concepts.add(concept)
 
             cypher, params = ReasoningQueries.find_monitoring(
                 entity.node_id, entity_label=entity.node_label
@@ -540,7 +575,10 @@ class ReasoningEngine:
             if q.include_evidence and semantic_matches
             else []
         )
-        return self._build_result(semantic_matches, all_evidence, q)
+        return self._build_result(
+            semantic_matches, all_evidence, q,
+            resolved_concepts=len(resolved_concepts),
+        )
 
     def _query_generic(self, q: ClinicalQuery) -> GraphRAGResult:
         """Generic query — search recommendations by entity + type."""
@@ -892,6 +930,7 @@ class ReasoningEngine:
         semantic_matches: list[SemanticMatch],
         evidence: list[EvidenceCitation],
         q: ClinicalQuery,
+        resolved_concepts: int | None = None,
     ) -> GraphRAGResult:
         """Build final result with ranking and conflict detection."""
         # Sort by: layer priority, conditions_met (True best, None middle, False last),
@@ -937,6 +976,18 @@ class ReasoningEngine:
         if not semantic_matches:
             hints = self._generate_hints(q)
 
+        # Compute data coverage
+        total_concepts = len(q.concepts)
+        if resolved_concepts is not None:
+            if resolved_concepts == 0:
+                data_coverage: str = "none"
+            elif resolved_concepts < total_concepts:
+                data_coverage = "partial"
+            else:
+                data_coverage = "full"
+        else:
+            data_coverage = "full" if semantic_matches else "partial"
+
         return GraphRAGResult(
             source="graph_traversal",
             semantic_matches=semantic_matches,
@@ -945,6 +996,7 @@ class ReasoningEngine:
             missing_variables=list(set(all_missing)),
             retrieval_layers_used=layers,
             hints=hints,
+            data_coverage=data_coverage,
         )
 
     @staticmethod

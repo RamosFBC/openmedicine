@@ -112,3 +112,12 @@ class GraphRAGResult(BaseModel):
         default_factory=list,
         description="Reformulation suggestions when results are empty",
     )
+    data_coverage: Literal["full", "partial", "none"] = Field(
+        default="full",
+        description=(
+            "Whether queried entities exist in the graph. "
+            "'none' = entity not found (cannot confirm safety). "
+            "'partial' = some entities found. "
+            "'full' = all queried entities found."
+        ),
+    )
