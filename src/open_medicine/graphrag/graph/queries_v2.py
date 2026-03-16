@@ -713,6 +713,31 @@ class ReasoningQueries:
         return (cypher, params)
 
     @staticmethod
+    def find_indications_for_drug(
+        entity_id: str,
+        entity_label: str = "Drug",
+        guideline_filter: str | None = None,
+    ) -> CypherStatement:
+        """What diseases is drug/drug_class X indicated for? Reverse of find_treatments."""
+        cypher = (
+            f"MATCH (src:{entity_label} {{id: $eid}})-[r:INDICATED_FOR]->(dis:Disease) "
+        )
+        params: dict = {"eid": entity_id}
+        if guideline_filter:
+            cypher += (
+                "MATCH (rec:Recommendation)-[:RECOMMENDS]->(src) "
+                "WHERE rec.guideline_id = $gfilter "
+            )
+            params["gfilter"] = guideline_filter
+        cypher += (
+            "RETURN 'Disease' AS entity_type, dis.id AS entity_id, "
+            "dis.name AS entity_name, r.strength AS strength, "
+            "r.evidence_quality AS evidence_quality, "
+            "r.conditions_json AS conditions"
+        )
+        return (cypher, params)
+
+    @staticmethod
     def find_contraindications(
         entity_id: str,
         entity_label: str,
@@ -845,7 +870,7 @@ class ReasoningQueries:
             "RETURN rec.id AS rec_id, rec.type AS rec_type, "
             "rec.action AS action, rec.action_detail AS detail, "
             "rec.strength AS strength, rec.evidence_quality AS evidence_quality, "
-            "ec.text AS source_text, ec.section AS section, "
+            "ec.id AS chunk_id, ec.text AS source_text, ec.section AS section, "
             "g.title AS guideline, g.doi AS doi, g.year AS year "
             "ORDER BY g.year DESC"
         )

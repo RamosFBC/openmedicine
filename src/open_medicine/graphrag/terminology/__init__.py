@@ -30,23 +30,30 @@ def load_terminology(filename: str) -> dict:
         return json.load(f)
 
 
+def _normalize_separators(name: str) -> str:
+    """Normalize separators (underscore, hyphen, slash) to a common form for matching."""
+    return name.replace("_", " ").replace("-", " ").replace("/", " ")
+
+
 def lookup(filename: str, name: str) -> dict | None:
     """Look up a concept by name (case-insensitive) in a terminology file.
 
-    Checks canonical names first, then aliases.
+    Checks canonical names first, then aliases. Normalizes separators
+    (underscore, hyphen, slash) so that e.g. ``sacubitril_valsartan``
+    matches ``sacubitril/valsartan``.
     """
     data = load_terminology(filename)
-    key = name.lower()
+    key = _normalize_separators(name.lower())
 
     # Direct canonical name match
     for canonical, entry in data.items():
-        if canonical.lower() == key:
+        if _normalize_separators(canonical.lower()) == key:
             return entry
 
     # Alias match
     for _canonical, entry in data.items():
         aliases = entry.get("aliases", [])
-        if any(a.lower() == key for a in aliases):
+        if any(_normalize_separators(a.lower()) == key for a in aliases):
             return entry
 
     return None
@@ -69,7 +76,7 @@ def fuzzy_match(query: str, max_results: int = 5) -> list[tuple[str, str]]:
     Returns list of (canonical_name, entity_type) tuples, sorted by match quality:
     prefix matches first, then substring matches.
     """
-    q = query.lower()
+    q = _normalize_separators(query.lower())
     prefix_matches: list[tuple[str, str]] = []
     substring_matches: list[tuple[str, str]] = []
 
@@ -78,7 +85,7 @@ def fuzzy_match(query: str, max_results: int = 5) -> list[tuple[str, str]]:
         for canonical, entry in data.items():
             names = [canonical] + entry.get("aliases", [])
             for name in names:
-                nl = name.lower()
+                nl = _normalize_separators(name.lower())
                 if nl.startswith(q):
                     prefix_matches.append((canonical, entity_type))
                     break

@@ -186,36 +186,65 @@ class ReasoningEngine:
         resolved_concepts: set[str] = set()
 
         for concept in q.concepts:
+            # Try as disease first (forward: what treats this disease?)
             entity = link_entity(concept, "disease")
-            if entity is None:
-                continue
-            if self._is_known_entity(entity):
+            if entity is not None and self._is_known_entity(entity):
                 resolved_concepts.add(concept)
 
-            cypher, params = ReasoningQueries.find_treatments(
-                entity.node_id, q.guideline_filter
-            )
-            rows = self._conn.execute_read(cypher, params)
-
-            for row in rows:
-                match = SemanticMatch(
-                    entity_id=row.get("entity_id", ""),
-                    entity_name=row.get("entity_name", ""),
-                    entity_type=row.get("entity_type", ""),
-                    edge_type="INDICATED_FOR",
-                    strength=row.get("strength", ""),
-                    evidence_quality=row.get("evidence_quality", ""),
-                    conditions_json=row.get("conditions"),
+                cypher, params = ReasoningQueries.find_treatments(
+                    entity.node_id, q.guideline_filter
                 )
-                self._evaluate_match_conditions(match, q.patient_vars)
-                semantic_matches.append(match)
+                rows = self._conn.execute_read(cypher, params)
 
-            # Layer 2 expansion: if insufficient results, try parent diseases
-            if len(semantic_matches) < q.min_results_threshold:
-                expanded = self._expand_disease_hierarchy(
-                    entity.node_id, "treatment_selection", q,
+                for row in rows:
+                    match = SemanticMatch(
+                        entity_id=row.get("entity_id", ""),
+                        entity_name=row.get("entity_name", ""),
+                        entity_type=row.get("entity_type", ""),
+                        edge_type="INDICATED_FOR",
+                        strength=row.get("strength", ""),
+                        evidence_quality=row.get("evidence_quality") or "",
+                        conditions_json=row.get("conditions"),
+                    )
+                    self._evaluate_match_conditions(match, q.patient_vars)
+                    semantic_matches.append(match)
+
+                # Layer 2 expansion: if insufficient results, try parent diseases
+                if len(semantic_matches) < q.min_results_threshold:
+                    expanded = self._expand_disease_hierarchy(
+                        entity.node_id, "treatment_selection", q,
+                    )
+                    semantic_matches.extend(expanded)
+                continue
+
+            # Reverse: concept is a drug/drug_class — find what it treats
+            for entity_type in ("drug", "drug_class"):
+                entity = link_entity(concept, entity_type)
+                if entity is None or not self._is_known_entity(entity):
+                    continue
+                resolved_concepts.add(concept)
+
+                label = "Drug" if entity_type == "drug" else "DrugClass"
+                cypher, params = ReasoningQueries.find_indications_for_drug(
+                    entity.node_id, label, q.guideline_filter
                 )
-                semantic_matches.extend(expanded)
+                rows = self._conn.execute_read(cypher, params)
+
+                for row in rows:
+                    match = SemanticMatch(
+                        entity_id=row.get("entity_id", ""),
+                        entity_name=row.get("entity_name", ""),
+                        entity_type=row.get("entity_type", ""),
+                        edge_type="INDICATED_FOR",
+                        strength=row.get("strength", ""),
+                        evidence_quality=row.get("evidence_quality") or "",
+                        conditions_json=row.get("conditions"),
+                    )
+                    self._evaluate_match_conditions(match, q.patient_vars)
+                    semantic_matches.append(match)
+
+                if semantic_matches:
+                    break  # found results, no need to try other entity type
 
         # Layer 3: vector fallback if still empty
         if len(semantic_matches) == 0:
@@ -260,7 +289,7 @@ class ReasoningEngine:
                         entity_type="Disease",
                         edge_type="CONTRAINDICATED_IN",
                         strength=row.get("strength", ""),
-                        evidence_quality=row.get("evidence_quality", ""),
+                        evidence_quality=row.get("evidence_quality") or "",
                         conditions_json=row.get("conditions"),
                     )
                     self._evaluate_match_conditions(match, q.patient_vars)
@@ -285,7 +314,7 @@ class ReasoningEngine:
                                 entity_type="Disease",
                                 edge_type="CONTRAINDICATED_IN",
                                 strength=row.get("strength", ""),
-                                evidence_quality=row.get("evidence_quality", ""),
+                                evidence_quality=row.get("evidence_quality") or "",
                                 conditions_json=row.get("conditions"),
                                 source_layer="expanded",
                             )
@@ -353,7 +382,7 @@ class ReasoningEngine:
                         entity_type=row.get("entity_type", "Drug"),
                         edge_type="INTERACTS_WITH",
                         strength="",
-                        evidence_quality=row.get("evidence_quality", ""),
+                        evidence_quality=row.get("evidence_quality") or "",
                     )
                 )
 
@@ -372,7 +401,7 @@ class ReasoningEngine:
                                 entity_type=row.get("entity_type", "Drug"),
                                 edge_type="INTERACTS_WITH",
                                 strength="",
-                                evidence_quality=row.get("evidence_quality", ""),
+                                evidence_quality=row.get("evidence_quality") or "",
                                 source_layer="expanded",
                             )
                         )
@@ -609,7 +638,7 @@ class ReasoningEngine:
                             action=row.get("action", ""),
                             action_detail=row.get("detail", ""),
                             strength=row.get("strength", ""),
-                            evidence_quality=row.get("evidence_quality", ""),
+                            evidence_quality=row.get("evidence_quality") or "",
                         )
                     )
                     if row.get("source_text"):
@@ -663,7 +692,7 @@ class ReasoningEngine:
                         entity_type=t_row.get("entity_type", ""),
                         edge_type="INDICATED_FOR",
                         strength=t_row.get("strength", ""),
-                        evidence_quality=t_row.get("evidence_quality", ""),
+                        evidence_quality=t_row.get("evidence_quality") or "",
                         conditions_json=t_row.get("conditions"),
                         source_layer="expanded",
                     )
@@ -748,7 +777,7 @@ class ReasoningEngine:
                     entity_type=row.get("entity_type", ""),
                     edge_type=self._infer_edge_type(q.intent),
                     strength=row.get("strength", ""),
-                    evidence_quality=row.get("evidence_quality", ""),
+                    evidence_quality=row.get("evidence_quality") or "",
                     conditions_json=row.get("conditions"),
                     source_layer="vector",
                     similarity_score=score,
@@ -813,8 +842,13 @@ class ReasoningEngine:
 
     @staticmethod
     def _normalize_var_name(name: str) -> str:
-        """Normalize a variable name through alias resolution."""
-        key = name.lower()
+        """Normalize a variable name through alias resolution.
+
+        Spaces are converted to underscores before lookup so that
+        graph conditions using e.g. ``NYHA Class`` match patient
+        variables provided as ``nyha_class``.
+        """
+        key = name.lower().replace(" ", "_")
         return _VARIABLE_ALIASES.get(key, key)
 
     def _evaluate_match_conditions(
@@ -901,7 +935,7 @@ class ReasoningEngine:
                     seen_chunks.add(text)
                     evidence.append(
                         EvidenceCitation(
-                            chunk_id="",
+                            chunk_id=row.get("chunk_id") or "",
                             text=text,
                             guideline_title=row.get("guideline") or "",
                             doi=row.get("doi") or "",
@@ -985,6 +1019,12 @@ class ReasoningEngine:
             confidence = "medium"
         else:
             confidence = "low"
+
+        # Downgrade confidence when results come exclusively from vector layer.
+        # Vector results are semantically approximate and may be clinically wrong
+        # (e.g., returning unrelated contraindications based on embedding similarity).
+        if confidence == "high" and layers == ["vector"]:
+            confidence = "medium"
 
         # Layer 4: hints when results are empty
         hints: list[str] = []
