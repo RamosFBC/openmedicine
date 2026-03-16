@@ -17,94 +17,189 @@ from open_medicine.graphrag.reasoning.types_v2 import ClinicalQuery
 TOOL_DEFINITIONS = [
     {
         "name": "check_drug_dosing",
-        "description": "Get dosing recommendation for a drug given patient variables. Returns evidence-backed rules from clinical guidelines.",
+        "description": (
+            "Get evidence-based dosing recommendations for a drug. "
+            "Returns starting dose, target dose, max dose, frequency, and titration schedule "
+            "from clinical guidelines. Evaluates patient variables (eGFR, weight, age) "
+            "against dosing conditions. Includes DOI citations."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "drug": {"type": "string", "description": "Drug name (e.g. 'apixaban', 'lisinopril')"},
-                "patient_vars": {"type": "object", "description": "Patient variables (e.g. {eGFR: 20, age: 80, weight_kg: 55})"},
+                "drug": {
+                    "type": "string",
+                    "description": "Drug name (e.g. 'apixaban', 'lisinopril', 'carvedilol')",
+                },
+                "patient_vars": {
+                    "type": "object",
+                    "description": (
+                        "Patient variables as key-value pairs "
+                        '(e.g. {"eGFR": 20, "age": 80, "weight_kg": 55, "potassium": 4.8})'
+                    ),
+                },
             },
             "required": ["drug"],
         },
     },
     {
         "name": "check_contraindications",
-        "description": "Check if an intervention is contraindicated given patient variables.",
+        "description": (
+            "Check if a drug or procedure is contraindicated for a patient. "
+            "Returns contraindication severity (ABSOLUTE, MAJOR, MINOR) and evidence quality. "
+            "ABSOLUTE contraindications must never be overridden. "
+            "Evaluates patient variables against contraindication conditions."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "intervention": {"type": "string", "description": "Drug or procedure to check"},
-                "patient_vars": {"type": "object", "description": "Patient variables"},
+                "intervention": {
+                    "type": "string",
+                    "description": "Drug or procedure to check (e.g. 'lisinopril', 'sacubitril_valsartan')",
+                },
+                "patient_vars": {
+                    "type": "object",
+                    "description": (
+                        'Patient variables (e.g. {"history_of_angioedema": true, "potassium": 5.5})'
+                    ),
+                },
             },
             "required": ["intervention"],
         },
     },
     {
         "name": "check_drug_interaction",
-        "description": "Check for interactions between two drugs.",
+        "description": (
+            "Check for interactions between two drugs. "
+            "Returns interaction severity (ABSOLUTE, MAJOR, MINOR), mechanism, and clinical effect. "
+            "ABSOLUTE interactions are hard contraindications — the drugs must not be co-prescribed."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "drug_a": {"type": "string"},
-                "drug_b": {"type": "string"},
-                "patient_vars": {"type": "object", "description": "Optional patient variables"},
+                "drug_a": {"type": "string", "description": "First drug name"},
+                "drug_b": {"type": "string", "description": "Second drug name"},
+                "patient_vars": {
+                    "type": "object",
+                    "description": "Optional patient variables for context",
+                },
             },
             "required": ["drug_a", "drug_b"],
         },
     },
     {
         "name": "check_monitoring_requirements",
-        "description": "Get lab/test monitoring requirements for an intervention.",
+        "description": (
+            "Get lab monitoring requirements for a drug or procedure. "
+            "Returns which labs to monitor, how often, alert thresholds, and stop thresholds. "
+            "Critical for ongoing medication management."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "intervention": {"type": "string"},
-                "patient_vars": {"type": "object"},
+                "intervention": {
+                    "type": "string",
+                    "description": "Drug or procedure name",
+                },
+                "patient_vars": {
+                    "type": "object",
+                    "description": "Optional patient variables",
+                },
             },
             "required": ["intervention"],
         },
     },
     {
         "name": "find_treatment_options",
-        "description": "Find recommended treatments for a condition given patient variables.",
+        "description": (
+            "Find recommended treatments for a clinical condition. "
+            "Returns drugs and drug classes ranked by recommendation strength "
+            "(strong > moderate > weak) and evidence quality (high > moderate > low). "
+            "Evaluates patient eligibility criteria."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "condition": {"type": "string"},
-                "patient_vars": {"type": "object"},
+                "condition": {
+                    "type": "string",
+                    "description": "Clinical condition (e.g. 'heart_failure_reduced_ef', 'atrial_fibrillation')",
+                },
+                "patient_vars": {
+                    "type": "object",
+                    "description": (
+                        'Patient variables to evaluate eligibility (e.g. {"lvef": 30, "egfr": 45})'
+                    ),
+                },
             },
             "required": ["condition"],
         },
     },
     {
         "name": "query_clinical_graph",
-        "description": "Structured query across the clinical knowledge graph. Use for advanced or exploratory queries.",
+        "description": (
+            "Advanced structured query across the clinical knowledge graph. "
+            "Supports all intent types: dosing, contraindication, interaction, monitoring, "
+            "treatment_selection, diagnostic_criteria, prevention, referral, device_therapy, "
+            "lifestyle, discharge, follow_up. Use this for multi-concept queries or when "
+            "you need to scope results to a specific guideline."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "intent": {"type": "string", "enum": ["dosing", "contraindication", "interaction", "monitoring", "treatment_selection", "diagnostic_criteria"]},
-                "concepts": {"type": "array", "items": {"type": "string"}},
-                "patient_vars": {"type": "object"},
-                "guideline_filter": {"type": "string", "description": "Optional: scope to a specific guideline ID"},
-                "include_source_text": {"type": "boolean", "default": True},
+                "intent": {
+                    "type": "string",
+                    "enum": [
+                        "dosing", "contraindication", "interaction", "monitoring",
+                        "treatment_selection", "diagnostic_criteria", "prevention",
+                        "referral", "device_therapy", "lifestyle", "discharge", "follow_up",
+                    ],
+                },
+                "concepts": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Clinical concepts to query",
+                },
+                "patient_vars": {
+                    "type": "object",
+                    "description": "Patient variables for condition evaluation",
+                },
+                "guideline_filter": {
+                    "type": "string",
+                    "description": "Optional guideline ID to scope results (e.g. 'aha_acc_hf_2022')",
+                },
+                "include_evidence": {
+                    "type": "boolean",
+                    "default": True,
+                    "description": "Include source text evidence chain",
+                },
             },
             "required": ["intent", "concepts"],
         },
     },
     {
         "name": "fetch_evidence_chunk",
-        "description": "Retrieve the exact source text for a citation by chunk ID.",
+        "description": (
+            "Retrieve the exact source text for an evidence citation by chunk ID. "
+            "Use this to verify or display the original guideline text backing a recommendation. "
+            "Chunk IDs are returned in query results under the 'evidence' field."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {
-                "chunk_id": {"type": "string", "description": "The evidence chunk ID from a previous query result"},
+                "chunk_id": {
+                    "type": "string",
+                    "description": "Evidence chunk ID from a previous query result",
+                },
             },
             "required": ["chunk_id"],
         },
     },
     {
         "name": "list_available_guidelines",
-        "description": "List all clinical guidelines available in the knowledge graph. Returns guideline IDs, titles, DOIs, and years.",
+        "description": (
+            "List all clinical guidelines loaded in the knowledge graph. "
+            "Returns guideline IDs, titles, DOIs, and publication years. "
+            "Use guideline IDs to filter other queries via the guideline_filter parameter."
+        ),
         "inputSchema": {
             "type": "object",
             "properties": {},
