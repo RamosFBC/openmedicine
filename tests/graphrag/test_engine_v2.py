@@ -1611,3 +1611,35 @@ class TestEvidenceReranking:
 
         evidence = engine._fetch_evidence_for_matches(matches, q)
         assert len(evidence) == 1
+
+
+# ---------------------------------------------------------------------------
+# Fix: Vector Fallback Deduplication
+# ---------------------------------------------------------------------------
+
+
+class TestVectorDeduplication:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_vector_results_deduplicated(self, mock_link, mock_embed):
+        """Vector fallback results should be deduplicated."""
+        mock_embed.return_value = [1.0, 0.0]
+
+        engine, conn = _make_engine()
+        # Return duplicate entity_ids from vector search
+        conn.execute_read.return_value = [
+            {"entity_id": "disease_hfref", "entity_name": "HFrEF", "entity_type": "Disease",
+             "strength": "", "evidence_quality": "", "conditions": None},
+            {"entity_id": "disease_hfref", "entity_name": "HFrEF", "entity_type": "Disease",
+             "strength": "", "evidence_quality": "", "conditions": None},
+            {"entity_id": "class_mra", "entity_name": "MRA", "entity_type": "DrugClass",
+             "strength": "", "evidence_quality": "", "conditions": None},
+        ]
+
+        q = ClinicalQuery(intent="monitoring", concepts=["MRA"])
+        result = engine.query(q)
+
+        # Should be deduplicated: only 2 unique (entity_id, edge_type) pairs
+        assert len(result.semantic_matches) == 2
+        names = {m.entity_name for m in result.semantic_matches}
+        assert names == {"HFrEF", "MRA"}

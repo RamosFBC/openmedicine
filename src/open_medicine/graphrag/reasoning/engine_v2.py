@@ -288,6 +288,8 @@ class ReasoningEngine:
         if not semantic_matches:
             semantic_matches.extend(self._vector_fallback(q))
 
+        semantic_matches = self._deduplicate(semantic_matches)
+
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
             if q.include_evidence and semantic_matches
@@ -360,6 +362,8 @@ class ReasoningEngine:
         if not semantic_matches:
             semantic_matches.extend(self._vector_fallback(q))
 
+        semantic_matches = self._deduplicate(semantic_matches)
+
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
             if q.include_evidence and semantic_matches
@@ -394,6 +398,9 @@ class ReasoningEngine:
         # Layer 3: vector fallback, then generic query if still empty
         if not semantic_matches:
             semantic_matches.extend(self._vector_fallback(q))
+
+        semantic_matches = self._deduplicate(semantic_matches)
+
         if not semantic_matches:
             return self._query_generic(q)
 
@@ -461,6 +468,8 @@ class ReasoningEngine:
         if not semantic_matches:
             semantic_matches.extend(self._vector_fallback(q))
 
+        semantic_matches = self._deduplicate(semantic_matches)
+
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
             if q.include_evidence and semantic_matches
@@ -520,11 +529,11 @@ class ReasoningEngine:
                             )
                         )
 
-        semantic_matches = self._deduplicate(semantic_matches)
-
         # Layer 3: vector fallback if no structured results
         if not semantic_matches:
             semantic_matches.extend(self._vector_fallback(q))
+
+        semantic_matches = self._deduplicate(semantic_matches)
 
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
