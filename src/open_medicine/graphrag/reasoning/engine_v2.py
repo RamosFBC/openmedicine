@@ -57,6 +57,10 @@ OPS = {
 # Layer priority for sort ordering (lower = higher priority)
 _LAYER_RANK = {"direct": 0, "expanded": 1, "vector": 2}
 
+# Minimum cosine similarity for vector fallback results (0-1).
+# Rows below this threshold are discarded to prevent semantically weak matches.
+VECTOR_SIMILARITY_THRESHOLD = 0.7
+
 # Variable name aliases: maps common alternative names to canonical forms
 # used by graph conditions. Keys and values are lowercase.
 _VARIABLE_ALIASES: dict[str, str] = {
@@ -727,6 +731,16 @@ class ReasoningEngine:
 
         matches: list[SemanticMatch] = []
         for row in rows:
+            score = row.get("score")
+            # Skip rows below the minimum similarity threshold
+            if score is not None and score < VECTOR_SIMILARITY_THRESHOLD:
+                logger.debug(
+                    "Vector fallback: skipping %s (score=%.3f < %.2f)",
+                    row.get("entity_name", "?"),
+                    score,
+                    VECTOR_SIMILARITY_THRESHOLD,
+                )
+                continue
             matches.append(
                 SemanticMatch(
                     entity_id=row.get("entity_id", ""),
@@ -737,6 +751,7 @@ class ReasoningEngine:
                     evidence_quality=row.get("evidence_quality", ""),
                     conditions_json=row.get("conditions"),
                     source_layer="vector",
+                    similarity_score=score,
                 )
             )
         return matches

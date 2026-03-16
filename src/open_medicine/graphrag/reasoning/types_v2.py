@@ -61,6 +61,10 @@ class SemanticMatch(BaseModel):
         default="direct",
         description="Retrieval layer: direct, expanded, or vector",
     )
+    similarity_score: float | None = Field(
+        default=None,
+        description="Cosine similarity score (0-1) for vector-sourced matches",
+    )
 
 
 class RecommendationMatch(BaseModel):

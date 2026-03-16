@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from open_medicine.graphrag.reasoning.engine_v2 import (
     OPS,
     STRENGTH_RANK,
+    VECTOR_SIMILARITY_THRESHOLD,
     ReasoningEngine,
 )
 from open_medicine.graphrag.reasoning.types_v2 import (
@@ -2012,3 +2013,163 @@ class TestDataCoverageDosing:
         result = engine.query(q)
 
         assert result.data_coverage == "full"
+
+
+class TestVectorSimilarityThreshold:
+    """Tests for cosine similarity threshold filtering in vector fallback."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_below_threshold_filtered_out(self, _mock_link, mock_embed):
+        """Vector results with score < 0.7 should be discarded."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        # Return rows: one below threshold, one above
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_aspirin",
+                "entity_name": "Aspirin",
+                "entity_type": "Drug",
+                "strength": "weak_for",
+                "evidence_quality": "low",
+                "conditions": None,
+                "score": 0.5,
+            },
+            {
+                "entity_id": "drug_acetaminophen",
+                "entity_name": "Acetaminophen",
+                "entity_type": "Drug",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "conditions": None,
+                "score": 0.85,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["acetaminophen"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        # Only the above-threshold match should survive
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "Acetaminophen"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_above_threshold_kept(self, _mock_link, mock_embed):
+        """Vector results at or above 0.7 should be kept."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_a",
+                "entity_name": "DrugA",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.7,
+            },
+            {
+                "entity_id": "drug_b",
+                "entity_name": "DrugB",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.95,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["something"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 2
+        names = {m.entity_name for m in result.semantic_matches}
+        assert names == {"DrugA", "DrugB"}
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_similarity_score_populated_on_vector_matches(self, _mock_link, mock_embed):
+        """Vector matches should have similarity_score set from the row score."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_x",
+                "entity_name": "DrugX",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.82,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["test"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        match = result.semantic_matches[0]
+        assert match.similarity_score == 0.82
+        assert match.source_layer == "vector"
+
+    def test_non_vector_matches_have_none_similarity_score(self):
+        """Non-vector SemanticMatch objects should have similarity_score=None."""
+        match = SemanticMatch(
+            entity_id="drug_1",
+            entity_name="TestDrug",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            source_layer="direct",
+        )
+        assert match.similarity_score is None
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_all_below_threshold_returns_empty(self, _mock_link, mock_embed):
+        """If all vector results are below threshold, return empty list."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_a",
+                "entity_name": "DrugA",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.3,
+            },
+            {
+                "entity_id": "drug_b",
+                "entity_name": "DrugB",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.65,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["something"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 0
+
+    def test_threshold_is_module_constant(self):
+        """VECTOR_SIMILARITY_THRESHOLD should be 0.7."""
+        assert VECTOR_SIMILARITY_THRESHOLD == 0.7
