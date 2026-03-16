@@ -82,6 +82,7 @@ class InteractionSeverity(StrEnum):
     MAJOR = "major"
     MODERATE = "moderate"
     MINOR = "minor"
+    UNKNOWN = "unknown"
 
 
 class ContraindicationSeverity(StrEnum):
@@ -89,6 +90,7 @@ class ContraindicationSeverity(StrEnum):
 
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
+    UNKNOWN = "unknown"
 
 
 class Likelihood(StrEnum):
@@ -375,6 +377,9 @@ class ContraindicatedInProps(BaseModel):
     severity: ContraindicationSeverity = Field(
         description="Absolute or relative contraindication"
     )
+    evidence_quality: EvidenceQuality | None = Field(
+        default=None, description="Evidence quality"
+    )
     conditions_json: str | None = Field(
         default=None, description="JSON-encoded eligibility criteria"
     )
@@ -384,6 +389,9 @@ class InteractsWithProps(BaseModel):
     """Properties on INTERACTS_WITH edges (Drug → Drug)."""
 
     severity: InteractionSeverity = Field(description="Interaction severity")
+    evidence_quality: EvidenceQuality | None = Field(
+        default=None, description="Evidence quality"
+    )
     mechanism: str | None = Field(default=None, description="Interaction mechanism")
     clinical_effect: str | None = Field(
         default=None, description="Clinical effect description"

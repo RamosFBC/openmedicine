@@ -298,7 +298,8 @@ def parse_interaction_properties(text: str) -> dict[str, str]:
     if effect_match:
         props["clinical_effect"] = effect_match.group(1).strip()[:100]
 
-    # Severity
+    # Severity — only set when keywords provide signal; omit to let caller
+    # default to UNKNOWN when no textual evidence of severity exists.
     if any(
         w in text.lower()
         for w in ["avoid", "contraindicated", "never", "must not"]
@@ -309,7 +310,10 @@ def parse_interaction_properties(text: str) -> dict[str, str]:
         for w in ["caution", "careful", "monitor closely"]
     ):
         props["severity"] = "MODERATE"
-    else:
+    elif any(
+        w in text.lower()
+        for w in ["minor", "mild", "minimal", "unlikely"]
+    ):
         props["severity"] = "MINOR"
 
     return props

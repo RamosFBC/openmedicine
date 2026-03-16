@@ -49,8 +49,10 @@ class SemanticMatch(BaseModel):
     conditions_json: str | None = Field(
         default=None, description="Eligibility criteria"
     )
-    conditions_met: bool = Field(
-        default=True, description="Whether patient meets criteria"
+    conditions_met: bool | None = Field(
+        default=True,
+        description="Whether patient meets criteria. True=all passed, "
+        "False=at least one failed, None=uncertain (missing variables)",
     )
     missing_variables: list[str] = Field(
         default_factory=list, description="Variables needed but not provided"
@@ -58,6 +60,10 @@ class SemanticMatch(BaseModel):
     source_layer: str = Field(
         default="direct",
         description="Retrieval layer: direct, expanded, or vector",
+    )
+    similarity_score: float | None = Field(
+        default=None,
+        description="Cosine similarity score (0-1) for vector-sourced matches",
     )
 
 
@@ -70,7 +76,11 @@ class RecommendationMatch(BaseModel):
     action_detail: str = Field(description="Human-readable explanation")
     strength: str = Field(description="Recommendation strength")
     evidence_quality: str = Field(description="Evidence quality level")
-    conditions_met: bool = Field(default=True)
+    conditions_met: bool | None = Field(
+        default=True,
+        description="Whether patient meets criteria. True=all passed, "
+        "False=at least one failed, None=uncertain (missing variables)",
+    )
     missing_variables: list[str] = Field(default_factory=list)
 
 
@@ -105,4 +115,13 @@ class GraphRAGResult(BaseModel):
     hints: list[str] = Field(
         default_factory=list,
         description="Reformulation suggestions when results are empty",
+    )
+    data_coverage: Literal["full", "partial", "none"] = Field(
+        default="full",
+        description=(
+            "Whether queried entities exist in the graph. "
+            "'none' = entity not found (cannot confirm safety). "
+            "'partial' = some entities found. "
+            "'full' = all queried entities found."
+        ),
     )

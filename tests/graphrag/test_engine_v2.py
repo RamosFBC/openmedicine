@@ -6,6 +6,7 @@ from unittest.mock import MagicMock, patch
 from open_medicine.graphrag.reasoning.engine_v2 import (
     OPS,
     STRENGTH_RANK,
+    VECTOR_SIMILARITY_THRESHOLD,
     ReasoningEngine,
 )
 from open_medicine.graphrag.reasoning.types_v2 import (
@@ -176,6 +177,30 @@ class TestQueryContraindications:
         # Should only call execute_read once (drug found, no need for drug_class)
         assert conn.execute_read.call_count == 1
 
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_quality_propagated_from_graph(self, mock_link):
+        """C2: evidence_quality should be read from graph row, not hardcoded."""
+        drug = MagicMock()
+        drug.node_id = "drug_lisinopril"
+        drug.node_label = "Drug"
+        mock_link.return_value = drug
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "d1",
+                "disease_name": "Pregnancy",
+                "strength": "strong_against",
+                "severity": "absolute",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+        q = ClinicalQuery(intent="contraindication", concepts=["Lisinopril"], include_evidence=False)
+        result = engine.query(q)
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].evidence_quality == "high"
+
 
 class TestQueryInteractions:
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
@@ -194,6 +219,31 @@ class TestQueryInteractions:
         assert len(result.semantic_matches) == 1
         assert result.semantic_matches[0].edge_type == "INTERACTS_WITH"
         assert result.semantic_matches[0].entity_type == "Drug"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_quality_propagated_from_graph(self, mock_link):
+        """C2: evidence_quality should be read from graph row, not hardcoded."""
+        linked = MagicMock()
+        linked.node_id = "drug_warfarin"
+        linked.node_label = "Drug"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_aspirin",
+                "entity_name": "Aspirin",
+                "entity_type": "Drug",
+                "severity": "major",
+                "evidence_quality": "moderate",
+                "mechanism": "antiplatelet",
+                "clinical_effect": "increased bleeding",
+            }
+        ]
+        q = ClinicalQuery(intent="interaction", concepts=["Warfarin"])
+        result = engine.query(q)
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].evidence_quality == "moderate"
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
     def test_tries_drug_class_when_drug_not_found(self, mock_link):
@@ -495,8 +545,8 @@ class TestEvaluateConditions:
             conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {})
-        # L4 fix: missing vars ≠ failed conditions — conditions_met=True
-        assert match.conditions_met is True
+        # C1 safety fix: missing vars → conditions_met=None (uncertain)
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
 
     def test_invalid_json_ignored(self):
@@ -562,8 +612,8 @@ class TestEvaluateConditions:
 
     # --- L4: Missing vars vs failed conditions ---
 
-    def test_missing_vars_only_does_not_fail_conditions(self):
-        """Missing vars but no failed condition → conditions_met=True."""
+    def test_missing_vars_only_sets_uncertain(self):
+        """Missing vars but no failed condition → conditions_met=None (uncertain)."""
         engine, _ = _make_engine()
         conditions = json.dumps([
             {"variable": "eGFR", "operator": ">=", "threshold": 30}
@@ -574,7 +624,7 @@ class TestEvaluateConditions:
             evidence_quality="high", conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {})
-        assert match.conditions_met is True
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
 
     def test_failed_condition_sets_conditions_met_false(self):
@@ -592,7 +642,7 @@ class TestEvaluateConditions:
         assert match.conditions_met is False
 
     def test_mixed_missing_and_met_conditions(self):
-        """One met condition + one missing var → conditions_met=True."""
+        """One met condition + one missing var → conditions_met=None (uncertain)."""
         engine, _ = _make_engine()
         conditions = json.dumps([
             {"variable": "LVEF", "operator": "<=", "threshold": 40},
@@ -604,8 +654,149 @@ class TestEvaluateConditions:
             evidence_quality="high", conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {"LVEF": 30})
-        assert match.conditions_met is True
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
+
+
+class TestThreeStateConditions:
+    """C1 safety fix: three-state conditions_met logic.
+
+    True  → all conditions evaluated and passed
+    None  → uncertain — missing variables prevent full evaluation
+    False → at least one condition explicitly failed
+    """
+
+    def test_all_conditions_pass_returns_true(self):
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+            {"variable": "eGFR", "operator": ">=", "threshold": 30},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 30, "eGFR": 45})
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_missing_variable_returns_none(self):
+        """A contraindication with unknown pregnancy status must NOT pass."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "pregnant", "operator": "==", "threshold": "false"},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="CONTRAINDICATED_IN", strength="strong_against",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {})
+        assert match.conditions_met is None
+        assert "pregnant" in match.missing_variables
+
+    def test_failed_condition_returns_false(self):
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 55})
+        assert match.conditions_met is False
+        assert match.missing_variables == []
+
+    def test_failed_plus_missing_returns_false(self):
+        """If any condition explicitly fails, result is False even with missing vars."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+            {"variable": "eGFR", "operator": ">=", "threshold": 30},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 55})  # fails; eGFR missing
+        assert match.conditions_met is False
+        assert "eGFR" in match.missing_variables
+
+    def test_no_conditions_stays_true(self):
+        """No conditions_json → conditions_met stays at default True."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=None,
+        )
+        engine._evaluate_match_conditions(match, {})
+        assert match.conditions_met is True
+
+    def test_build_result_sort_order_with_uncertain(self):
+        """True matches rank before None (uncertain) which rank before False."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d_false", entity_name="False", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=False,
+            ),
+            SemanticMatch(
+                entity_id="d_none", entity_name="None", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=None,
+            ),
+            SemanticMatch(
+                entity_id="d_true", entity_name="True", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=True,
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.semantic_matches[0].conditions_met is True
+        assert result.semantic_matches[1].conditions_met is None
+        assert result.semantic_matches[2].conditions_met is False
+
+    def test_build_result_confidence_medium_for_uncertain_only(self):
+        """If only uncertain matches exist, confidence is medium."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d1", entity_name="D", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=None,
+                missing_variables=["eGFR"],
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"
+
+    def test_build_result_confidence_high_when_true_match_exists(self):
+        """If at least one True match exists alongside None, confidence is high."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d1", entity_name="D1", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=True,
+            ),
+            SemanticMatch(
+                entity_id="d2", entity_name="D2", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="moderate_for",
+                evidence_quality="high", conditions_met=None,
+                missing_variables=["eGFR"],
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
 
 
 class TestEvaluateCondition:
@@ -1400,7 +1591,7 @@ class TestVariableAliases:
 
         engine._evaluate_match_conditions(match, {"ejection_fraction": 35})
 
-        assert match.conditions_met is True  # known condition met
+        assert match.conditions_met is None  # uncertain: known condition met but missing var
         assert "some_unknown_var" in match.missing_variables
 
     def test_multiple_aliases_in_same_query(self):
@@ -1643,3 +1834,342 @@ class TestVectorDeduplication:
         assert len(result.semantic_matches) == 2
         names = {m.entity_name for m in result.semantic_matches}
         assert names == {"HFrEF", "MRA"}
+
+
+# ---------------------------------------------------------------------------
+# C7: data_coverage — distinguish "no data" from "no contraindications"
+# ---------------------------------------------------------------------------
+
+
+def _make_unknown_entity():
+    """Create a mock entity that is NOT in terminology (no coded IDs)."""
+    entity = MagicMock()
+    entity.node_id = "drug:unknowndrug123"
+    entity.node_label = "Drug"
+    entity.snomed_code = None
+    entity.rxnorm_code = None
+    entity.atc_code = None
+    entity.loinc_code = None
+    entity.icd10_code = None
+    entity.cpt_code = None
+    entity.gmdn_code = None
+    return entity
+
+
+def _make_known_entity(node_id="rxnorm:12345", label="Drug"):
+    """Create a mock entity that IS in terminology (has coded IDs)."""
+    entity = MagicMock()
+    entity.node_id = node_id
+    entity.node_label = label
+    entity.snomed_code = None
+    entity.rxnorm_code = "12345"
+    entity.atc_code = None
+    entity.loinc_code = None
+    entity.icd10_code = None
+    entity.cpt_code = None
+    entity.gmdn_code = None
+    return entity
+
+
+class TestDataCoverageContraindications:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_drug_returns_coverage_none(self, mock_link):
+        """Unknown drug -> data_coverage='none' (cannot confirm safety)."""
+        unknown = _make_unknown_entity()
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="contraindication", concepts=["FakeDrugXYZ"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_drug_no_results_returns_coverage_full(self, mock_link):
+        """Known drug with no contraindications -> data_coverage='full'."""
+        known = _make_known_entity()
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="contraindication", concepts=["Metoprolol"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_mixed_concepts_returns_coverage_partial(self, mock_link):
+        """One known + one unknown concept -> data_coverage='partial'."""
+        known = _make_known_entity()
+        unknown = _make_unknown_entity()
+
+        # contraindications: tries ("drug", "drug_class") per concept
+        # Concept 1 "Metoprolol": drug -> known, finds rows -> found=True, break
+        # Concept 2 "FakeDrug": drug -> unknown (not None but no codes),
+        #   no CI rows, then parent classes (empty), then drug_class -> unknown, no CI rows
+        mock_link.side_effect = [known, unknown, unknown]
+
+        engine, conn = _make_engine()
+        # Call 1: find_contraindications for known drug -> results, break
+        # Call 2: find_contraindications for unknown as drug -> empty
+        # Call 3: _get_parent_classes for unknown drug -> empty
+        # Call 4: find_contraindications for unknown as drug_class -> empty
+        conn.execute_read.side_effect = [
+            [{"disease_id": "d1", "disease_name": "Asthma",
+              "strength": "strong_against", "evidence_quality": "",
+              "conditions": None}],
+            [],  # CI for FakeDrug as drug
+            [],  # parent classes for FakeDrug
+            [],  # CI for FakeDrug as drug_class
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication", concepts=["Metoprolol", "FakeDrug"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert result.data_coverage == "partial"
+
+
+class TestDataCoverageTreatments:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_disease_returns_coverage_none(self, mock_link):
+        """Unknown disease -> data_coverage='none'."""
+        unknown = _make_unknown_entity()
+        unknown.node_label = "Disease"
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="treatment_selection", concepts=["FakeDisease"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_disease_returns_coverage_full(self, mock_link):
+        """Known disease -> data_coverage='full'."""
+        known = _make_known_entity(node_id="snomed:42343007", label="Disease")
+        known.snomed_code = "42343007"
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="treatment_selection", concepts=["Heart Failure"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"
+
+
+class TestDataCoverageInteractions:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_unknown_drug_interactions_coverage_none(self, mock_link):
+        """Unknown drug in interaction query -> data_coverage='none'."""
+        unknown = _make_unknown_entity()
+        mock_link.return_value = unknown
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="interaction", concepts=["UnknownDrug"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+
+class TestDataCoverageMonitoring:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members", return_value=[])
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_fully_unknown_monitoring_coverage_none(self, _mock_link, _mock_members):
+        """Completely unknown concept -> data_coverage='none'."""
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = []
+
+        q = ClinicalQuery(intent="monitoring", concepts=["TotallyUnknown"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "none"
+
+
+class TestDataCoverageDosing:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_known_drug_dosing_coverage_full(self, mock_link):
+        """Known drug in dosing query -> data_coverage='full'."""
+        known = _make_known_entity()
+        mock_link.return_value = known
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"disease_id": "d1", "disease": "HFrEF", "conditions": None}
+        ]
+
+        q = ClinicalQuery(intent="dosing", concepts=["Metoprolol"])
+        result = engine.query(q)
+
+        assert result.data_coverage == "full"
+
+
+class TestVectorSimilarityThreshold:
+    """Tests for cosine similarity threshold filtering in vector fallback."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_below_threshold_filtered_out(self, _mock_link, mock_embed):
+        """Vector results with score < 0.7 should be discarded."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        # Return rows: one below threshold, one above
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_aspirin",
+                "entity_name": "Aspirin",
+                "entity_type": "Drug",
+                "strength": "weak_for",
+                "evidence_quality": "low",
+                "conditions": None,
+                "score": 0.5,
+            },
+            {
+                "entity_id": "drug_acetaminophen",
+                "entity_name": "Acetaminophen",
+                "entity_type": "Drug",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "conditions": None,
+                "score": 0.85,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["acetaminophen"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        # Only the above-threshold match should survive
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "Acetaminophen"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_above_threshold_kept(self, _mock_link, mock_embed):
+        """Vector results at or above 0.7 should be kept."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_a",
+                "entity_name": "DrugA",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.7,
+            },
+            {
+                "entity_id": "drug_b",
+                "entity_name": "DrugB",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.95,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["something"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 2
+        names = {m.entity_name for m in result.semantic_matches}
+        assert names == {"DrugA", "DrugB"}
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_similarity_score_populated_on_vector_matches(self, _mock_link, mock_embed):
+        """Vector matches should have similarity_score set from the row score."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_x",
+                "entity_name": "DrugX",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.82,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["test"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        match = result.semantic_matches[0]
+        assert match.similarity_score == 0.82
+        assert match.source_layer == "vector"
+
+    def test_non_vector_matches_have_none_similarity_score(self):
+        """Non-vector SemanticMatch objects should have similarity_score=None."""
+        match = SemanticMatch(
+            entity_id="drug_1",
+            entity_name="TestDrug",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            source_layer="direct",
+        )
+        assert match.similarity_score is None
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_all_below_threshold_returns_empty(self, _mock_link, mock_embed):
+        """If all vector results are below threshold, return empty list."""
+        mock_embed.return_value = [0.1] * 128
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_a",
+                "entity_name": "DrugA",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.3,
+            },
+            {
+                "entity_id": "drug_b",
+                "entity_name": "DrugB",
+                "entity_type": "Drug",
+                "strength": "",
+                "evidence_quality": "",
+                "conditions": None,
+                "score": 0.65,
+            },
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["something"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 0
+
+    def test_threshold_is_module_constant(self):
+        """VECTOR_SIMILARITY_THRESHOLD should be 0.7."""
+        assert VECTOR_SIMILARITY_THRESHOLD == 0.7

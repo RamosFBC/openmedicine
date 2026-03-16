@@ -85,12 +85,20 @@ class TestTemporalType:
 
 class TestInteractionSeverity:
     def test_all_values(self):
-        assert {v.value for v in InteractionSeverity} == {"major", "moderate", "minor"}
+        assert {v.value for v in InteractionSeverity} == {"major", "moderate", "minor", "unknown"}
+
+    def test_unknown_exists(self):
+        assert InteractionSeverity.UNKNOWN == "unknown"
+        assert InteractionSeverity("unknown") == InteractionSeverity.UNKNOWN
 
 
 class TestContraindicationSeverity:
     def test_all_values(self):
-        assert {v.value for v in ContraindicationSeverity} == {"absolute", "relative"}
+        assert {v.value for v in ContraindicationSeverity} == {"absolute", "relative", "unknown"}
+
+    def test_unknown_exists(self):
+        assert ContraindicationSeverity.UNKNOWN == "unknown"
+        assert ContraindicationSeverity("unknown") == ContraindicationSeverity.UNKNOWN
 
 
 class TestLikelihood:
@@ -436,6 +444,21 @@ class TestContraindicatedInProps:
         )
         assert p.severity == ContraindicationSeverity.ABSOLUTE
 
+    def test_evidence_quality_optional(self):
+        p = ContraindicatedInProps(
+            strength=RecommendationStrength.STRONG_AGAINST,
+            severity=ContraindicationSeverity.ABSOLUTE,
+        )
+        assert p.evidence_quality is None
+
+    def test_evidence_quality_accepted(self):
+        p = ContraindicatedInProps(
+            strength=RecommendationStrength.STRONG_AGAINST,
+            severity=ContraindicationSeverity.ABSOLUTE,
+            evidence_quality=EvidenceQuality.HIGH,
+        )
+        assert p.evidence_quality == EvidenceQuality.HIGH
+
 
 class TestInteractsWithProps:
     def test_valid(self):
@@ -445,6 +468,17 @@ class TestInteractsWithProps:
             clinical_effect="Increased bleeding risk",
         )
         assert p.severity == InteractionSeverity.MAJOR
+
+    def test_evidence_quality_optional(self):
+        p = InteractsWithProps(severity=InteractionSeverity.MODERATE)
+        assert p.evidence_quality is None
+
+    def test_evidence_quality_accepted(self):
+        p = InteractsWithProps(
+            severity=InteractionSeverity.MAJOR,
+            evidence_quality=EvidenceQuality.MODERATE,
+        )
+        assert p.evidence_quality == EvidenceQuality.MODERATE
 
 
 class TestDosedForProps:
