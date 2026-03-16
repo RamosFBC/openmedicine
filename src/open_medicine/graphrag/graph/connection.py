@@ -1,10 +1,15 @@
 from __future__ import annotations
+import platform
 from typing import Any
 import neo4j
 
 
 class GraphConnection:
     def __init__(self, uri: str, user: str, password: str) -> None:
+        # macOS Python can't verify Neo4j Aura's certificate chain;
+        # use neo4j+ssc:// (skip certificate verification) on Darwin.
+        if platform.system() == "Darwin" and "neo4j+s://" in uri:
+            uri = uri.replace("neo4j+s://", "neo4j+ssc://")
         self._driver = neo4j.GraphDatabase.driver(uri, auth=(user, password))
 
     def close(self) -> None:

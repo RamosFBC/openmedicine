@@ -56,4 +56,5 @@ class TestEmbedQuery:
         mock_embed.assert_called_once_with(
             ["dosing apixaban"], api_key="key",
             model="voyage-3", input_type="query",
+            max_retries=1, timeout=10.0,
         )

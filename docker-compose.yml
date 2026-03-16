@@ -9,6 +9,19 @@ services:
       NEO4J_PLUGINS: '["apoc"]'
     volumes:
       - neo4j_data:/data
+    profiles:
+      - local-graph
+
+  openmedicine:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      GRAPHRAG_NEO4J_URI: ${GRAPHRAG_NEO4J_URI}
+      GRAPHRAG_NEO4J_USER: ${GRAPHRAG_NEO4J_USER}
+      GRAPHRAG_NEO4J_PASSWORD: ${GRAPHRAG_NEO4J_PASSWORD}
+      OM_AUTH_MODE: ${OM_AUTH_MODE:-none}
+      OM_API_KEYS: ${OM_API_KEYS:-}
 
 volumes:
   neo4j_data:

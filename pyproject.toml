@@ -64,11 +64,17 @@ graphrag = [
     "anthropic>=0.40.0",
     "pydantic-settings>=2.0.0",
 ]
+service = [
+    "uvicorn>=0.30.0",
+    "sse-starlette>=1.6.0",
+    "pydantic-settings>=2.0.0",
+]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/open_medicine"]
 
 [project.scripts]
 open-medicine-mcp = "open_medicine.mcp.server:main"
-open-medicine-graphrag = "open_medicine.graphrag.server.__main__:main"
+open-medicine-graphrag = "open_medicine.graphrag.server.mcp_server:main"
 open-medicine-graphrag-ingest = "open_medicine.graphrag.ingest:main"
+open-medicine-server = "open_medicine.server.__main__:main"

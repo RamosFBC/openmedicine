@@ -144,3 +144,7 @@ Overall:          [grade]
 Recommendations:
 - [actionable items based on failures]
 ```
+
+**Remediation:** If grade < B+, run `/enrich-graph` to improve edge property coverage, then re-audit. If CRITICAL clinical spot-checks fail, investigate the source extraction and re-ingest if needed.
+
+Follow the Severity Definitions from CLAUDE.md for all findings.

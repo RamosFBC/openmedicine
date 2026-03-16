@@ -41,7 +41,10 @@ with GraphConnection(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_pas
 
 ### `add-term <name> <type> [aliases...]`
 
-Add a new term to the terminology files:
+Add a new term to the terminology files.
+
+**Validation required before adding:** (1) Verify the term exists in the appropriate terminology system (SNOMED, LOINC, ATC, RxNorm). (2) Check for duplicates — search existing terminology JSON for the term or its aliases. (3) Provide the source reference for the new term. Never add terms without verified codes.
+
 
 ```bash
 uv run python -c "
@@ -148,3 +151,7 @@ with GraphConnection(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_pas
         print('\nTo fix: re-run /ingest-guideline to reload the graph')
 "
 ```
+
+## Quality Assurance
+
+After any maintenance operation, verify A+ quality standards from CLAUDE.md are maintained. Run `/audit-graph` if structural changes were made.

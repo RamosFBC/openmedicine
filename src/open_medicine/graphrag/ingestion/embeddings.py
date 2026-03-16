@@ -12,6 +12,7 @@ def embed_texts(
     input_type: str = "document",
     batch_size: int = 128,
     max_retries: int = 3,
+    timeout: float = 60.0,
 ) -> list[list[float]]:
     """Embed a list of texts using the Voyage AI API."""
     all_embeddings: list[list[float]] = []
@@ -33,7 +34,7 @@ def embed_texts(
                     "model": model,
                     "input_type": input_type,
                 },
-                timeout=60.0,
+                timeout=timeout,
             )
             if response.status_code == 429:
                 wait = 30 * (attempt + 1)
@@ -54,6 +55,13 @@ def embed_query(
     api_key: str,
     model: str = "voyage-3",
 ) -> list[float]:
-    """Embed a single query text for similarity search."""
-    results = embed_texts([text], api_key=api_key, model=model, input_type="query")
+    """Embed a single query text for similarity search.
+
+    Uses a shorter timeout (10s) and no retries since this is called
+    during interactive queries where latency matters.
+    """
+    results = embed_texts(
+        [text], api_key=api_key, model=model,
+        input_type="query", max_retries=1, timeout=10.0,
+    )
     return results[0]

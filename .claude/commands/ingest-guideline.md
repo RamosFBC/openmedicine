@@ -133,6 +133,8 @@ if result.rejected > 0:
 - Zero pregnancy contraindications targeting managed disease instead of Pregnancy
 - If pass rate < 80%, re-run the failing typed extractors with explicit correction instructions
 
+**Note:** Phase 2.3 handles initial extraction validation; Phase 2.5 handles concept-level validation. Both are required for A+ quality.
+
 ### Phase 2.5: Legacy Quality Gate (Concept Validation)
 
 Before proceeding to normalization, run a **strict quality gate** on the raw extractions:
@@ -504,3 +506,5 @@ Read the validator agent doc and embed its full instructions in the agent prompt
 
 The validator runs Tier 1 (structural Cypher checks) + Tier 2 (clinical scenario tests)
 and produces a scored report. **Grade B+ (≥75/100) = pass.**
+
+After ingestion, the graph must meet A+ quality standards defined in CLAUDE.md. Enrichment via `/enrich-graph` is REQUIRED — ingestion alone does not achieve A+ quality.

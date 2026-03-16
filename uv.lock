@@ -560,6 +560,11 @@ graphrag = [
     { name = "pydantic-settings" },
     { name = "uvicorn" },
 ]
+service = [
+    { name = "pydantic-settings" },
+    { name = "sse-starlette" },
+    { name = "uvicorn" },
+]
 test = [
     { name = "ascvd" },
     { name = "hypothesis" },
@@ -578,10 +583,13 @@ requires-dist = [
     { name = "neo4j", marker = "extra == 'graphrag'", specifier = ">=5.0.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "pydantic-settings", marker = "extra == 'graphrag'", specifier = ">=2.0.0" },
+    { name = "pydantic-settings", marker = "extra == 'service'", specifier = ">=2.0.0" },
     { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
+    { name = "sse-starlette", marker = "extra == 'service'", specifier = ">=1.6.0" },
     { name = "uvicorn", marker = "extra == 'graphrag'", specifier = ">=0.30.0" },
+    { name = "uvicorn", marker = "extra == 'service'", specifier = ">=0.30.0" },
 ]
-provides-extras = ["test", "embeddings", "graphrag"]
+provides-extras = ["test", "embeddings", "graphrag", "service"]
 
 [[package]]
 name = "packaging"
