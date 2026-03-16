@@ -153,6 +153,43 @@ class TestInteractionEdgeProperties:
         assert match.edge_properties.get("severity") is None
 
 
+class TestContraindicationEdgeProperties:
+    """Verify contraindication queries surface severity."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_contraindication_severity_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="contraindication", concepts=["sacubitril_valsartan"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["severity"] == "ABSOLUTE"
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]

@@ -291,6 +291,9 @@ class ReasoningEngine:
                         strength=row.get("strength", ""),
                         evidence_quality=row.get("evidence_quality") or "",
                         conditions_json=row.get("conditions"),
+                        edge_properties={
+                            "severity": row.get("severity"),
+                        },
                     )
                     self._evaluate_match_conditions(match, q.patient_vars)
                     semantic_matches.append(match)
@@ -317,6 +320,9 @@ class ReasoningEngine:
                                 evidence_quality=row.get("evidence_quality") or "",
                                 conditions_json=row.get("conditions"),
                                 source_layer="expanded",
+                                edge_properties={
+                                    "severity": row.get("severity"),
+                                },
                             )
                             self._evaluate_match_conditions(match, q.patient_vars)
                             semantic_matches.append(match)
