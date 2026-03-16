@@ -386,6 +386,7 @@ class TestFraminghamRiskThresholdBoundaries:
 # =============================================================================
 
 
+@pytest.mark.slow
 @given(
     is_female=st.booleans(),
     age=st.integers(min_value=30, max_value=74),
@@ -423,6 +424,7 @@ def test_framingham_fuzz_valid_range(
     assert result.evidence.source_doi == "10.1161/CIRCULATIONAHA.107.699579"
 
 
+@pytest.mark.slow
 @given(
     is_female=st.booleans(),
     age=st.integers(min_value=30, max_value=74),
@@ -458,6 +460,7 @@ def test_framingham_fuzz_no_nan(
     assert not math.isinf(result.value)
 
 
+@pytest.mark.slow
 @given(
     is_female=st.booleans(),
     age=st.one_of(

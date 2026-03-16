@@ -75,6 +75,7 @@ def test_nfs_fhir_code():
     assert res.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=18, max_value=90),
     bmi=st.floats(min_value=15.0, max_value=60.0),

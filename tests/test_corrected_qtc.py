@@ -99,6 +99,7 @@ def test_fhir_code():
 
 # --- Fuzz tests ---
 
+@pytest.mark.slow
 @given(
     qt_ms=st.floats(min_value=100, max_value=700),
     heart_rate=st.floats(min_value=20, max_value=250),
@@ -110,6 +111,7 @@ def test_qtc_fuzz_bazett(qt_ms, heart_rate):
     assert result.value > 0
     assert result.interpretation
 
+@pytest.mark.slow
 @given(
     qt_ms=st.floats(min_value=100, max_value=700),
     heart_rate=st.floats(min_value=20, max_value=250),

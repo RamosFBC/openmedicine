@@ -70,6 +70,7 @@ def test_meld_na_fhir_code():
     assert res.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     creatinine=st.floats(min_value=0.3, max_value=8.0),
     bilirubin=st.floats(min_value=0.1, max_value=50.0),

@@ -52,6 +52,7 @@ def test_evidence():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     fio2=st.floats(min_value=0.21, max_value=1.0),
     pao2=st.floats(min_value=20, max_value=600),

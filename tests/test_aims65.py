@@ -190,6 +190,7 @@ def test_aims65_defaults():
 # Tier 2: Property-Based Fuzz Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     st.builds(
         AIMS65Params,

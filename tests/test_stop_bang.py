@@ -264,6 +264,7 @@ def test_stop_bang_score_7():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         STOPBangParams,
@@ -289,6 +290,7 @@ def test_stop_bang_fuzz_bounds(params):
     assert result.evidence.source_doi == "10.1097/ALN.0b013e31816d83e4"
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         STOPBangParams,

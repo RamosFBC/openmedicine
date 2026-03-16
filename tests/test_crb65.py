@@ -268,6 +268,7 @@ def test_crb65_each_criterion_individually():
 # Tier 2: Property-Based Fuzz Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     confusion=st.booleans(),
     respiratory_rate=st.integers(min_value=8, max_value=60),
@@ -300,6 +301,7 @@ def test_crb65_fuzz_valid_range(confusion, respiratory_rate, systolic_bp, diasto
     assert result.evidence.description
 
 
+@pytest.mark.slow
 @given(
     confusion=st.booleans(),
     respiratory_rate=st.integers(min_value=8, max_value=60),
@@ -327,6 +329,7 @@ def test_crb65_fuzz_risk_stratification_consistency(confusion, respiratory_rate,
         assert "High risk" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     confusion=st.booleans(),
     respiratory_rate=st.integers(min_value=8, max_value=60),

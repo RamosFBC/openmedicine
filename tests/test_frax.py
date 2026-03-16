@@ -570,6 +570,7 @@ class TestFRAXNoteSimplifedEstimation:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=40, max_value=90),
     is_female=st.booleans(),
@@ -618,6 +619,7 @@ def test_frax_fuzz_valid_range(
     assert "Fracture Risk Assessment" in result.fhir_display
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=40, max_value=90),
     is_female=st.booleans(),
@@ -642,6 +644,7 @@ def test_frax_fuzz_no_risk_factors_reasonable_range(
     assert result.value < 40.0
 
 
+@pytest.mark.slow
 @given(
     age=st.one_of(
         st.integers(min_value=1, max_value=39),

@@ -33,10 +33,13 @@ def _neo4j_uri() -> str:
     return uri
 
 
-pytestmark = pytest.mark.skipif(
-    not _neo4j_uri(),
-    reason="GRAPHRAG_NEO4J_URI / NEO4J_URI not set — skipping integration tests",
-)
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(
+        not _neo4j_uri(),
+        reason="GRAPHRAG_NEO4J_URI / NEO4J_URI not set — skipping integration tests",
+    ),
+]
 
 
 @pytest.fixture(scope="module")

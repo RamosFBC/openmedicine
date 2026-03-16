@@ -261,6 +261,7 @@ def test_tbsa_value_type():
 # ============================================================
 
 
+@pytest.mark.slow
 @given(
     head_and_neck=st.booleans(),
     anterior_trunk=st.booleans(),
@@ -302,6 +303,7 @@ def test_tbsa_fuzz_valid_range(
     assert result.evidence.source_doi == "10.1016/S0140-6736(51)91975-7"
 
 
+@pytest.mark.slow
 @given(
     head_and_neck=st.booleans(),
     anterior_trunk=st.booleans(),

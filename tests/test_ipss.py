@@ -315,6 +315,7 @@ def test_ipss_rejects_qol_out_of_range_low():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         IPSSParams,

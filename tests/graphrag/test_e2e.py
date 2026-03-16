@@ -6,10 +6,13 @@ import json
 import pytest
 from pathlib import Path
 
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("NEO4J_URI"),
-    reason="NEO4J_URI not set — skipping integration tests",
-)
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(
+        not os.environ.get("NEO4J_URI"),
+        reason="NEO4J_URI not set — skipping integration tests",
+    ),
+]
 
 
 @pytest.fixture(scope="module")

@@ -533,6 +533,7 @@ def test_pews_control_patient_median_score():
 # ---- Tier 2: Property-Based Fuzz Tests ----
 
 
+@pytest.mark.slow
 @given(
     hr=st.integers(min_value=0, max_value=300),
     sbp=st.integers(min_value=0, max_value=300),
@@ -566,6 +567,7 @@ def test_pews_fuzz_valid_range(hr, sbp, crt, rr, spo2, effort, age_group, o2_the
     assert result.evidence.source_doi == "10.1186/cc7998"
 
 
+@pytest.mark.slow
 @given(
     hr=st.integers(min_value=0, max_value=300),
     sbp=st.integers(min_value=0, max_value=300),

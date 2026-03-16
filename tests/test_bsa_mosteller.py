@@ -51,6 +51,7 @@ def test_bsa_fhir_code():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     height_cm=st.floats(min_value=30, max_value=250),
     weight_kg=st.floats(min_value=1, max_value=300),

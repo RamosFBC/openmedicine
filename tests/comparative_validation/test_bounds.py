@@ -44,6 +44,7 @@ from open_medicine.mcp.calculators.renal_dose_adjustment import (
     calculate_renal_dose_adjustment, RenalDoseAdjustmentParams, RenalMetric, _DRUG_DB
 )
 
+@pytest.mark.slow
 @given(
     st.builds(
         SOFAParams,
@@ -74,6 +75,7 @@ def test_sofa_bounds(params):
     assert len(result.interpretation) > 0
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CHADSVAScParams,
@@ -97,6 +99,7 @@ def test_chadsvasc_bounds(params):
     assert type(result.interpretation) == str
     assert len(result.interpretation) > 0
 
+@pytest.mark.slow
 @given(
     st.builds(
         CKDEPIParams,
@@ -120,6 +123,7 @@ def test_ckd_epi_bounds(params):
     assert "eGFR" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CockcroftGaultParams,
@@ -143,6 +147,7 @@ def test_cockcroft_gault_bounds(params):
     assert "mL/min" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         GCSParams,
@@ -164,6 +169,7 @@ def test_gcs_bounds(params):
     assert "Classification:" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         HASBLEDParams,
@@ -190,6 +196,7 @@ def test_hasbled_bounds(params):
     assert "HAS-BLED" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CURB65Params,
@@ -213,6 +220,7 @@ def test_curb65_bounds(params):
     assert "CURB-65" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         OttawaAnkleParams,
@@ -238,6 +246,7 @@ def test_ottawa_ankle_bounds(params):
     assert "Ottawa Ankle Rules:" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         GAD7Params,
@@ -262,6 +271,7 @@ def test_gad7_bounds(params):
     assert "GAD-7" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         AUDITCParams,
@@ -283,6 +293,7 @@ def test_audit_c_bounds(params):
     assert "AUDIT-C" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     temperature=st.floats(min_value=20.0, max_value=45.0),
     mean_arterial_pressure=st.floats(min_value=20.0, max_value=250.0),
@@ -355,6 +366,7 @@ def test_apache2_bounds(
     assert "APACHE II score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         ISTHDICParams,
@@ -377,6 +389,7 @@ def test_isth_dic_bounds(params):
     assert "DIC" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         MaintenanceIVFluidsParams,
@@ -399,6 +412,7 @@ def test_maintenance_iv_fluids_bounds(params):
     assert "mL/hr" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     is_female=st.booleans(),
     age=st.integers(min_value=30, max_value=74),
@@ -439,6 +453,7 @@ def test_framingham_bounds(
     assert "Framingham" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=40, max_value=90),
     is_female=st.booleans(),
@@ -489,6 +504,7 @@ def test_frax_bounds(
     assert "FRAX" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),
@@ -520,6 +536,7 @@ def test_das28_esr_bounds(
     assert "DAS28-ESR" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),
@@ -550,6 +567,7 @@ def test_das28_crp_bounds(
     assert "DAS28-CRP" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         RCRIParams,
@@ -574,6 +592,7 @@ def test_rcri_bounds(params):
     assert "RCRI" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     myocardial_infarction=st.booleans(),
     congestive_heart_failure=st.booleans(),
@@ -654,6 +673,7 @@ def test_charlson_bounds(
     assert "Estimated 10-year survival:" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         ECOGParams,
@@ -673,6 +693,7 @@ def test_ecog_bounds(params):
     assert "ECOG Performance Status" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         KarnofskyParams,
@@ -693,6 +714,7 @@ def test_karnofsky_bounds(params):
     assert "Karnofsky Performance Status" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         ApgarParams,
@@ -716,6 +738,7 @@ def test_apgar_bounds(params):
     assert "Apgar Score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         TBSAParams,
@@ -743,6 +766,7 @@ def test_tbsa_bounds(params):
     assert "TBSA" in result.interpretation or "No burn areas selected" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         EPDSParams,
@@ -771,6 +795,7 @@ def test_epds_bounds(params):
     assert "EPDS" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         ClinicalFrailtyParams,
@@ -790,6 +815,7 @@ def test_clinical_frailty_bounds(params):
     assert "Clinical Frailty Scale" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CAGEParams,
@@ -812,6 +838,7 @@ def test_cage_bounds(params):
     assert "CAGE score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=18, max_value=110),
     is_female=st.booleans(),
@@ -895,6 +922,7 @@ def test_psi_port_bounds(
     assert "PSI/PORT" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         IPSSParams,
@@ -921,6 +949,7 @@ def test_ipss_bounds(params):
     assert "IPSS" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         MASCCParams,
@@ -946,6 +975,7 @@ def test_mascc_bounds(params):
     assert "MASCC Risk Index is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         NaranjoParams,
@@ -974,6 +1004,7 @@ def test_naranjo_bounds(params):
     assert "Naranjo ADR Probability Scale score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CIWAArParams,
@@ -1002,6 +1033,7 @@ def test_ciwa_ar_bounds(params):
     assert "CIWA-Ar score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         RumackMatthewParams,
@@ -1024,6 +1056,7 @@ def test_rumack_matthew_bounds(params):
     assert result.fhir_code is None
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         MEWSParams,
@@ -1047,6 +1080,7 @@ def test_mews_bounds(params):
     assert "MEWS is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         COWSParams,
@@ -1076,6 +1110,7 @@ def test_cows_bounds(params):
     assert "COWS total score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         AIMS65Params,
@@ -1099,6 +1134,7 @@ def test_aims65_bounds(params):
     assert "AIMS65 Score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         STOPBangParams,
@@ -1125,6 +1161,7 @@ def test_stop_bang_bounds(params):
     assert "STOP-Bang score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         LRINECParams,
@@ -1149,6 +1186,7 @@ def test_lrinec_bounds(params):
     assert "LRINEC score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         RASSParams,
@@ -1169,6 +1207,7 @@ def test_rass_bounds(params):
     assert "RASS" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         PediatricGCSParams,
@@ -1191,6 +1230,7 @@ def test_pediatric_gcs_bounds(params):
     assert "Classification:" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CAMICUParams,
@@ -1216,6 +1256,7 @@ def test_cam_icu_bounds(params):
         assert result.value in (0, 1)
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         PEWSParams,
@@ -1242,6 +1283,7 @@ def test_pews_bounds(params):
     assert "Bedside PEWS score is" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         RenalDoseAdjustmentParams,

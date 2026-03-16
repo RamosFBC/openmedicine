@@ -235,6 +235,7 @@ class TestInputValidation:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         PediatricGCSParams,
@@ -254,6 +255,7 @@ def test_pediatric_gcs_fuzz_bounds(params):
     assert result.evidence.source_doi
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         PediatricGCSParams,
@@ -275,6 +277,7 @@ def test_pediatric_gcs_fuzz_severity_classification(params):
         assert "Severe" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         PediatricGCSParams,

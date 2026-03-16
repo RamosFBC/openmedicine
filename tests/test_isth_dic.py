@@ -460,6 +460,7 @@ class TestInputValidation:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     platelet_count=st.integers(min_value=0, max_value=800),
     fibrin_marker_increase=st.integers(min_value=0, max_value=2),
@@ -485,6 +486,7 @@ def test_isth_dic_fuzz_valid_range(
     assert result.evidence.source_doi
 
 
+@pytest.mark.slow
 @given(
     platelet_count=st.integers(min_value=0, max_value=800),
     fibrin_marker_increase=st.integers(min_value=0, max_value=2),

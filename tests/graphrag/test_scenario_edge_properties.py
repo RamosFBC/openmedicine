@@ -12,10 +12,13 @@ from open_medicine.graphrag.graph.connection import GraphConnection
 from open_medicine.graphrag.reasoning.engine_v2 import ReasoningEngine
 from open_medicine.graphrag.reasoning.types_v2 import ClinicalQuery
 
-pytestmark = pytest.mark.skipif(
-    not os.environ.get("GRAPHRAG_NEO4J_URI"),
-    reason="Requires live Neo4j (source .env)",
-)
+pytestmark = [
+    pytest.mark.slow,
+    pytest.mark.skipif(
+        not os.environ.get("GRAPHRAG_NEO4J_URI"),
+        reason="Requires live Neo4j (source .env)",
+    ),
+]
 
 
 @pytest.fixture(scope="module")

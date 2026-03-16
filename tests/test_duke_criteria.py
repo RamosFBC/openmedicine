@@ -459,6 +459,7 @@ class TestEvidenceAndFHIR:
 # =============================================================================
 
 
+@pytest.mark.slow
 @given(
     pathological_vegetation=st.booleans(),
     pathological_lesions=st.booleans(),
@@ -521,6 +522,7 @@ def test_duke_criteria_fuzz_valid_classification(
     assert result.fhir_display
 
 
+@pytest.mark.slow
 @given(
     pathological_vegetation=st.booleans(),
     pathological_lesions=st.booleans(),
@@ -572,6 +574,7 @@ def test_duke_criteria_fuzz_pathological_always_definite(
     assert result.value == "Definite"
 
 
+@pytest.mark.slow
 @given(
     pathological_vegetation=st.booleans(),
     pathological_lesions=st.booleans(),

@@ -46,6 +46,7 @@ def test_fhir_code():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     calcium=st.floats(min_value=4.0, max_value=16.0),
     albumin=st.floats(min_value=1.0, max_value=6.0),

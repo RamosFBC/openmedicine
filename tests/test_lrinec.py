@@ -457,6 +457,7 @@ def test_lrinec_clinical_scenario_cellulitis():
 # Tier 2: Property-Based Fuzz Tests (bounds checking)
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     st.builds(
         LRINECParams,

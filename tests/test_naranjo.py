@@ -463,6 +463,7 @@ class TestNaranjoClinicalScenarios:
 naranjo_response_strategy = st.sampled_from(list(NaranjoResponse))
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         NaranjoParams,
@@ -489,6 +490,7 @@ def test_naranjo_fuzz_bounds(params):
     assert result.evidence.source_doi == "10.1038/clpt.1981.154"
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         NaranjoParams,

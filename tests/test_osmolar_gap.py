@@ -37,6 +37,7 @@ def test_fhir_code():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     measured=st.floats(min_value=200, max_value=450),
     sodium=st.floats(min_value=100, max_value=180),

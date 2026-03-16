@@ -372,6 +372,7 @@ burden_strategy = st.sampled_from(list(BurdenOfIllness))
 cancer_strategy = st.sampled_from(list(CancerType))
 
 
+@pytest.mark.slow
 @given(
     burden_of_illness=burden_strategy,
     hypotension=st.booleans(),
@@ -419,6 +420,7 @@ def test_mascc_fuzz_valid_range(
     assert result.evidence.description
 
 
+@pytest.mark.slow
 @given(
     burden_of_illness=burden_strategy,
     hypotension=st.booleans(),

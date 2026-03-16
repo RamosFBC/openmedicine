@@ -348,6 +348,7 @@ VALID_ANXIETY = [0, 1, 2, 4]
 VALID_GOOSEFLESH = [0, 3, 5]
 
 
+@pytest.mark.slow
 @given(
     resting_pulse_rate=st.sampled_from(VALID_PULSE),
     sweating=st.sampled_from(VALID_SWEATING),
@@ -399,6 +400,7 @@ def test_cows_fuzz_valid_scores(
     assert result.evidence.source_doi == "10.1080/02791072.2003.10400007"
 
 
+@pytest.mark.slow
 @given(
     resting_pulse_rate=st.integers(min_value=0, max_value=4),
     sweating=st.integers(min_value=0, max_value=4),

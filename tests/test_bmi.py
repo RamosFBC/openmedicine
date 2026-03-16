@@ -57,6 +57,7 @@ def test_invalid_height():
     assert result.value is None
 
 
+@pytest.mark.slow
 @given(
     weight=st.floats(min_value=20, max_value=300),
     height=st.floats(min_value=50, max_value=250),

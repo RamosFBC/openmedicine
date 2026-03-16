@@ -157,6 +157,7 @@ def test_maintenance_iv_fluids_interpretation_mentions_weight():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     weight_kg=st.floats(min_value=0.1, max_value=300.0),
 )
@@ -175,6 +176,7 @@ def test_maintenance_iv_fluids_fuzz_valid_range(weight_kg):
     assert result.evidence.source_doi == "10.1542/peds.19.5.823"
 
 
+@pytest.mark.slow
 @given(
     weight_kg=st.floats(min_value=0.1, max_value=300.0),
 )
@@ -188,6 +190,7 @@ def test_maintenance_iv_fluids_fuzz_monotonic(weight_kg):
     assert result2.value >= result1.value
 
 
+@pytest.mark.slow
 @given(
     weight_kg=st.floats(min_value=0.1, max_value=10.0),
 )
@@ -200,6 +203,7 @@ def test_maintenance_iv_fluids_fuzz_first_bracket(weight_kg):
     assert result.value == expected
 
 
+@pytest.mark.slow
 @given(
     weight_kg=st.floats(min_value=10.01, max_value=20.0),
 )
@@ -212,6 +216,7 @@ def test_maintenance_iv_fluids_fuzz_second_bracket(weight_kg):
     assert result.value == expected
 
 
+@pytest.mark.slow
 @given(
     weight_kg=st.floats(min_value=20.01, max_value=300.0),
 )

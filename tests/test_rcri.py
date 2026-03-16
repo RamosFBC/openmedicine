@@ -311,6 +311,7 @@ def test_rcri_to_fhir():
 # for completeness, testing all 64 possible boolean combinations.
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         RCRIParams,

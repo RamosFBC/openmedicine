@@ -437,6 +437,7 @@ def test_ciwa_ar_clinical_scenario_borderline_mild_to_moderate():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CIWAArParams,
@@ -465,6 +466,7 @@ def test_ciwa_ar_fuzz_valid_range(params):
     assert result.evidence.source_doi == "10.1111/j.1360-0443.1989.tb00737.x"
 
 
+@pytest.mark.slow
 @given(
     st.builds(
         CIWAArParams,

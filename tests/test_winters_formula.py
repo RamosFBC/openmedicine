@@ -42,6 +42,7 @@ def test_fhir_code():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(bicarbonate=st.floats(min_value=1, max_value=40))
 @settings(max_examples=200)
 def test_fuzz(bicarbonate):

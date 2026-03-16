@@ -69,6 +69,7 @@ def test_fib4_fhir_code():
     assert res.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     age=st.integers(min_value=18, max_value=100),
     ast=st.floats(min_value=1.0, max_value=500.0),

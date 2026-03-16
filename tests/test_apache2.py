@@ -840,6 +840,7 @@ class TestIntegrationScenarios:
 # TIER 2: Property-Based Fuzz Tests
 # ===========================================================================
 
+@pytest.mark.slow
 @given(
     temperature=st.floats(min_value=20.0, max_value=45.0),
     mean_arterial_pressure=st.floats(min_value=20.0, max_value=250.0),
@@ -912,6 +913,7 @@ def test_apache2_fuzz_valid_range(
     assert result.evidence.source_doi == "10.1097/00003246-198510000-00009"
 
 
+@pytest.mark.slow
 @given(
     temperature=st.floats(min_value=20.0, max_value=45.0),
 )
@@ -922,6 +924,7 @@ def test_temperature_score_always_0_to_4(temperature):
     assert 0 <= score <= 4
 
 
+@pytest.mark.slow
 @given(
     gcs=st.integers(min_value=3, max_value=15),
 )
@@ -932,6 +935,7 @@ def test_gcs_score_always_0_to_12(gcs):
     assert 0 <= score <= 12
 
 
+@pytest.mark.slow
 @given(
     cr=st.floats(min_value=0.1, max_value=15.0),
     arf=st.booleans(),

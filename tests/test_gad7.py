@@ -271,6 +271,7 @@ def test_gad7_field_validation_rejects_out_of_range():
 # Tier 2: Property-Based Fuzz Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     feeling_nervous=st.integers(min_value=0, max_value=3),
     cannot_stop_worrying=st.integers(min_value=0, max_value=3),
@@ -309,6 +310,7 @@ def test_gad7_fuzz_valid_range(
     assert "GAD-7" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     feeling_nervous=st.integers(min_value=0, max_value=3),
     cannot_stop_worrying=st.integers(min_value=0, max_value=3),
@@ -351,6 +353,7 @@ def test_gad7_fuzz_additive_property(
     assert result.value == expected
 
 
+@pytest.mark.slow
 @given(
     feeling_nervous=st.integers(min_value=0, max_value=3),
     cannot_stop_worrying=st.integers(min_value=0, max_value=3),

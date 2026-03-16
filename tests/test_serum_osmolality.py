@@ -38,6 +38,7 @@ def test_fhir_code():
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     sodium=st.floats(min_value=100, max_value=180),
     glucose=st.floats(min_value=20, max_value=1000),

@@ -270,6 +270,7 @@ class TestEdgeCases:
 # Tier 2: Property-Based Fuzz Tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     serum=st.floats(min_value=0.0, max_value=1000.0),
     hours=st.floats(min_value=4.0, max_value=24.0),
@@ -291,6 +292,7 @@ def test_rumack_matthew_fuzz_valid_range(serum, hours):
     assert "only validated" not in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     serum=st.floats(min_value=0.0, max_value=1000.0),
     hours=st.floats(min_value=0.0, max_value=3.99),
@@ -304,6 +306,7 @@ def test_rumack_matthew_fuzz_before_4h(serum, hours):
     assert "only validated" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     serum=st.floats(min_value=0.0, max_value=1000.0),
     hours=st.floats(min_value=24.01, max_value=72.0),
@@ -317,6 +320,7 @@ def test_rumack_matthew_fuzz_after_24h(serum, hours):
     assert "only validated" in result.interpretation
 
 
+@pytest.mark.slow
 @given(
     serum=st.floats(min_value=0.0, max_value=1000.0),
     hours=st.floats(min_value=4.0, max_value=24.0),

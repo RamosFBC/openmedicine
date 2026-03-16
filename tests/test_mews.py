@@ -399,6 +399,7 @@ class TestMEWSCrossValidation:
 # Tier 2: Property-based fuzz tests
 # ---------------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     systolic_bp=st.integers(min_value=30, max_value=300),
     heart_rate=st.integers(min_value=10, max_value=250),
@@ -424,6 +425,7 @@ def test_mews_fuzz_valid_range(systolic_bp, heart_rate, respiratory_rate, temper
     assert result.evidence.source_doi == "10.1093/qjmed/94.10.521"
 
 
+@pytest.mark.slow
 @given(
     systolic_bp=st.integers(min_value=30, max_value=300),
     heart_rate=st.integers(min_value=10, max_value=250),
@@ -447,6 +449,7 @@ def test_mews_fuzz_individual_scores_bounded(systolic_bp, heart_rate, respirator
     assert 0 <= avpu_score <= 3
 
 
+@pytest.mark.slow
 @given(
     systolic_bp=st.integers(min_value=101, max_value=199),
     heart_rate=st.integers(min_value=51, max_value=100),

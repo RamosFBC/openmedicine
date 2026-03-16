@@ -551,6 +551,7 @@ class TestDAS28InterpretationContent:
 # Tier 2: Property-Based Fuzz Tests (mandatory for equation calculators)
 # -----------------------------------------------------------------------
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),
@@ -582,6 +583,7 @@ def test_das28_esr_fuzz_valid_range(tender_joint_count, swollen_joint_count, esr
     ])
 
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),
@@ -611,6 +613,7 @@ def test_das28_crp_fuzz_valid_range(tender_joint_count, swollen_joint_count, crp
     ])
 
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),
@@ -641,6 +644,7 @@ def test_das28_esr_fuzz_monotonic_esr(tender_joint_count, swollen_joint_count, e
         assert result_high.value >= result_low.value
 
 
+@pytest.mark.slow
 @given(
     tender_joint_count=st.integers(min_value=0, max_value=28),
     swollen_joint_count=st.integers(min_value=0, max_value=28),

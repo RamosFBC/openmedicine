@@ -369,6 +369,7 @@ class TestCAMICURASS:
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.slow
 @given(
     rass=st.integers(min_value=-5, max_value=4),
     feature1=st.booleans(),
@@ -409,6 +410,7 @@ def test_cam_icu_fuzz_valid_range(rass, feature1, feature2_errors, feature4_erro
     assert result.fhir_system == "http://loinc.org"
 
 
+@pytest.mark.slow
 @given(
     rass=st.integers(min_value=-3, max_value=4),
     feature2_errors=st.integers(min_value=3, max_value=10),
@@ -428,6 +430,7 @@ def test_cam_icu_fuzz_feature1_required(rass, feature2_errors, feature4_errors):
     assert result.value == 0
 
 
+@pytest.mark.slow
 @given(
     rass=st.integers(min_value=-3, max_value=4),
     feature2_errors=st.integers(min_value=0, max_value=2),
@@ -447,6 +450,7 @@ def test_cam_icu_fuzz_feature2_required(rass, feature2_errors, feature4_errors):
     assert result.value == 0
 
 
+@pytest.mark.slow
 @given(
     feature2_errors=st.integers(min_value=3, max_value=10),
     feature4_errors=st.integers(min_value=0, max_value=1),
