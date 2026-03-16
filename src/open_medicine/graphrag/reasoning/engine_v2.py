@@ -296,6 +296,7 @@ class ReasoningEngine:
                         },
                     )
                     self._evaluate_match_conditions(match, q.patient_vars)
+                    self._evaluate_contraindication_applicability(match, q.patient_vars)
                     semantic_matches.append(match)
 
                 if rows:
@@ -325,6 +326,7 @@ class ReasoningEngine:
                                 },
                             )
                             self._evaluate_match_conditions(match, q.patient_vars)
+                            self._evaluate_contraindication_applicability(match, q.patient_vars)
                             semantic_matches.append(match)
                         if c_rows:
                             found = True
@@ -940,6 +942,43 @@ class ReasoningEngine:
         else:
             match.conditions_met = True
         match.missing_variables = missing
+
+    # Map from disease names to patient variable keys for contraindication lookup
+    _DISEASE_TO_PATIENT_VAR: dict[str, str] = {
+        "angioedema": "history_of_angioedema",
+        "pregnancy": "pregnant",
+        "bilateral renal artery stenosis": "bilateral_renal_artery_stenosis",
+        "hyperkalemia": "history_of_hyperkalemia",
+        "cardiogenic shock": "cardiogenic_shock",
+    }
+
+    def _evaluate_contraindication_applicability(
+        self,
+        match: SemanticMatch,
+        patient_vars: dict[str, Any],
+    ) -> None:
+        """For contraindications without conditions_json, check if the disease
+        applies to the patient based on history variables.
+
+        Example: Angioedema contraindication checks history_of_angioedema.
+        If the patient variable is explicitly False, set conditions_met=False.
+        """
+        if match.conditions_json:
+            return  # Already handled by _evaluate_match_conditions
+
+        disease_name = match.entity_name.lower()
+        patient_var_key = self._DISEASE_TO_PATIENT_VAR.get(disease_name)
+        if not patient_var_key:
+            return  # No mapping — keep default conditions_met=True
+
+        # Normalize patient vars to check
+        norm_vars = {k.lower(): v for k, v in patient_vars.items()}
+        if patient_var_key in norm_vars:
+            if norm_vars[patient_var_key] is False:
+                match.conditions_met = False
+            else:
+                match.conditions_met = True
+        # If variable not provided, leave as True (conservative — assume contraindication applies)
 
     @staticmethod
     def _evaluate_condition(

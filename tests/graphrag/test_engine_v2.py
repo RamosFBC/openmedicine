@@ -273,6 +273,123 @@ class TestMonitoringEdgeProperties:
         assert match.edge_properties["threshold_stop"] == "K+ >= 6.0 mEq/L"
 
 
+class TestContraindicationPatientVarEvaluation:
+    """Verify contraindication respects patient_vars like history_of_angioedema."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_angioedema_false_suppresses_match(self, mock_link):
+        """When patient has no angioedema history, the contraindication should not fire."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={"history_of_angioedema": False},
+        )
+        result = engine.query(q)
+
+        # The match should still be returned (for awareness) but conditions_met=False
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.conditions_met is False
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_angioedema_true_fires_match(self, mock_link):
+        """When patient HAS angioedema history, conditions_met should be True."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={"history_of_angioedema": True},
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.conditions_met is True
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_patient_var_leaves_conditions_met_true(self, mock_link):
+        """When no patient vars provided, default conditions_met stays True."""
+        mock_entity = MagicMock()
+        mock_entity.node_id = "atc:C09DX"
+        mock_entity.node_label = "DrugClass"
+        mock_entity.snomed_code = None
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = "C09DX"
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:41291007",
+                "disease_name": "Angioedema",
+                "strength": "strong_against",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication",
+            concepts=["sacubitril_valsartan"],
+            patient_vars={},
+        )
+        result = engine.query(q)
+        match = result.semantic_matches[0]
+        assert match.conditions_met is True
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]
