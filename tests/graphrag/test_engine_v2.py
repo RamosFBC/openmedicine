@@ -1261,7 +1261,7 @@ class TestFetchEvidence:
         mock_link.return_value = linked
 
         engine, conn = _make_engine()
-        # First call: treatments query; second call: evidence fetch
+        # First call: treatments query; second: dosing enrichment; third: evidence fetch
         conn.execute_read.side_effect = [
             [
                 {
@@ -1273,6 +1273,7 @@ class TestFetchEvidence:
                     "conditions": None,
                 }
             ],
+            [],  # dosing enrichment (no dosing data)
             [
                 {
                     "source_text": "ARNi recommended for HFrEF...",
@@ -1375,6 +1376,7 @@ class TestLayer2Expansion:
                     "evidence_quality": "high", "conditions": None,
                 }
             ],
+            [],  # dosing enrichment
         ]
         q = ClinicalQuery(
             intent="treatment_selection", concepts=["HFrEF"],
@@ -1433,8 +1435,8 @@ class TestLayer2Expansion:
             include_evidence=False, min_results_threshold=1,
         )
         result = engine.query(q)
-        # Only 1 execute_read call (Layer 1), no expansion
-        assert conn.execute_read.call_count == 1
+        # 2 execute_read calls: Layer 1 + dosing enrichment, no expansion
+        assert conn.execute_read.call_count == 2
         assert "expanded" not in result.retrieval_layers_used
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
@@ -2718,3 +2720,90 @@ class TestConceptVariableInference:
         engine, _ = _make_engine()
         inferred = engine._infer_vars_from_concepts(["some_random_condition"])
         assert inferred == {}
+
+
+class TestTreatmentDosingEnrichment:
+    """Treatment results should include dosing summary from related DOSED_FOR edges."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_treatment_results_enriched_with_dosing(self, mock_link):
+        linked = MagicMock()
+        linked.node_id = "snomed:703272007"
+        linked.node_label = "Disease"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        # side_effect returns different results for sequential execute_read calls:
+        # Call 1: find_treatments (INDICATED_FOR results)
+        # Call 2: dosing enrichment query (DOSED_FOR properties)
+        conn.execute_read.side_effect = [
+            # Layer 1: INDICATED_FOR results
+            [
+                {
+                    "entity_id": "atc:A10BK",
+                    "entity_name": "SGLT2 Inhibitor",
+                    "entity_type": "DrugClass",
+                    "strength": "strong_for",
+                    "evidence_quality": "high",
+                    "conditions": None,
+                }
+            ],
+            # Dosing enrichment query result
+            [
+                {
+                    "entity_id": "atc:A10BK",
+                    "starting_dose": "10 mg",
+                    "target_dose": "10 mg",
+                    "max_dose": None,
+                    "frequency": "once daily",
+                }
+            ],
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["heart_failure_reduced_ef"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        sglt2 = next(
+            (m for m in result.semantic_matches if m.entity_name == "SGLT2 Inhibitor"),
+            None,
+        )
+        assert sglt2 is not None
+        assert sglt2.edge_properties.get("starting_dose") == "10 mg"
+        assert sglt2.edge_properties.get("frequency") == "once daily"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_treatment_enrichment_skips_non_drug_entities(self, mock_link):
+        """Disease entities in results should NOT get dosing enrichment."""
+        linked = MagicMock()
+        linked.node_id = "snomed:703272007"
+        linked.node_label = "Disease"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.side_effect = [
+            [
+                {
+                    "entity_id": "snomed:84114007",
+                    "entity_name": "Heart Failure",
+                    "entity_type": "Disease",
+                    "strength": "strong_for",
+                    "evidence_quality": "low",
+                    "conditions": None,
+                }
+            ],
+            # No dosing enrichment expected (no Drug/DrugClass matches)
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["heart_failure_reduced_ef"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        hf = next(
+            (m for m in result.semantic_matches if m.entity_name == "Heart Failure"),
+            None,
+        )
+        assert hf is not None
+        assert hf.edge_properties == {}

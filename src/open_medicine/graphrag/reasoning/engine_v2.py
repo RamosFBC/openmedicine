@@ -272,6 +272,30 @@ class ReasoningEngine:
 
         semantic_matches = self._deduplicate(semantic_matches)
 
+        # Enrich drug/drug_class matches with dosing summary
+        drug_matches = [
+            m for m in semantic_matches
+            if m.entity_type in ("Drug", "DrugClass") and not m.edge_properties
+        ]
+        if drug_matches:
+            drug_ids = [m.entity_id for m in drug_matches]
+            d_cypher, d_params = ReasoningQueries.find_dosing_summary_for_entities(
+                drug_ids
+            )
+            dosing_rows = self._conn.execute_read(d_cypher, d_params)
+            dosing_by_id: dict[str, dict[str, str | None]] = {}
+            for row in dosing_rows:
+                eid = row.get("entity_id", "")
+                if eid not in dosing_by_id:  # Keep first (best) match per entity
+                    dosing_by_id[eid] = {
+                        k: row.get(k)
+                        for k in ("starting_dose", "target_dose", "max_dose", "frequency")
+                        if row.get(k)
+                    }
+            for m in drug_matches:
+                if m.entity_id in dosing_by_id:
+                    m.edge_properties = dosing_by_id[m.entity_id]
+
         # Enrich with evidence if requested
         if q.include_evidence and semantic_matches:
             all_evidence = self._fetch_evidence_for_matches(semantic_matches, q)

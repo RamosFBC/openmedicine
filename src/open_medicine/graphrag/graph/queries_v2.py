@@ -921,6 +921,30 @@ class ReasoningQueries:
             {"embedding": query_embedding, "limit": limit},
         )
 
+    # -- Dosing enrichment -----------------------------------------------------
+
+    @staticmethod
+    def find_dosing_summary_for_entities(
+        entity_ids: list[str],
+    ) -> CypherStatement:
+        """Fetch basic dosing properties for a list of drug/drug_class entities.
+
+        Used to enrich treatment recommendations with dosing context.
+        Returns one row per entity with the best available dosing info.
+        """
+        return (
+            "UNWIND $ids AS eid "
+            "MATCH (src {id: eid})-[r:DOSED_FOR]->(dis) "
+            "RETURN src.id AS entity_id, "
+            "r.starting_dose AS starting_dose, "
+            "r.target_dose AS target_dose, "
+            "r.max_dose AS max_dose, "
+            "r.frequency AS frequency "
+            "ORDER BY entity_id "
+            "LIMIT 50",
+            {"ids": entity_ids},
+        )
+
     # -- Disease hierarchy traversal -------------------------------------------
 
     @staticmethod
