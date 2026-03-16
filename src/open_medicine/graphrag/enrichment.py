@@ -220,6 +220,23 @@ def parse_dosing_properties(text: str) -> dict[str, str]:
             route = "iv"
         props["route"] = route
 
+    # --- Titration schedule ---
+    titration_patterns = [
+        # "titrate every 2 weeks", "titrate every 2-4 weeks"
+        r"(titrat\w*\s+every\s+\d+(?:-\d+)?\s*(?:weeks?|days?|months?))",
+        # "uptitrate at 2-week intervals"
+        r"(uptitrat\w*\s+(?:at\s+)?\d+(?:-\d+)?[\s-]*(?:week|day|month)\s*intervals?)",
+        # "double the dose every 4 weeks"
+        r"(double\s+(?:the\s+)?dose\s+every\s+\d+(?:-\d+)?\s*(?:weeks?|days?|months?))",
+        # "increase dose every 2 weeks"
+        r"(increase\s+(?:the\s+)?dose\s+every\s+\d+(?:-\d+)?\s*(?:weeks?|days?|months?))",
+    ]
+    for pat in titration_patterns:
+        m = re.search(pat, text, re.IGNORECASE)
+        if m:
+            props["titration_schedule"] = m.group(1).strip()
+            break
+
     # Validate dose plausibility
     issues = validate_dose_consistency(props)
     if issues:
@@ -241,6 +258,10 @@ def parse_monitoring_properties(text: str) -> dict[str, str]:
         r"(approximately\s+[\d\-]+\s*(?:weeks?|days?|months?),?\s+"
         r"then\s+[\d\-]+\s*(?:weeks?|days?|months?)(?:,?\s+"
         r"then\s+(?:every\s+)?[\d\-]+\s*(?:weeks?|days?|months?))?)",
+        # "at 1 week, 4 weeks, then every 6 months" (initiation schedule)
+        r"(?:at\s+)?([\d\-]+\s*(?:weeks?|days?|months?),?\s+"
+        r"(?:then\s+)?[\d\-]+\s*(?:weeks?|days?|months?),?\s+"
+        r"then\s+(?:every\s+)?[\d\-]+\s*(?:weeks?|days?|months?))",
         # "1 week, then 4 weeks" (schedule pattern)
         r"([\d\-]+\s*(?:week|month)s?,?\s+then\s+[\d\-]+\s*(?:weeks?|months?))",
         # "within 1-2 weeks", "within 7 days"
@@ -279,6 +300,15 @@ def parse_monitoring_properties(text: str) -> dict[str, str]:
             r"(?:\s+(?:level|levels?))?"
             r"\s*(?:>=?|<=?|≥|≤|>|<)\s*[\d.]+\s*"
             r"(?:mEq/L|mg/dL|mL/min(?:/1\.73\s*m2)?|pg/mL|ng/mL)?)",
+            re.IGNORECASE,
+        ),
+        # "Discontinue if potassium cannot be maintained <5.5 mEq/L"
+        re.compile(
+            r"(?:stop|discontinue|hold|withhold)\s+if\s+"
+            r"(?:\w+\s+)*?cannot\s+be\s+maintained\s+"
+            r"((?:K\+?|potassium|creatinine|eGFR)?"
+            r"\s*(?:>=?|<=?|≥|≤|>|<)\s*[\d.]+\s*"
+            r"(?:mEq/L|mg/dL|mL/min(?:/1\.73\s*m2)?)?)",
             re.IGNORECASE,
         ),
         # "K+ >= 6.0 ... discontinue" (threshold before action word)

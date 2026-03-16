@@ -19,7 +19,9 @@ if TYPE_CHECKING:
     from open_medicine.graphrag.graph.connection import GraphConnection
 from open_medicine.graphrag.enrichment import (
     parse_contraindication_properties,
+    parse_dosing_properties,
     parse_interaction_properties,
+    parse_monitoring_properties,
 )
 from open_medicine.graphrag.graph.schema_v2 import (
     ContraindicatedInProps,
@@ -582,13 +584,15 @@ def _create_semantic_edge(
             )
         )
     elif edge_type == "DOSED_FOR":
+        # Fall back to regex extraction from action_detail (like contraindications)
+        parsed = parse_dosing_properties(extraction.action_detail)
         dosed_props = DosedForProps(
-            starting_dose=sp.get("starting_dose"),
-            target_dose=sp.get("target_dose"),
-            max_dose=sp.get("max_dose"),
-            route=sp.get("route"),
-            frequency=sp.get("frequency"),
-            titration_schedule=sp.get("titration_schedule"),
+            starting_dose=sp.get("starting_dose") or parsed.get("starting_dose"),
+            target_dose=sp.get("target_dose") or parsed.get("target_dose"),
+            max_dose=sp.get("max_dose") or parsed.get("max_dose"),
+            route=sp.get("route") or parsed.get("route"),
+            frequency=sp.get("frequency") or parsed.get("frequency"),
+            titration_schedule=sp.get("titration_schedule") or parsed.get("titration_schedule"),
             conditions_json=json.dumps(extraction.conditions)
             if extraction.conditions
             else None,
@@ -599,10 +603,25 @@ def _create_semantic_edge(
             )
         )
     elif edge_type == "MONITORED_BY":
+        # Fall back to regex extraction from action_detail (like contraindications)
+        parsed = parse_monitoring_properties(extraction.action_detail)
+        # Also accept enrichment keys: schedule→frequency, threshold_discontinuation→threshold_stop
+        freq = (
+            sp.get("frequency")
+            or sp.get("schedule")
+            or parsed.get("frequency")
+        )
+        alert = sp.get("threshold_alert") or parsed.get("threshold_alert")
+        stop = (
+            sp.get("threshold_stop")
+            or sp.get("threshold_discontinuation")
+            or sp.get("threshold_hold")
+            or parsed.get("threshold_stop")
+        )
         mon_props = MonitoredByProps(
-            frequency=sp.get("frequency"),
-            threshold_alert=sp.get("threshold_alert"),
-            threshold_stop=sp.get("threshold_stop"),
+            frequency=freq,
+            threshold_alert=alert,
+            threshold_stop=stop,
             conditions_json=json.dumps(extraction.conditions)
             if extraction.conditions
             else None,

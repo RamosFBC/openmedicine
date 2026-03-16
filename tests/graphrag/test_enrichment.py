@@ -423,3 +423,67 @@ class TestMonitoringThresholdStop:
         text = "Monitor electrolytes periodically."
         props = parse_monitoring_properties(text)
         assert "threshold_stop" not in props
+
+    def test_stop_cannot_be_maintained(self):
+        """'Cannot be maintained' pattern for threshold_stop."""
+        text = (
+            "Discontinue if potassium cannot be maintained "
+            "K+ <5.5 mEq/L despite dose reduction."
+        )
+        props = parse_monitoring_properties(text)
+        assert "threshold_stop" in props
+        assert "5.5" in props["threshold_stop"]
+
+
+class TestMonitoringInitiationSchedule:
+    """Verify initiation schedule extraction for monitoring frequency."""
+
+    def test_initiation_schedule_at_pattern(self):
+        text = (
+            "Monitor potassium at 1 week, 4 weeks, then every 6 months "
+            "during spironolactone therapy."
+        )
+        props = parse_monitoring_properties(text)
+        assert "frequency" in props
+        # Should capture the full schedule, not just "every 6 months"
+        assert "1 week" in props["frequency"]
+        assert "6 months" in props["frequency"]
+
+    def test_simple_frequency_still_works(self):
+        text = "Monitor potassium every 3 months during therapy."
+        props = parse_monitoring_properties(text)
+        assert "frequency" in props
+        assert "3 months" in props["frequency"]
+
+
+class TestDosingRouteOral:
+    """Verify oral route extraction for oral medications."""
+
+    def test_orally_route(self):
+        text = "Dapagliflozin 10 mg orally once daily for HFrEF."
+        props = parse_dosing_properties(text)
+        assert props.get("route") == "orally"
+
+    def test_no_route_from_plain_dose(self):
+        text = "Start at 10 mg once daily."
+        props = parse_dosing_properties(text)
+        # Should not hallucinate a route
+        assert "route" not in props or props["route"] is None
+
+    # --- Titration schedule ---
+
+    def test_titration_schedule_every_2_weeks(self):
+        text = "Start 3.125 mg twice daily; titrate every 2 weeks to 25 mg twice daily"
+        result = parse_dosing_properties(text)
+        assert result.get("titration_schedule") is not None
+        assert "2 weeks" in result["titration_schedule"]
+
+    def test_titration_schedule_double_dose(self):
+        text = "Initiate 12.5 mg daily; double the dose every 4 weeks as tolerated"
+        result = parse_dosing_properties(text)
+        assert result.get("titration_schedule") is not None
+
+    def test_titration_schedule_uptitrate(self):
+        text = "uptitrate at 2-week intervals to target dose of 200 mg BID"
+        result = parse_dosing_properties(text)
+        assert result.get("titration_schedule") is not None

@@ -524,6 +524,126 @@ class TestDefaultSeverityIsUnknown:
             "Enrichment should detect 'avoid' and set severity to MAJOR"
         )
 
+    def test_monitored_by_schedule_alias(self):
+        """Enrichment key 'schedule' should map to frequency on MONITORED_BY edge."""
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.x/y", year=2022, organization="Org"
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="rec_mon_alias",
+                rec_type="monitoring",
+                action="Monitor potassium",
+                action_detail="Monitor potassium at 1 week, 4 weeks, then every 6 months",
+                strength="strong_for",
+                evidence_quality="moderate",
+                concepts=[
+                    ConceptRef("Spironolactone", "drug", "subject"),
+                    ConceptRef("Potassium", "lab", "monitor"),
+                ],
+                relationships=[
+                    ExtractedRelationship(
+                        rel_type="MONITORED_BY",
+                        source_name="Spironolactone",
+                        source_type="drug",
+                        target_name="Potassium",
+                        target_type="lab",
+                        properties={
+                            "schedule": "1 week, 4 weeks, then every 6 months",
+                            "threshold_discontinuation": ">=5.5 mEq/L",
+                        },
+                    ),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        mb_queries = [
+            (c, p) for c, p in all_queries
+            if "MONITORED_BY" in c and "freq" in p
+        ]
+        assert len(mb_queries) >= 1
+        _, params = mb_queries[0]
+        assert params.get("freq") == "1 week, 4 weeks, then every 6 months", (
+            "schedule key should map to frequency"
+        )
+        assert params.get("stop") == ">=5.5 mEq/L", (
+            "threshold_discontinuation key should map to threshold_stop"
+        )
+
+    def test_dosed_for_regex_fallback(self):
+        """When structured_properties is empty, DOSED_FOR should use regex from action_detail."""
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.x/y", year=2022, organization="Org"
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="rec_dose_fb",
+                rec_type="dosing",
+                action="Start dapagliflozin",
+                action_detail="Start at 10 mg orally once daily for HFrEF",
+                strength="strong_for",
+                evidence_quality="high",
+                concepts=[
+                    ConceptRef("Dapagliflozin", "drug", "subject"),
+                    ConceptRef("HFrEF", "disease", "target"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        df_queries = [
+            (c, p) for c, p in all_queries
+            if "DOSED_FOR" in c
+        ]
+        assert len(df_queries) >= 1
+        _, params = df_queries[0]
+        assert params.get("start") == "10 mg"
+        assert params.get("route") == "orally"
+        assert "once daily" in (params.get("freq") or "")
+
+    def test_dosed_for_titration_fallback(self):
+        """DOSED_FOR titration_schedule should fall back to regex like other dosing props."""
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.x/y", year=2022, organization="Org"
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="rec_dose_tit",
+                rec_type="dosing",
+                action="Start carvedilol",
+                action_detail="Start at 3.125 mg twice daily; titrate every 2 weeks to target 25 mg twice daily",
+                strength="strong_for",
+                evidence_quality="high",
+                concepts=[
+                    ConceptRef("Carvedilol", "drug", "subject"),
+                    ConceptRef("HFrEF", "disease", "target"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        df_queries = [
+            (c, p) for c, p in all_queries
+            if "DOSED_FOR" in c
+        ]
+        assert len(df_queries) >= 1
+        _, params = df_queries[0]
+        assert params.get("titration") is not None
+        assert "2 weeks" in params["titration"]
+
     def test_contraindication_enrichment_relative(self):
         """When action_detail contains 'caution', enrichment should set RELATIVE."""
         conn = MagicMock()
