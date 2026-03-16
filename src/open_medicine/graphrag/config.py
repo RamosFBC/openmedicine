@@ -11,7 +11,7 @@ class GraphRAGSettings(BaseSettings):
 
     anthropic_api_key: str = ""
     voyage_api_key: str = ""
-    embedding_model: str = "voyage-3-lite"
+    embedding_model: str = "voyage-3"
     embedding_dimensions: int = 1024
 
     api_keys: str = ""  # comma-separated

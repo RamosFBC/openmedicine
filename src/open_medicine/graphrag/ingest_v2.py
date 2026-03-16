@@ -31,8 +31,20 @@ from open_medicine.graphrag.ingestion.extractor_v2 import (
     ExtractedRelationship,
     ExtractionResult,
 )
+from open_medicine.graphrag.graph.queries_v2 import PatchQueries
 from open_medicine.graphrag.ingestion.loader_v2 import LoadableGuideline, load_guideline
 from open_medicine.graphrag.ingestion.parser import parse_markdown
+from open_medicine.graphrag.ingestion.differ import (
+    diff_snapshots,
+    dry_run_report,
+    print_diff_report,
+    print_dry_run_report,
+    snapshot_guideline,
+)
+from open_medicine.graphrag.ingestion.validator import (
+    print_validation_report,
+    validate_graph as run_validation,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -143,6 +155,14 @@ def load_from_jsonl(
     logger.info(
         "Done: %s loaded with %d recommendations", guideline_id, len(extractions)
     )
+
+    # Post-ingestion validation
+    validation = run_validation(conn)
+    print_validation_report(validation)
+    if not validation.ok:
+        logger.warning(
+            "Post-ingestion validation found %d failure(s)", validation.failures
+        )
 
 
 def clear_graph(conn: GraphConnection) -> None:
@@ -611,17 +631,140 @@ def embed_chunks(conn: GraphConnection) -> int:
         return 0
 
     chunk_ids = [r["id"] for r in rows]
-    texts = [r["text"] for r in rows]
+    texts = [r["text"] or "" for r in rows]
     print(f"Embedding {len(texts)} chunks...")
 
-    embeddings = embed_texts(texts, api_key=api_key)
+    # Embed and save in batches to avoid losing progress on rate limits
+    batch_size = 128
+    total_embedded = 0
+    for i in range(0, len(texts), batch_size):
+        batch_texts = texts[i : i + batch_size]
+        batch_ids = chunk_ids[i : i + batch_size]
+        embeddings = embed_texts(batch_texts, api_key=api_key, batch_size=batch_size)
+        for chunk_id, embedding in zip(batch_ids, embeddings):
+            cypher, params = LoaderQueries.set_embedding(chunk_id, embedding)
+            conn.execute_write(cypher, params)
+        total_embedded += len(embeddings)
+        print(f"  Saved {total_embedded}/{len(texts)} embeddings")
 
-    for chunk_id, embedding in zip(chunk_ids, embeddings):
-        cypher, params = LoaderQueries.set_embedding(chunk_id, embedding)
-        conn.execute_write(cypher, params)
+    print(f"Embedded {total_embedded} chunks")
+    return total_embedded
 
-    print(f"Embedded {len(embeddings)} chunks")
-    return len(embeddings)
+
+def add_edge(
+    conn: GraphConnection,
+    source: str,
+    target: str,
+    edge_type: str,
+    props: dict | None = None,
+) -> None:
+    """Add a single edge between two existing nodes."""
+    if edge_type not in PatchQueries.VALID_EDGE_TYPES:
+        raise ValueError(
+            f"Invalid edge type '{edge_type}'. "
+            f"Valid types: {sorted(PatchQueries.VALID_EDGE_TYPES)}"
+        )
+
+    # Verify source exists
+    cypher, params = PatchQueries.check_node_exists(source)
+    src_rows = conn.execute_read(cypher, params)
+    if not src_rows:
+        raise ValueError(f"Source node '{source}' not found in graph")
+    src_label = src_rows[0]["label"]
+
+    # Verify target exists
+    cypher, params = PatchQueries.check_node_exists(target)
+    tgt_rows = conn.execute_read(cypher, params)
+    if not tgt_rows:
+        raise ValueError(f"Target node '{target}' not found in graph")
+    tgt_label = tgt_rows[0]["label"]
+
+    cypher, params = PatchQueries.add_edge(
+        source, src_label, target, tgt_label, edge_type, props or {}
+    )
+    conn.execute_write(cypher, params)
+    logger.info("Added edge: %s -[%s]-> %s", source, edge_type, target)
+
+
+def add_node(
+    conn: GraphConnection,
+    label: str,
+    node_id: str,
+    name: str,
+    props: dict | None = None,
+) -> None:
+    """Add a new node to the graph."""
+    if label not in PatchQueries.VALID_LABELS:
+        raise ValueError(
+            f"Invalid label '{label}'. "
+            f"Valid labels: {sorted(PatchQueries.VALID_LABELS)}"
+        )
+
+    cypher, params = PatchQueries.add_node(label, node_id, name, props or {})
+    conn.execute_write(cypher, params)
+    logger.info("Added node: %s {id: %s, name: %s}", label, node_id, name)
+
+
+def patch_node(
+    conn: GraphConnection,
+    node_id: str,
+    props: dict,
+) -> None:
+    """Patch properties on an existing node."""
+    # Find node and its label
+    cypher, params = PatchQueries.check_node_exists(node_id)
+    rows = conn.execute_read(cypher, params)
+    if not rows:
+        raise ValueError(f"Node '{node_id}' not found in graph")
+
+    label = rows[0]["label"]
+    cypher, params = PatchQueries.patch_node(node_id, label, props)
+    conn.execute_write(cypher, params)
+    logger.info("Patched node: %s (%s) with %d properties", node_id, label, len(props))
+
+
+def apply_patch(conn: GraphConnection, patch_path: Path) -> int:
+    """Apply a JSONL patch file with add_edge, add_node, patch_node operations.
+
+    Returns number of operations applied.
+    """
+    count = 0
+    for line_num, line in enumerate(
+        patch_path.read_text(encoding="utf-8").strip().split("\n"), 1
+    ):
+        if not line:
+            continue
+        op = json.loads(line)
+        op_type = op.get("op", "")
+
+        if op_type == "add_edge":
+            add_edge(
+                conn,
+                source=op["source"],
+                target=op["target"],
+                edge_type=op["edge_type"],
+                props=op.get("props", {}),
+            )
+        elif op_type == "add_node":
+            add_node(
+                conn,
+                label=op["label"],
+                node_id=op["id"],
+                name=op["name"],
+                props=op.get("props", {}),
+            )
+        elif op_type == "patch_node":
+            patch_node(
+                conn,
+                node_id=op["id"],
+                props=op.get("props", {}),
+            )
+        else:
+            raise ValueError(f"Line {line_num}: unknown op '{op_type}'")
+        count += 1
+
+    logger.info("Applied %d patch operations from %s", count, patch_path)
+    return count
 
 
 def main() -> None:
@@ -639,6 +782,7 @@ def main() -> None:
     load_cmd.add_argument("--title", default="", help="Guideline title")
     load_cmd.add_argument("--year", type=int, default=2024, help="Publication year")
     load_cmd.add_argument("--org", default="", help="Organization")
+    load_cmd.add_argument("--dry-run", action="store_true", help="Preview changes without executing")
 
     # Clear command
     sub.add_parser("clear", help="Clear entire graph (destructive)")
@@ -662,6 +806,26 @@ def main() -> None:
 
     # Embed command
     sub.add_parser("embed", help="Generate embeddings for EvidenceChunks (requires VOYAGE_API_KEY)")
+
+    # Patch operations
+    add_edge_cmd = sub.add_parser("add-edge", help="Add a single edge between existing nodes")
+    add_edge_cmd.add_argument("--source", required=True, help="Source node ID")
+    add_edge_cmd.add_argument("--target", required=True, help="Target node ID")
+    add_edge_cmd.add_argument("--type", required=True, dest="edge_type", help="Edge type (e.g. MONITORED_BY)")
+    add_edge_cmd.add_argument("--props", default="{}", help="JSON properties (default: {})")
+
+    add_node_cmd = sub.add_parser("add-node", help="Add a new node to the graph")
+    add_node_cmd.add_argument("--label", required=True, help="Node label (e.g. Drug)")
+    add_node_cmd.add_argument("--id", required=True, dest="node_id", help="Node ID")
+    add_node_cmd.add_argument("--name", required=True, help="Node name")
+    add_node_cmd.add_argument("--props", default="{}", help="JSON properties (default: {})")
+
+    patch_node_cmd = sub.add_parser("patch-node", help="Patch properties on an existing node")
+    patch_node_cmd.add_argument("--id", required=True, dest="node_id", help="Node ID")
+    patch_node_cmd.add_argument("--set", required=True, dest="props", help="JSON properties to set")
+
+    apply_patch_cmd = sub.add_parser("apply-patch", help="Apply a JSONL patch file")
+    apply_patch_cmd.add_argument("--file", type=Path, required=True, help="JSONL patch file")
 
     # Migrate command (clear + load)
     migrate_cmd = sub.add_parser("migrate", help="Clear graph and load (full migration)")
@@ -702,15 +866,68 @@ def main() -> None:
         elif args.command == "embed":
             embed_chunks(conn)
 
+        elif args.command == "add-edge":
+            add_edge(
+                conn,
+                source=args.source,
+                target=args.target,
+                edge_type=args.edge_type,
+                props=json.loads(args.props),
+            )
+
+        elif args.command == "add-node":
+            add_node(
+                conn,
+                label=args.label,
+                node_id=args.node_id,
+                name=args.name,
+                props=json.loads(args.props),
+            )
+
+        elif args.command == "patch-node":
+            patch_node(
+                conn,
+                node_id=args.node_id,
+                props=json.loads(args.props),
+            )
+
+        elif args.command == "apply-patch":
+            count = apply_patch(conn, args.file)
+            print(f"Applied {count} patch operations")
+
         elif args.command in ("load", "migrate"):
             if args.command == "migrate":
                 clear_graph(conn)
 
             ensure_indexes(conn)
+
+            # Dry-run mode: preview changes without executing
+            if args.command == "load" and getattr(args, "dry_run", False):
+                extractions = load_extractions_from_jsonl(args.jsonl, args.id)
+                doc = parse_markdown(args.file, guideline_id=args.id)
+                chunks = chunk_document(doc)
+                report = dry_run_report(
+                    conn, args.id, len(extractions), len(chunks)
+                )
+                print_dry_run_report(report)
+                return
+
+            # Snapshot before load (for diff)
+            before = snapshot_guideline(conn, args.id)
+
             load_from_jsonl(
                 conn, args.jsonl, args.file,
                 args.id, args.doi, args.title, args.year, args.org,
             )
+
+            # Diff after load
+            after = snapshot_guideline(conn, args.id)
+            diff = diff_snapshots(before, after)
+            if diff.lost_patch_edges:
+                print_diff_report(diff)
+
+            # Embed new EvidenceChunks (skips if VOYAGE_API_KEY not set)
+            embed_chunks(conn)
 
             checks = validate_graph(conn)
             print_report(checks)

@@ -1,6 +1,6 @@
 import pytest
 
-from open_medicine.graphrag.graph.queries_v2 import LoaderQueries, ReasoningQueries
+from open_medicine.graphrag.graph.queries_v2 import LoaderQueries, PatchQueries, ReasoningQueries
 from open_medicine.graphrag.graph.schema_v2 import (
     ContraindicatedInProps,
     ContraindicationSeverity,
@@ -374,10 +374,12 @@ class TestLoaderCrossGuidelineEdges:
 class TestLoaderDelete:
     def test_delete_guideline(self):
         stmts = LoaderQueries.delete_guideline("g1")
-        assert len(stmts) == 3
+        assert len(stmts) == 4  # patch-preserving delete has 4 steps
         for cypher, params in stmts:
             assert isinstance(cypher, str)
             assert isinstance(params, dict)
+        # First statement should preserve patch edges
+        assert "patch" in stmts[0][0]
 
 
 # ---------------------------------------------------------------------------
@@ -479,6 +481,16 @@ class TestReasoningLayer2:
         )
         assert "RECOMMENDS" in cypher
 
+    def test_find_recommendations_uses_optional_match_for_evidence(self):
+        """Evidence/guideline joins should be OPTIONAL so recs without full chains still return."""
+        cypher, params = ReasoningQueries.find_recommendations_for_entity(
+            "rxnorm:123", "Drug"
+        )
+        # The RECOMMENDS edge is required, but SOURCED_FROM and DEFINED_BY should be optional
+        assert "MATCH (rec:Recommendation)-[:RECOMMENDS]" in cypher
+        assert "OPTIONAL MATCH (rec)-[:SOURCED_FROM]" in cypher
+        assert "OPTIONAL MATCH (rec)-[:DEFINED_BY]" in cypher
+
     def test_find_recommendations_with_type_filter(self):
         cypher, params = _assert_valid_cypher(
             ReasoningQueries.find_recommendations_for_entity(
@@ -565,3 +577,150 @@ class TestVectorEntitySearch:
         cypher, params = ReasoningQueries.vector_entity_search(embedding)
         assert "rec.type" not in cypher
         assert "rec_type" not in params
+
+
+# ---------------------------------------------------------------------------
+# Fix 7a: Patch Queries
+# ---------------------------------------------------------------------------
+
+
+class TestPatchQueriesAddEdge:
+    def test_generates_valid_cypher(self):
+        cypher, params = PatchQueries.add_edge(
+            "rxnorm:9997", "Drug", "loinc:2823-3", "Lab",
+            "MONITORED_BY", {"frequency": "weekly"},
+        )
+        _assert_valid_cypher((cypher, params))
+        assert "MATCH (a:Drug" in cypher
+        assert "MATCH" in cypher and "Lab" in cypher
+        assert "MONITORED_BY" in cypher
+        assert "r._source = 'patch'" in cypher
+        assert params["sid"] == "rxnorm:9997"
+        assert params["tid"] == "loinc:2823-3"
+        assert params["props"]["frequency"] == "weekly"
+
+
+class TestPatchQueriesAddNode:
+    def test_generates_valid_cypher(self):
+        cypher, params = PatchQueries.add_node(
+            "DrugClass", "atc:M01A", "NSAIDs",
+            {"atc_code": "M01A"},
+        )
+        _assert_valid_cypher((cypher, params))
+        assert "DrugClass" in cypher
+        assert "MERGE" in cypher
+        assert params["id"] == "atc:M01A"
+        assert params["name"] == "NSAIDs"
+
+    def test_source_tracking(self):
+        cypher, _ = PatchQueries.add_node("Drug", "rxnorm:123", "TestDrug", {})
+        assert "_source = 'patch'" in cypher
+
+
+class TestPatchQueriesPatchNode:
+    def test_generates_valid_cypher(self):
+        cypher, params = PatchQueries.patch_node(
+            "rxnorm:9997", "Drug", {"aliases": ["Aldactone"]},
+        )
+        _assert_valid_cypher((cypher, params))
+        assert "Drug" in cypher
+        assert "SET n += $props" in cypher
+        assert params["props"]["aliases"] == ["Aldactone"]
+
+    def test_preserves_existing_properties(self):
+        """SET += should be used, not SET =, to preserve existing properties."""
+        cypher, _ = PatchQueries.patch_node("rxnorm:9997", "Drug", {"x": 1})
+        assert "+=" in cypher
+
+
+class TestPatchQueriesCheckNode:
+    def test_check_node_exists(self):
+        cypher, params = PatchQueries.check_node_exists("rxnorm:9997")
+        _assert_valid_cypher((cypher, params))
+        assert params["id"] == "rxnorm:9997"
+
+
+class TestPatchQueriesValidation:
+    def test_valid_edge_types(self):
+        assert "MONITORED_BY" in PatchQueries.VALID_EDGE_TYPES
+        assert "INDICATED_FOR" in PatchQueries.VALID_EDGE_TYPES
+        assert "DIAGNOSED_BY" in PatchQueries.VALID_EDGE_TYPES
+        assert "INTERACTS_WITH" in PatchQueries.VALID_EDGE_TYPES
+
+    def test_valid_labels(self):
+        assert "Drug" in PatchQueries.VALID_LABELS
+        assert "DrugClass" in PatchQueries.VALID_LABELS
+        assert "Disease" in PatchQueries.VALID_LABELS
+        assert "Lab" in PatchQueries.VALID_LABELS
+
+
+class TestPatchOperationFunctions:
+    """Tests for the higher-level patch functions in ingest_v2."""
+
+    def test_add_edge_validates_edge_type(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import add_edge
+
+        conn = MagicMock()
+        with pytest.raises(ValueError, match="Invalid edge type"):
+            add_edge(conn, "src", "tgt", "INVALID_TYPE")
+
+    def test_add_edge_fails_for_missing_source(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import add_edge
+
+        conn = MagicMock()
+        conn.execute_read.return_value = []  # source not found
+
+        with pytest.raises(ValueError, match="Source node"):
+            add_edge(conn, "rxnorm:999", "loinc:123", "MONITORED_BY")
+
+    def test_add_edge_fails_for_missing_target(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import add_edge
+
+        conn = MagicMock()
+        conn.execute_read.side_effect = [
+            [{"id": "rxnorm:999", "label": "Drug"}],  # source found
+            [],  # target not found
+        ]
+
+        with pytest.raises(ValueError, match="Target node"):
+            add_edge(conn, "rxnorm:999", "loinc:123", "MONITORED_BY")
+
+    def test_add_edge_creates_relationship(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import add_edge
+
+        conn = MagicMock()
+        conn.execute_read.side_effect = [
+            [{"id": "rxnorm:999", "label": "Drug"}],
+            [{"id": "loinc:123", "label": "Lab"}],
+        ]
+
+        add_edge(conn, "rxnorm:999", "loinc:123", "MONITORED_BY", {"frequency": "weekly"})
+        conn.execute_write.assert_called_once()
+
+    def test_add_node_validates_label(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import add_node
+
+        conn = MagicMock()
+        with pytest.raises(ValueError, match="Invalid label"):
+            add_node(conn, "InvalidLabel", "id:1", "Test")
+
+    def test_patch_node_fails_for_missing_node(self):
+        from unittest.mock import MagicMock
+
+        from open_medicine.graphrag.ingest_v2 import patch_node
+
+        conn = MagicMock()
+        conn.execute_read.return_value = []
+
+        with pytest.raises(ValueError, match="not found"):
+            patch_node(conn, "rxnorm:999", {"aliases": ["test"]})

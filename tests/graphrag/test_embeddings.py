@@ -55,5 +55,5 @@ class TestEmbedQuery:
         assert result == [0.1, 0.2, 0.3]
         mock_embed.assert_called_once_with(
             ["dosing apixaban"], api_key="key",
-            model="voyage-3-lite", input_type="query",
+            model="voyage-3", input_type="query",
         )

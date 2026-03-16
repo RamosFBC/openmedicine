@@ -32,15 +32,27 @@ class LoaderQueries:
 
     @staticmethod
     def delete_guideline(guideline_id: str) -> list[CypherStatement]:
-        """Delete a guideline and all nodes scoped to it."""
+        """Delete a guideline and all nodes scoped to it.
+
+        Preserves edges with _source='patch' — these are manual corrections
+        that should survive re-ingestion.
+        """
         return [
-            # Delete Recommendations and their edges (scoped by guideline_id)
+            # Delete non-patch edges from Recommendations first
             (
-                "MATCH (rec:Recommendation {guideline_id: $gid}) DETACH DELETE rec",
+                "MATCH (rec:Recommendation {guideline_id: $gid})-[r]-() "
+                "WHERE coalesce(r._source, '') <> 'patch' "
+                "DELETE r",
                 {"gid": guideline_id},
             ),
-            # Delete EvidenceChunks linked to this guideline's recommendations
-            # (only orphaned chunks — shared chunks may survive)
+            # Delete Recommendation nodes (now disconnected from non-patch edges)
+            (
+                "MATCH (rec:Recommendation {guideline_id: $gid}) "
+                "WHERE NOT exists { (rec)-[r]-() WHERE r._source = 'patch' } "
+                "DELETE rec",
+                {"gid": guideline_id},
+            ),
+            # Delete orphaned EvidenceChunks
             (
                 "MATCH (ec:EvidenceChunk) "
                 "WHERE NOT exists { (rec:Recommendation)-[:SOURCED_FROM]->(ec) } "
@@ -760,10 +772,12 @@ class ReasoningQueries:
         )
 
     @staticmethod
-    def find_monitoring(entity_id: str) -> CypherStatement:
+    def find_monitoring(
+        entity_id: str, entity_label: str = "Drug"
+    ) -> CypherStatement:
         """What labs should be monitored for entity X?"""
         return (
-            "MATCH (d:Drug {id: $eid})-[r:MONITORED_BY]->(l:Lab) "
+            f"MATCH (d:{entity_label} {{id: $eid}})-[r:MONITORED_BY]->(l:Lab) "
             "RETURN l.id AS lab_id, l.name AS lab_name, "
             "r.frequency AS frequency, r.threshold_alert AS threshold_alert, "
             "r.threshold_stop AS threshold_stop",
@@ -816,8 +830,8 @@ class ReasoningQueries:
         """All recommendations that reference a specific entity."""
         cypher = (
             f"MATCH (rec:Recommendation)-[:RECOMMENDS]->(tgt:{entity_label} {{id: $eid}}) "
-            "MATCH (rec)-[:SOURCED_FROM]->(ec:EvidenceChunk) "
-            "MATCH (rec)-[:DEFINED_BY]->(g:Guideline) "
+            "OPTIONAL MATCH (rec)-[:SOURCED_FROM]->(ec:EvidenceChunk) "
+            "OPTIONAL MATCH (rec)-[:DEFINED_BY]->(g:Guideline) "
         )
         params: dict = {"eid": entity_id}
         if rec_type:
@@ -994,4 +1008,86 @@ class ReasoningQueries:
             "RETURN dc.id AS id, dc.name AS name, dc.atc_code AS atc, "
             "collect(d.name) AS members ORDER BY dc.name",
             {},
+        )
+
+
+# ---------------------------------------------------------------------------
+# Patch Queries (incremental updates)
+# ---------------------------------------------------------------------------
+
+
+class PatchQueries:
+    """Cypher builders for incremental graph updates (patch operations)."""
+
+    # Valid node labels for patch operations
+    VALID_LABELS = frozenset({
+        "Drug", "DrugClass", "Disease", "Symptom", "Lab",
+        "Procedure", "Device", "Guideline", "Recommendation",
+        "EvidenceChunk", "PatientVariable", "Publication",
+        "Population", "TemporalConstraint", "Organization",
+    })
+
+    # Valid semantic edge types
+    VALID_EDGE_TYPES = frozenset({
+        "INDICATED_FOR", "CONTRAINDICATED_IN", "DOSED_FOR",
+        "MONITORED_BY", "INTERACTS_WITH", "DIAGNOSED_BY",
+        "MEMBER_OF", "STAGE_OF", "PRESENTS_WITH",
+        "RECOMMENDS", "FOR_CONDITION", "SOURCED_FROM",
+        "DEFINED_BY", "EVALUATES", "APPLIES_TO", "TIMED_BY",
+        "PUBLISHED_BY", "CITED_IN", "MEASURES",
+        "CONFLICTS_WITH", "SUPERSEDES",
+    })
+
+    @staticmethod
+    def check_node_exists(node_id: str) -> CypherStatement:
+        """Check if a node with the given ID exists."""
+        return (
+            "MATCH (n {id: $id}) RETURN n.id AS id, labels(n)[0] AS label",
+            {"id": node_id},
+        )
+
+    @staticmethod
+    def add_edge(
+        source_id: str,
+        source_label: str,
+        target_id: str,
+        target_label: str,
+        edge_type: str,
+        props: dict,
+    ) -> CypherStatement:
+        """Create or merge an edge between two existing nodes.
+
+        Adds _source='patch' and _patch_date for tracking.
+        """
+        return (
+            f"MATCH (a:{source_label} {{id: $sid}}), (b:{target_label} {{id: $tid}}) "
+            f"MERGE (a)-[r:{edge_type}]->(b) "
+            "SET r += $props, r._source = 'patch'",
+            {"sid": source_id, "tid": target_id, "props": props},
+        )
+
+    @staticmethod
+    def add_node(
+        label: str,
+        node_id: str,
+        name: str,
+        props: dict,
+    ) -> CypherStatement:
+        """Create a new node with the given label, ID, name, and properties."""
+        return (
+            f"MERGE (n:{label} {{id: $id}}) "
+            "ON CREATE SET n.name = $name, n += $props, n._source = 'patch'",
+            {"id": node_id, "name": name, "props": props},
+        )
+
+    @staticmethod
+    def patch_node(
+        node_id: str,
+        label: str,
+        props: dict,
+    ) -> CypherStatement:
+        """Update properties on an existing node (non-destructive merge)."""
+        return (
+            f"MATCH (n:{label} {{id: $id}}) SET n += $props",
+            {"id": node_id, "props": props},
         )

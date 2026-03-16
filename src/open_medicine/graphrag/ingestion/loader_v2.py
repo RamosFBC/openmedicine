@@ -323,7 +323,10 @@ def load_guideline(conn: GraphConnection, data: LoadableGuideline) -> None:
                             )
                         )
 
-    # 6. Conflict detection
+    # 6. Propagate MONITORED_BY edges from member drugs to parent DrugClass
+    queries.extend(propagate_monitoring_to_classes(queries, seen_entities))
+
+    # 7. Conflict detection
     conflicts = detect_conflicts(data.extractions)
     for winner_id, loser_id, resolution in conflicts:
         queries.append(
@@ -488,6 +491,15 @@ def _derive_semantic_edges(
                     targets.append(e)
             if new_subjects:
                 subjects = new_subjects
+        elif extraction.rec_type == "diagnostic_criteria":
+            new_subjects = []
+            for e in subjects:
+                if e.entity_type == "disease":
+                    new_subjects.append(e)
+                elif e.entity_type in ("lab", "procedure"):
+                    targets.append(e)
+            if new_subjects:
+                subjects = new_subjects
         elif extraction.rec_type == "interaction":
             # Separate drugs/drug_classes into two groups by entity type
             # to pair drugs with interacting drug_classes (and vice versa)
@@ -591,6 +603,69 @@ def _create_interacts_with(
             target_label=drug_b.node_label,
         )
     )
+
+
+def propagate_monitoring_to_classes(
+    queries: list[CypherStatement],
+    seen_entities: dict[str, LinkedEntity],
+) -> list[CypherStatement]:
+    """Propagate MONITORED_BY edges from member drugs to their parent DrugClass.
+
+    Scans the already-built query list for MONITORED_BY edges on drugs,
+    then creates matching edges on the parent DrugClass if that class
+    is in the seen_entities set.
+    """
+    # Collect MONITORED_BY edges per drug: drug_id → list of (lab_id, props_dict)
+    drug_monitoring: dict[str, list[tuple[str, dict]]] = {}
+    for cypher_str, params in queries:
+        if "MONITORED_BY" in cypher_str and "did" in params and "lid" in params:
+            drug_id = params["did"]
+            lab_id = params["lid"]
+            props = {
+                k: params.get(k)
+                for k in ("freq", "alert", "stop", "conds")
+                if params.get(k) is not None
+            }
+            drug_monitoring.setdefault(drug_id, []).append((lab_id, props))
+
+    if not drug_monitoring:
+        return []
+
+    # For each drug class, check if its members have monitoring edges
+    propagated: list[CypherStatement] = []
+    seen_class_labs: set[tuple[str, str]] = set()
+
+    for entity in seen_entities.values():
+        if entity.entity_type != "drug_class":
+            continue
+
+        members = get_drug_class_members(entity.canonical_name)
+        for member_name in members:
+            member = link_entity(member_name, "drug")
+            if member is None or member.node_id not in drug_monitoring:
+                continue
+
+            for lab_id, props in drug_monitoring[member.node_id]:
+                key = (entity.node_id, lab_id)
+                if key in seen_class_labs:
+                    continue
+                seen_class_labs.add(key)
+
+                # Create MONITORED_BY on the DrugClass
+                propagated.append((
+                    "MATCH (dc:DrugClass {id: $did}), (l:Lab {id: $lid}) "
+                    "MERGE (dc)-[r:MONITORED_BY]->(l) "
+                    "ON CREATE SET r.frequency = $freq, r.threshold_alert = $alert, "
+                    "r.threshold_stop = $stop, r.conditions_json = $conds, "
+                    "r._source = 'propagated'",
+                    {
+                        "did": entity.node_id,
+                        "lid": lab_id,
+                        **{k: props.get(k) for k in ("freq", "alert", "stop", "conds")},
+                    },
+                ))
+
+    return propagated
 
 
 def _create_semantic_edge_from_relationship(

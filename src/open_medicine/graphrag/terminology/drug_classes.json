@@ -3,7 +3,7 @@
     "id": "atc:C09A",
     "atc_code": "C09A",
     "fda_epc": "Angiotensin Converting Enzyme Inhibitor",
-    "aliases": ["ACEi", "ACE inhibitors", "ACE inhibitor"],
+    "aliases": ["ACEi", "ACE inhibitors", "ACE inhibitor", "ace inhibitor"],
     "member_drugs": ["Lisinopril", "Enalapril", "Ramipril", "Captopril"]
   },
   "ARB": {
@@ -17,21 +17,21 @@
     "id": "atc:C09DX",
     "atc_code": "C09DX",
     "fda_epc": "Angiotensin Receptor Neprilysin Inhibitor",
-    "aliases": ["ARNI", "angiotensin receptor-neprilysin inhibitor"],
+    "aliases": ["ARNI", "arni", "angiotensin receptor-neprilysin inhibitor", "sacubitril-valsartan", "sacubitril/valsartan"],
     "member_drugs": ["Sacubitril/Valsartan"]
   },
   "Beta Blocker": {
     "id": "atc:C07",
     "atc_code": "C07",
     "fda_epc": "Beta-Adrenergic Blocker",
-    "aliases": ["beta-blocker", "BB", "beta blockers"],
+    "aliases": ["beta-blocker", "BB", "beta blockers", "beta-blockers", "\u03b2-blocker", "\u03b2-blockers"],
     "member_drugs": ["Metoprolol Succinate", "Carvedilol", "Bisoprolol"]
   },
   "MRA": {
     "id": "atc:C03DA",
     "atc_code": "C03DA",
     "fda_epc": "Mineralocorticoid Receptor Antagonist",
-    "aliases": ["mineralocorticoid receptor antagonist", "aldosterone antagonist"],
+    "aliases": ["mineralocorticoid receptor antagonist", "aldosterone antagonist", "MRAs"],
     "member_drugs": ["Spironolactone", "Eplerenone"]
   },
   "SGLT2 Inhibitor": {
@@ -68,5 +68,19 @@
     "fda_epc": "Cardiac Glycoside",
     "aliases": ["digitalis glycoside"],
     "member_drugs": ["Digoxin"]
+  },
+  "NSAID": {
+    "id": "atc:M01A",
+    "atc_code": "M01A",
+    "fda_epc": "Non-Steroidal Anti-Inflammatory Drug",
+    "aliases": ["NSAIDs", "Nsaid", "NSAID", "Non-Steroidal Anti-Inflammatory Drug", "non-steroidal anti-inflammatory", "nonsteroidal anti-inflammatory"],
+    "member_drugs": ["Ibuprofen", "Naproxen", "Diclofenac", "Celecoxib", "Indomethacin"]
+  },
+  "Calcium Channel Blocker": {
+    "id": "atc:C08",
+    "atc_code": "C08",
+    "fda_epc": "Calcium Channel Blocker",
+    "aliases": ["CCB", "CCBs", "Calcium Channel Blockers", "calcium channel blocker", "calcium channel blockers"],
+    "member_drugs": ["Amlodipine", "Diltiazem", "Verapamil", "Nifedipine"]
   }
 }

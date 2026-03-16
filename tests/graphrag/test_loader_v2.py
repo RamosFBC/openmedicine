@@ -241,3 +241,69 @@ class TestLoadGuideline:
         assert "CONTRAINDICATED_IN" in all_cypher
         assert "DrugClass" in all_cypher
         assert "Disease" in all_cypher
+
+
+class TestDiagnosedByEdgeDerivation:
+    """Fix 4: DIAGNOSED_BY edges are derived from diagnostic_criteria extractions."""
+
+    def test_diagnostic_criteria_creates_diagnosed_by(self):
+        """Extraction with rec_type=diagnostic_criteria should create DIAGNOSED_BY edge."""
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.1234/test", year=2022,
+            organization="Test Org",
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="test_diag_1",
+                rec_type="diagnostic_criteria",
+                action="diagnose",
+                action_detail="Use BNP to diagnose Heart Failure",
+                strength="strong_for",
+                evidence_quality="high",
+                concepts=[
+                    ConceptRef("Heart Failure", "disease", "subject"),
+                    ConceptRef("BNP", "lab", "subject"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        all_cypher = " ".join(q[0] for q in all_queries)
+
+        assert "DIAGNOSED_BY" in all_cypher
+
+    def test_diagnostic_criteria_with_procedure(self):
+        """DIAGNOSED_BY should also work for Disease → Procedure."""
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.1234/test", year=2022,
+            organization="Test Org",
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="test_diag_2",
+                rec_type="diagnostic_criteria",
+                action="diagnose",
+                action_detail="Use echocardiography for HF diagnosis",
+                strength="strong_for",
+                evidence_quality="high",
+                concepts=[
+                    ConceptRef("Heart Failure", "disease", "subject"),
+                    ConceptRef("Echocardiography", "procedure", "subject"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        all_cypher = " ".join(q[0] for q in all_queries)
+
+        assert "DIAGNOSED_BY" in all_cypher
