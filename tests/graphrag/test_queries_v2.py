@@ -203,6 +203,18 @@ class TestLoaderSemanticEdges:
         assert "CONTRAINDICATED_IN" in cypher
         assert params["severity"] == "absolute"
 
+    def test_create_contraindicated_in_with_evidence_quality(self):
+        props = ContraindicatedInProps(
+            strength=RecommendationStrength.STRONG_AGAINST,
+            severity=ContraindicationSeverity.ABSOLUTE,
+            evidence_quality=EvidenceQuality.HIGH,
+        )
+        cypher, params = _assert_valid_cypher(
+            LoaderQueries.create_contraindicated_in("rxnorm:123", "Drug", "snomed:456", props)
+        )
+        assert "evidence_quality" in cypher
+        assert params["eq"] == "high"
+
     def test_create_interacts_with(self):
         props = InteractsWithProps(
             severity=InteractionSeverity.MAJOR,
@@ -213,6 +225,17 @@ class TestLoaderSemanticEdges:
         )
         assert "INTERACTS_WITH" in cypher
         assert "Drug" in cypher  # Default labels are Drug
+
+    def test_create_interacts_with_evidence_quality(self):
+        props = InteractsWithProps(
+            severity=InteractionSeverity.MAJOR,
+            evidence_quality=EvidenceQuality.MODERATE,
+        )
+        cypher, params = _assert_valid_cypher(
+            LoaderQueries.create_interacts_with("rxnorm:1", "rxnorm:2", props)
+        )
+        assert "evidence_quality" in cypher
+        assert params["eq"] == "moderate"
 
     def test_create_interacts_with_dynamic_labels(self):
         props = InteractsWithProps(severity=InteractionSeverity.MODERATE)
@@ -407,11 +430,19 @@ class TestReasoningLayer1:
         )
         assert "CONTRAINDICATED_IN" in cypher
 
+    def test_find_contraindications_returns_evidence_quality(self):
+        cypher, _ = ReasoningQueries.find_contraindications("rxnorm:123", "Drug")
+        assert "evidence_quality" in cypher
+
     def test_find_interactions(self):
         cypher, _ = _assert_valid_cypher(
             ReasoningQueries.find_interactions("rxnorm:123")
         )
         assert "INTERACTS_WITH" in cypher
+
+    def test_find_interactions_returns_evidence_quality(self):
+        cypher, _ = ReasoningQueries.find_interactions("rxnorm:123")
+        assert "evidence_quality" in cypher
 
     def test_find_interactions_with_drug_class_label(self):
         cypher, _ = _assert_valid_cypher(

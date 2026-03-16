@@ -375,6 +375,9 @@ class ContraindicatedInProps(BaseModel):
     severity: ContraindicationSeverity = Field(
         description="Absolute or relative contraindication"
     )
+    evidence_quality: EvidenceQuality | None = Field(
+        default=None, description="Evidence quality"
+    )
     conditions_json: str | None = Field(
         default=None, description="JSON-encoded eligibility criteria"
     )
@@ -384,6 +387,9 @@ class InteractsWithProps(BaseModel):
     """Properties on INTERACTS_WITH edges (Drug → Drug)."""
 
     severity: InteractionSeverity = Field(description="Interaction severity")
+    evidence_quality: EvidenceQuality | None = Field(
+        default=None, description="Evidence quality"
+    )
     mechanism: str | None = Field(default=None, description="Interaction mechanism")
     clinical_effect: str | None = Field(
         default=None, description="Clinical effect description"

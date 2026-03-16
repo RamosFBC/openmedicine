@@ -247,7 +247,7 @@ class ReasoningEngine:
                         entity_type="Disease",
                         edge_type="CONTRAINDICATED_IN",
                         strength=row.get("strength", ""),
-                        evidence_quality="",
+                        evidence_quality=row.get("evidence_quality", ""),
                         conditions_json=row.get("conditions"),
                     )
                     self._evaluate_match_conditions(match, q.patient_vars)
@@ -272,7 +272,7 @@ class ReasoningEngine:
                                 entity_type="Disease",
                                 edge_type="CONTRAINDICATED_IN",
                                 strength=row.get("strength", ""),
-                                evidence_quality="",
+                                evidence_quality=row.get("evidence_quality", ""),
                                 conditions_json=row.get("conditions"),
                                 source_layer="expanded",
                             )
@@ -334,7 +334,7 @@ class ReasoningEngine:
                         entity_type=row.get("entity_type", "Drug"),
                         edge_type="INTERACTS_WITH",
                         strength="",
-                        evidence_quality="",
+                        evidence_quality=row.get("evidence_quality", ""),
                     )
                 )
 
@@ -353,7 +353,7 @@ class ReasoningEngine:
                                 entity_type=row.get("entity_type", "Drug"),
                                 edge_type="INTERACTS_WITH",
                                 strength="",
-                                evidence_quality="",
+                                evidence_quality=row.get("evidence_quality", ""),
                                 source_layer="expanded",
                             )
                         )

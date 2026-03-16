@@ -395,12 +395,13 @@ class LoaderQueries:
             f"MATCH (src:{source_label} {{id: $src_id}}), (tgt:Disease {{id: $tgt_id}}) "
             "MERGE (src)-[r:CONTRAINDICATED_IN]->(tgt) "
             "ON CREATE SET r.strength = $strength, r.severity = $severity, "
-            "r.conditions_json = $conds",
+            "r.evidence_quality = $eq, r.conditions_json = $conds",
             {
                 "src_id": source_id,
                 "tgt_id": target_id,
                 "strength": props.strength.value,
                 "severity": props.severity.value,
+                "eq": props.evidence_quality.value if props.evidence_quality else None,
                 "conds": props.conditions_json,
             },
         )
@@ -417,12 +418,13 @@ class LoaderQueries:
         return (
             f"MATCH (a:{source_label} {{id: $aid}}), (b:{target_label} {{id: $bid}}) "
             "MERGE (a)-[r:INTERACTS_WITH]->(b) "
-            "ON CREATE SET r.severity = $severity, r.mechanism = $mechanism, "
-            "r.clinical_effect = $effect",
+            "ON CREATE SET r.severity = $severity, r.evidence_quality = $eq, "
+            "r.mechanism = $mechanism, r.clinical_effect = $effect",
             {
                 "aid": drug_a_id,
                 "bid": drug_b_id,
                 "severity": props.severity.value,
+                "eq": props.evidence_quality.value if props.evidence_quality else None,
                 "mechanism": props.mechanism,
                 "effect": props.clinical_effect,
             },
@@ -720,6 +722,7 @@ class ReasoningQueries:
             f"MATCH (src:{entity_label} {{id: $eid}})-[r:CONTRAINDICATED_IN]->(dis:Disease) "
             "RETURN dis.id AS disease_id, dis.name AS disease_name, "
             "r.strength AS strength, r.severity AS severity, "
+            "r.evidence_quality AS evidence_quality, "
             "r.conditions_json AS conditions",
             {"eid": entity_id},
         )
@@ -734,7 +737,8 @@ class ReasoningQueries:
             "WHERE other:Drug OR other:DrugClass "
             "RETURN other.id AS entity_id, other.name AS entity_name, "
             "labels(other)[0] AS entity_type, "
-            "r.severity AS severity, r.mechanism AS mechanism, "
+            "r.severity AS severity, r.evidence_quality AS evidence_quality, "
+            "r.mechanism AS mechanism, "
             "r.clinical_effect AS clinical_effect",
             {"did": entity_id},
         )

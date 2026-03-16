@@ -176,6 +176,30 @@ class TestQueryContraindications:
         # Should only call execute_read once (drug found, no need for drug_class)
         assert conn.execute_read.call_count == 1
 
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_quality_propagated_from_graph(self, mock_link):
+        """C2: evidence_quality should be read from graph row, not hardcoded."""
+        drug = MagicMock()
+        drug.node_id = "drug_lisinopril"
+        drug.node_label = "Drug"
+        mock_link.return_value = drug
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "d1",
+                "disease_name": "Pregnancy",
+                "strength": "strong_against",
+                "severity": "absolute",
+                "evidence_quality": "high",
+                "conditions": None,
+            }
+        ]
+        q = ClinicalQuery(intent="contraindication", concepts=["Lisinopril"], include_evidence=False)
+        result = engine.query(q)
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].evidence_quality == "high"
+
 
 class TestQueryInteractions:
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
@@ -194,6 +218,31 @@ class TestQueryInteractions:
         assert len(result.semantic_matches) == 1
         assert result.semantic_matches[0].edge_type == "INTERACTS_WITH"
         assert result.semantic_matches[0].entity_type == "Drug"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_quality_propagated_from_graph(self, mock_link):
+        """C2: evidence_quality should be read from graph row, not hardcoded."""
+        linked = MagicMock()
+        linked.node_id = "drug_warfarin"
+        linked.node_label = "Drug"
+        mock_link.return_value = linked
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "drug_aspirin",
+                "entity_name": "Aspirin",
+                "entity_type": "Drug",
+                "severity": "major",
+                "evidence_quality": "moderate",
+                "mechanism": "antiplatelet",
+                "clinical_effect": "increased bleeding",
+            }
+        ]
+        q = ClinicalQuery(intent="interaction", concepts=["Warfarin"])
+        result = engine.query(q)
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].evidence_quality == "moderate"
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
     def test_tries_drug_class_when_drug_not_found(self, mock_link):

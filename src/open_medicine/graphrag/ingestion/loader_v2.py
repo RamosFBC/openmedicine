@@ -553,6 +553,7 @@ def _create_semantic_edge(
         props = ContraindicatedInProps(
             strength=RecommendationStrength(extraction.strength),
             severity=ContraindicationSeverity.ABSOLUTE,  # Default; refined by relationship properties
+            evidence_quality=EvidenceQuality(extraction.evidence_quality),
         )
         queries.append(
             LoaderQueries.create_contraindicated_in(
@@ -593,7 +594,10 @@ def _create_interacts_with(
     extraction: ExtractionResult,
 ) -> None:
     """Create INTERACTS_WITH edge between two drugs/drug classes."""
-    props = InteractsWithProps(severity=InteractionSeverity.MODERATE)
+    props = InteractsWithProps(
+        severity=InteractionSeverity.MODERATE,
+        evidence_quality=EvidenceQuality(extraction.evidence_quality),
+    )
     queries.append(
         LoaderQueries.create_interacts_with(
             drug_a.node_id,

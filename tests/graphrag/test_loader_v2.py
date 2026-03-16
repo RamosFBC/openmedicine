@@ -246,6 +246,78 @@ class TestLoadGuideline:
 class TestDiagnosedByEdgeDerivation:
     """Fix 4: DIAGNOSED_BY edges are derived from diagnostic_criteria extractions."""
 
+class TestEvidenceQualityOnEdges:
+    """C2: evidence_quality must be propagated to CONTRAINDICATED_IN and INTERACTS_WITH edges."""
+
+    def test_contraindicated_in_includes_evidence_quality(self):
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.x/y", year=2022, organization="Org"
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="rec_ci_001",
+                rec_type="contraindication",
+                action="Avoid ACEi in angioedema",
+                action_detail="ACEi contraindicated in angioedema",
+                strength="strong_against",
+                evidence_quality="high",
+                concepts=[
+                    ConceptRef("ACE Inhibitor", "drug_class", "subject"),
+                    ConceptRef("Angioedema", "disease", "target"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        # Find the CONTRAINDICATED_IN query and check its params include evidence_quality
+        ci_queries = [
+            (c, p) for c, p in all_queries
+            if "CONTRAINDICATED_IN" in c and "evidence_quality" in c
+        ]
+        assert len(ci_queries) >= 1, "CONTRAINDICATED_IN edge must include evidence_quality"
+        _, params = ci_queries[0]
+        assert params.get("eq") == "high"
+
+    def test_interacts_with_includes_evidence_quality(self):
+        conn = MagicMock()
+        guideline = Guideline(
+            id="test_2022", title="Test", doi="10.x/y", year=2022, organization="Org"
+        )
+        extractions = [
+            ExtractionResult(
+                rec_id="rec_ix_001",
+                rec_type="interaction",
+                action="Warfarin interacts with Aspirin",
+                action_detail="Increased bleeding risk",
+                strength="strong_against",
+                evidence_quality="moderate",
+                concepts=[
+                    ConceptRef("Warfarin", "drug", "subject"),
+                    ConceptRef("Aspirin", "drug", "subject"),
+                ],
+                guideline_id="test_2022",
+            ),
+        ]
+        data = LoadableGuideline(guideline=guideline, chunks=[], extractions=extractions)
+        load_guideline(conn, data)
+
+        all_queries = conn.execute_write_tx.call_args[0][0]
+        iw_queries = [
+            (c, p) for c, p in all_queries
+            if "INTERACTS_WITH" in c and "evidence_quality" in c
+        ]
+        assert len(iw_queries) >= 1, "INTERACTS_WITH edge must include evidence_quality"
+        _, params = iw_queries[0]
+        assert params.get("eq") == "moderate"
+
+
+class TestDiagnosedByEdgeDerivation:
+    """Fix 4: DIAGNOSED_BY edges are derived from diagnostic_criteria extractions."""
+
     def test_diagnostic_criteria_creates_diagnosed_by(self):
         """Extraction with rec_type=diagnostic_criteria should create DIAGNOSED_BY edge."""
         conn = MagicMock()
