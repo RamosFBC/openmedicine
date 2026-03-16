@@ -830,6 +830,9 @@ class ReasoningEngine:
                     similarity_score=score,
                 )
             )
+        # Evaluate conditions on vector results using the query's patient_vars
+        for m in matches:
+            self._evaluate_match_conditions(m, q.patient_vars)
         return matches
 
     @staticmethod

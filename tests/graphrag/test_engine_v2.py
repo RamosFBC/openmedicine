@@ -1518,6 +1518,39 @@ class TestLayer3VectorFallback:
         mock_embed.assert_not_called()
         assert "vector" not in result.retrieval_layers_used
 
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_vector_fallback_evaluates_conditions(self, mock_link, mock_embed):
+        """Vector fallback results must have conditions evaluated against patient_vars."""
+        mock_embed.return_value = [0.1] * 1024
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "atc:C09C",
+                "entity_name": "ARB",
+                "entity_type": "DrugClass",
+                "strength": "weak_for",
+                "evidence_quality": "moderate",
+                "conditions": json.dumps([
+                    {"variable": "LVEF", "operator": ">=", "threshold": 41, "unit": "%"},
+                    {"variable": "LVEF", "operator": "<=", "threshold": 49, "unit": "%"},
+                ]),
+                "score": 0.85,
+            }
+        ]
+        q = ClinicalQuery(
+            intent="treatment_selection",
+            concepts=["SomeCondition"],
+            patient_vars={"lvef": 28},
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.source_layer == "vector"
+        # LVEF 28 does NOT meet >= 41, so conditions_met must be False
+        assert match.conditions_met is False
+
     @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("No API key"))
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
     def test_vector_fallback_graceful_on_embed_error(self, mock_link, mock_embed):
