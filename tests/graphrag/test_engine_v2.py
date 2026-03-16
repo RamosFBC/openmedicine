@@ -81,10 +81,10 @@ class TestQueryTreatments:
     def test_no_entity_match(self, mock_link):
         mock_link.return_value = None
         engine, conn = _make_engine()
+        conn.execute_read.return_value = []  # vector fallback returns nothing
         q = ClinicalQuery(intent="treatment_selection", concepts=["Unknown"])
         result = engine.query(q)
         assert result.semantic_matches == []
-        conn.execute_read.assert_not_called()
 
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
     def test_returns_semantic_matches(self, mock_link):
@@ -835,13 +835,14 @@ class TestLayer2Expansion:
     def test_monitoring_expands_class_to_members(self, mock_link, mock_members):
         """If MRA class has no MONITORED_BY, expand to member drugs."""
         # First call: link_entity("MRA", "drug") returns None
-        # Second call: link_entity("Spironolactone", "drug") returns a drug
+        # Second call: link_entity("MRA", "drug_class") returns None (not in graph)
+        # Third call: link_entity("Spironolactone", "drug") returns a drug
         member_drug = MagicMock()
         member_drug.node_id = "rxnorm:35827"
         member_drug.node_label = "Drug"
         member_drug.entity_type = "drug"
 
-        mock_link.side_effect = [None, member_drug]
+        mock_link.side_effect = [None, None, member_drug]
         mock_members.return_value = ["Spironolactone"]
 
         engine, conn = _make_engine()
@@ -1070,3 +1071,543 @@ class TestSourceLayerSorting:
         # direct+met first (sorted by strength), then expanded+met, then vector+unmet
         assert layers[0] == "direct"
         assert layers[-1] == "vector"
+
+
+# ---------------------------------------------------------------------------
+# Fix 1: Class-Level Edge Inheritance
+# ---------------------------------------------------------------------------
+
+
+class TestClassInheritance:
+    """Tests for drug → drug class inheritance in monitoring/interactions."""
+
+    def _mock_drug_entity(self, name="Lisinopril", node_id="rxnorm:29046"):
+        entity = MagicMock()
+        entity.node_id = node_id
+        entity.node_label = "Drug"
+        entity.snomed_code = None
+        entity.rxnorm_code = "29046"
+        entity.atc_code = None
+        entity.loinc_code = None
+        entity.icd10_code = None
+        entity.cpt_code = None
+        entity.gmdn_code = None
+        return entity
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_monitoring_inherits_from_class(self, mock_link):
+        """Query Lisinopril monitoring should inherit from ACE Inhibitor class."""
+        entity = self._mock_drug_entity()
+        mock_link.return_value = entity
+
+        engine, conn = _make_engine()
+
+        # First call: find_monitoring for Drug — returns empty (no direct edges)
+        # Second call: find_drug_class — returns ACE Inhibitor class
+        # Third call: find_monitoring for DrugClass — returns monitoring labs
+        conn.execute_read.side_effect = [
+            [],  # Drug-level monitoring: empty
+            [{"class_id": "atc:C09A", "class_name": "ACE Inhibitor"}],  # MEMBER_OF
+            [  # Class-level monitoring: has results
+                {"lab_id": "loinc:2823-3", "lab_name": "Potassium"},
+                {"lab_id": "loinc:2160-0", "lab_name": "Creatinine"},
+            ],
+            [],  # _fetch_evidence_for_matches for Potassium
+            [],  # _fetch_evidence_for_matches for Creatinine
+        ]
+
+        q = ClinicalQuery(intent="monitoring", concepts=["Lisinopril"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 2
+        lab_names = {m.entity_name for m in result.semantic_matches}
+        assert "Potassium" in lab_names
+        assert "Creatinine" in lab_names
+        # Inherited results should be marked as expanded
+        assert all(m.source_layer == "expanded" for m in result.semantic_matches)
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_interaction_inherits_from_class(self, mock_link):
+        """Query Spironolactone interactions should inherit from MRA class."""
+        entity = self._mock_drug_entity(
+            name="Spironolactone", node_id="rxnorm:9997"
+        )
+        mock_link.return_value = entity
+
+        engine, conn = _make_engine()
+
+        conn.execute_read.side_effect = [
+            [],  # Drug-level interactions: empty
+            [{"class_id": "atc:C03DA", "class_name": "MRA"}],  # MEMBER_OF
+            [  # Class-level interactions
+                {
+                    "entity_id": "atc:C09A",
+                    "entity_name": "ACE Inhibitor",
+                    "entity_type": "DrugClass",
+                },
+            ],
+            [],  # _fetch_evidence_for_matches for ACE Inhibitor
+        ]
+
+        q = ClinicalQuery(intent="interaction", concepts=["Spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "ACE Inhibitor"
+        assert result.semantic_matches[0].source_layer == "expanded"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_direct_match_skips_inheritance(self, mock_link):
+        """When drug has direct edges, class lookup should not happen."""
+        entity = self._mock_drug_entity(
+            name="Spironolactone", node_id="rxnorm:9997"
+        )
+        mock_link.return_value = entity
+
+        engine, conn = _make_engine()
+
+        # Drug-level monitoring returns results — no inheritance needed
+        conn.execute_read.return_value = [
+            {"lab_id": "loinc:2823-3", "lab_name": "Potassium"},
+        ]
+
+        q = ClinicalQuery(
+            intent="monitoring", concepts=["Spironolactone"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "Potassium"
+        # Should be direct layer, not expanded
+        assert result.semantic_matches[0].source_layer == "direct"
+        # execute_read called only once (for drug-level query, not class lookup)
+        assert conn.execute_read.call_count == 1
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_contraindication_inherits_from_class(self, mock_link):
+        """Drug with no direct contraindications inherits from class."""
+        entity = self._mock_drug_entity()
+        mock_link.return_value = entity
+
+        engine, conn = _make_engine()
+
+        conn.execute_read.side_effect = [
+            [],  # Drug-level contraindications: empty
+            [{"class_id": "atc:C09A", "class_name": "ACE Inhibitor"}],  # MEMBER_OF
+            [  # Class-level contraindications
+                {
+                    "disease_id": "snomed:77386006",
+                    "disease_name": "Pregnancy",
+                    "strength": "strong_against",
+                },
+            ],
+            [],  # _fetch_evidence_for_matches
+        ]
+
+        q = ClinicalQuery(
+            intent="contraindication", concepts=["Lisinopril"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "Pregnancy"
+        assert result.semantic_matches[0].source_layer == "expanded"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_dosing_inherits_from_class(self, mock_link):
+        """Drug with no direct dosing edges inherits from class."""
+        entity = self._mock_drug_entity()
+        mock_link.return_value = entity
+
+        engine, conn = _make_engine()
+
+        conn.execute_read.side_effect = [
+            [],  # Drug-level dosing: empty
+            [{"class_id": "atc:C09A", "class_name": "ACE Inhibitor"}],  # MEMBER_OF
+            [  # Class-level dosing
+                {"disease": "Heart Failure", "disease_id": "snomed:84114007"},
+            ],
+        ]
+
+        q = ClinicalQuery(
+            intent="dosing", concepts=["Lisinopril"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].source_layer == "expanded"
+
+
+# ---------------------------------------------------------------------------
+# Fix 2: Terminology Expansion
+# ---------------------------------------------------------------------------
+
+
+class TestTerminologyExpansion:
+    """Tests for new terminology entries resolving correctly."""
+
+    def test_nsaid_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("NSAIDs", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "M01A"
+
+    def test_nsaid_singular_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("NSAID", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "M01A"
+
+    def test_ccb_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("Calcium Channel Blockers", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "C08"
+
+    def test_ccb_abbreviation_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("CCB", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "C08"
+
+    def test_common_abbreviations(self):
+        """All common drug class abbreviations should resolve."""
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        abbreviations = {
+            "ACEi": "C09A",
+            "ARNi": "C09DX",
+            "BB": "C07",
+            "CCB": "C08",
+            "MRA": "C03DA",
+            "SGLT2i": "A10BK",
+        }
+        for abbr, expected_atc in abbreviations.items():
+            entity = link_entity(abbr, "drug_class")
+            assert entity is not None, f"{abbr} did not resolve"
+            assert entity.atc_code == expected_atc, (
+                f"{abbr} resolved to {entity.atc_code}, expected {expected_atc}"
+            )
+
+    def test_beta_blockers_plural_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("beta-blockers", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "C07"
+
+    def test_sacubitril_valsartan_resolves(self):
+        from open_medicine.graphrag.ingestion.linker_v2 import link_entity
+
+        entity = link_entity("sacubitril-valsartan", "drug_class")
+        assert entity is not None
+        assert entity.atc_code == "C09DX"
+
+
+# ---------------------------------------------------------------------------
+# Fix 3: Variable Alias Resolution
+# ---------------------------------------------------------------------------
+
+
+class TestVariableAliases:
+    """Tests for variable name alias resolution in condition evaluation."""
+
+    def test_variable_alias_heart_failure_type(self):
+        """Patient vars with heart_failure_type should match HF_type condition."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="test",
+            entity_name="Test",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "HF_type", "operator": "==", "threshold": "HFrEF"},
+            ]),
+        )
+
+        engine._evaluate_match_conditions(
+            match, {"heart_failure_type": "HFrEF"}
+        )
+
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_variable_alias_ef(self):
+        """Patient vars with ejection_fraction should match LVEF condition."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="test",
+            entity_name="Test",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "LVEF", "operator": "<=", "threshold": "40"},
+            ]),
+        )
+
+        engine._evaluate_match_conditions(
+            match, {"ejection_fraction": 35}
+        )
+
+        assert match.conditions_met is True
+
+    def test_canonical_still_works(self):
+        """Patient vars with lvef should still match LVEF condition."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="test",
+            entity_name="Test",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "LVEF", "operator": "<=", "threshold": "40"},
+            ]),
+        )
+
+        engine._evaluate_match_conditions(match, {"lvef": 30})
+
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_alias_missing_variable_still_reported(self):
+        """Unresolvable variables should still be reported as missing."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="test",
+            entity_name="Test",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "LVEF", "operator": "<=", "threshold": "40"},
+                {"variable": "some_unknown_var", "operator": "==", "threshold": "yes"},
+            ]),
+        )
+
+        engine._evaluate_match_conditions(match, {"ejection_fraction": 35})
+
+        assert match.conditions_met is True  # known condition met
+        assert "some_unknown_var" in match.missing_variables
+
+    def test_multiple_aliases_in_same_query(self):
+        """Multiple aliased variables should all resolve correctly."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="test",
+            entity_name="Test",
+            entity_type="Drug",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "LVEF", "operator": "<=", "threshold": "40"},
+                {"variable": "potassium", "operator": "<", "threshold": "5.0"},
+                {"variable": "eGFR", "operator": ">=", "threshold": "30"},
+            ]),
+        )
+
+        engine._evaluate_match_conditions(
+            match,
+            {"ejection_fraction": 35, "K": 4.5, "estimated_gfr": 45},
+        )
+
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+
+# ---------------------------------------------------------------------------
+# Fix 6: Fuzzy Auto-Retry
+# ---------------------------------------------------------------------------
+
+
+class TestFuzzyAutoRetry:
+    """Tests for automatic retry with fuzzy-matched concepts."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members", return_value=[])
+    @patch("open_medicine.graphrag.reasoning.engine_v2.fuzzy_match")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_fuzzy_auto_retry_on_empty_results(self, mock_link, mock_fuzzy, _mock_members):
+        """When initial query returns empty with misspelling, auto-retry with fuzzy match."""
+        # "spironolacton" (misspelled) → fuzzy suggests "Spironolactone"
+        mock_fuzzy.return_value = [("Spironolactone", "drug")]
+
+        def link_side_effect(name, etype):
+            if etype != "drug":
+                return None
+            # Only resolve exact canonical name
+            if name != "Spironolactone":
+                return None
+            entity = MagicMock()
+            entity.node_id = "rxnorm:9997"
+            entity.node_label = "Drug"
+            entity.snomed_code = None
+            entity.rxnorm_code = "9997"
+            entity.atc_code = None
+            entity.loinc_code = None
+            entity.icd10_code = None
+            entity.cpt_code = None
+            entity.gmdn_code = None
+            return entity
+
+        mock_link.side_effect = link_side_effect
+
+        engine, conn = _make_engine()
+
+        # Retry with "Spironolactone": monitoring returns results
+        conn.execute_read.side_effect = [
+            [{"lab_id": "loinc:2823-3", "lab_name": "Potassium"}],
+            [],  # _fetch_evidence_for_matches
+        ]
+
+        q = ClinicalQuery(intent="monitoring", concepts=["spironolacton"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 1
+        assert result.semantic_matches[0].entity_name == "Potassium"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.fuzzy_match")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_fuzzy_no_infinite_loop(self, _mock_link, mock_fuzzy):
+        """When no fuzzy match, should generate hints without retry loop."""
+        mock_fuzzy.return_value = []
+
+        engine, conn = _make_engine()
+        q = ClinicalQuery(intent="monitoring", concepts=["unknowndrug"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) == 0
+        # Should still have hints
+        assert result.confidence == "low"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.fuzzy_match")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity", return_value=None)
+    def test_fuzzy_same_concept_no_retry(self, _mock_link, mock_fuzzy):
+        """If fuzzy match returns same concept (case-insensitive), don't retry."""
+        mock_fuzzy.return_value = [("unknowndrug", "drug")]
+
+        engine, conn = _make_engine()
+        q = ClinicalQuery(intent="monitoring", concepts=["unknowndrug"])
+        result = engine.query(q)
+
+        # Should not retry — fuzzy returned same concept
+        assert len(result.semantic_matches) == 0
+
+
+class TestQueryMonitoring:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members", return_value=[])
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_drug_class_direct_lookup_before_expansion(self, mock_link, mock_members):
+        """When 'MRA' fails as drug, try drug_class directly before expanding."""
+        mock_class_entity = MagicMock()
+        mock_class_entity.node_id = "class_mra"
+        mock_class_entity.node_label = "DrugClass"
+
+        # First call: link_entity("MRA", "drug") -> None
+        # Second call: link_entity("MRA", "drug_class") -> mock_class_entity
+        mock_link.side_effect = [None, mock_class_entity]
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"lab_id": "lab_potassium", "lab_name": "Potassium"}
+        ]
+        q = ClinicalQuery(intent="monitoring", concepts=["MRA"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        assert result.semantic_matches[0].entity_name == "Potassium"
+        assert mock_link.call_count == 2
+        mock_members.assert_not_called()
+
+
+class TestQueryDosing:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_drug_class_fallback(self, mock_link):
+        """When drug lookup fails, try drug_class before returning empty."""
+        mock_class_entity = MagicMock()
+        mock_class_entity.node_id = "class_arni"
+        mock_class_entity.node_label = "DrugClass"
+
+        mock_link.side_effect = [None, mock_class_entity]
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"disease_id": "disease_hfref", "disease": "HFrEF", "conditions": None}
+        ]
+        q = ClinicalQuery(intent="dosing", concepts=["ARNi"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        assert mock_link.call_count == 2
+
+
+class TestEvidenceReranking:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_ranked_by_relevance(self, mock_link, mock_embed):
+        """Evidence re-ranked by cosine similarity when > 5 candidates."""
+        mock_embed.return_value = [1.0, 0.0, 0.0]
+
+        engine, conn = _make_engine()
+
+        # First call: find_recommendations_for_entity returns 6+ citations
+        # Second call: embedding fetch
+        recommendations = [
+            {"source_text": f"text_{i}", "guideline": "AHA", "doi": "10.1161/test", "section": "S"}
+            for i in range(8)
+        ]
+        embeddings = [
+            {"text": "text_0", "embedding": [0.0, 1.0, 0.0]},
+            {"text": "text_1", "embedding": [0.9, 0.1, 0.0]},  # most similar
+            {"text": "text_2", "embedding": [0.5, 0.5, 0.0]},
+            {"text": "text_3", "embedding": [0.1, 0.9, 0.0]},
+            {"text": "text_4", "embedding": [0.8, 0.2, 0.0]},  # second most
+            {"text": "text_5", "embedding": [0.0, 0.0, 1.0]},
+            {"text": "text_6", "embedding": [0.3, 0.7, 0.0]},
+            {"text": "text_7", "embedding": [0.7, 0.3, 0.0]},  # third most
+        ]
+        conn.execute_read.side_effect = [recommendations, embeddings]
+
+        matches = [
+            SemanticMatch(
+                entity_id="x", entity_name="X", entity_type="Drug", edge_type="INDICATED_FOR",
+                strength="strong_for", evidence_quality="high",
+            )
+        ]
+        q = ClinicalQuery(intent="monitoring", concepts=["Spironolactone"], include_evidence=True)
+
+        evidence = engine._fetch_evidence_for_matches(matches, q)
+
+        assert len(evidence) == 5
+        # Most similar (text_1, score ~0.99) should be first
+        assert evidence[0].text == "text_1"
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_evidence_no_reranking_when_few(self, mock_link):
+        """When <= 5 evidence citations, skip re-ranking."""
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {"source_text": "Only one citation", "guideline": "AHA", "doi": "10.1161/test", "section": "X"},
+        ]
+
+        matches = [SemanticMatch(
+            entity_id="x", entity_name="X", entity_type="Drug", edge_type="INDICATED_FOR",
+            strength="strong_for", evidence_quality="high",
+        )]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"], include_evidence=True)
+
+        evidence = engine._fetch_evidence_for_matches(matches, q)
+        assert len(evidence) == 1

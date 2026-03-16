@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import logging
+import math
 import operator
 import os
 from typing import TYPE_CHECKING, Any
@@ -56,6 +57,24 @@ OPS = {
 # Layer priority for sort ordering (lower = higher priority)
 _LAYER_RANK = {"direct": 0, "expanded": 1, "vector": 2}
 
+# Variable name aliases: maps common alternative names to canonical forms
+# used by graph conditions. Keys and values are lowercase.
+_VARIABLE_ALIASES: dict[str, str] = {
+    "heart_failure_type": "hf_type",
+    "ejection_fraction": "lvef",
+    "ef": "lvef",
+    "gfr": "egfr",
+    "estimated_gfr": "egfr",
+    "k": "potassium",
+    "k+": "potassium",
+    "na": "sodium",
+    "na+": "sodium",
+    "sbp": "systolic_bp",
+    "dbp": "diastolic_bp",
+    "hr": "heart_rate",
+    "bmi": "body_mass_index",
+}
+
 # Maps query intents to Layer 1 query methods
 _INTENT_TO_QUERY = {
     "treatment_selection": "_query_treatments",
@@ -65,6 +84,16 @@ _INTENT_TO_QUERY = {
     "monitoring": "_query_monitoring",
     "diagnostic_criteria": "_query_diagnostic_criteria",
 }
+
+
+def _cosine_similarity(a: list[float], b: list[float]) -> float:
+    """Compute cosine similarity between two vectors."""
+    dot = sum(x * y for x, y in zip(a, b))
+    norm_a = math.sqrt(sum(x * x for x in a))
+    norm_b = math.sqrt(sum(x * x for x in b))
+    if norm_a == 0 or norm_b == 0:
+        return 0.0
+    return dot / (norm_a * norm_b)
 
 
 class ReasoningEngine:
@@ -80,18 +109,69 @@ class ReasoningEngine:
         2. If below threshold, try Layer 2 expansion (multi-hop)
         3. If include_evidence, enrich with recommendation data
         4. Evaluate patient conditions
-        5. Return ranked results
+        5. If empty, auto-retry with fuzzy-matched concepts
+        6. Return ranked results
         """
-        # Route to intent-specific query
+        result = self._execute_query(q)
+
+        # Auto-retry with fuzzy-matched concepts if no results
+        if not result.semantic_matches and not result.recommendation_matches:
+            retried_concepts = self._fuzzy_resolve_concepts(q.concepts)
+            if retried_concepts and retried_concepts != q.concepts:
+                retry_q = ClinicalQuery(
+                    intent=q.intent,
+                    concepts=retried_concepts,
+                    patient_vars=q.patient_vars,
+                    guideline_filter=q.guideline_filter,
+                    include_evidence=q.include_evidence,
+                    min_results_threshold=q.min_results_threshold,
+                )
+                result = self._execute_query(retry_q)
+
+        return result
+
+    def _execute_query(self, q: ClinicalQuery) -> GraphRAGResult:
+        """Route to intent-specific query handler."""
         method_name = _INTENT_TO_QUERY.get(q.intent)
         if method_name:
             handler = getattr(self, method_name)
-            result = handler(q)
-        else:
-            # Fall back to generic recommendation search
-            result = self._query_generic(q)
+            return handler(q)
+        return self._query_generic(q)
 
-        return result
+    @staticmethod
+    def _fuzzy_resolve_concepts(concepts: list[str]) -> list[str]:
+        """Try to resolve unrecognized concepts via fuzzy matching.
+
+        Returns a new concept list with fuzzy-matched replacements,
+        or the original list if no better matches found.
+        """
+        resolved = []
+        changed = False
+        for concept in concepts:
+            matches = fuzzy_match(concept, max_results=1)
+            if matches:
+                matched_name, _entity_type = matches[0]
+                if matched_name.lower() != concept.lower():
+                    resolved.append(matched_name)
+                    changed = True
+                    continue
+            resolved.append(concept)
+        return resolved if changed else concepts
+
+    # ----- Class-level inheritance -----
+
+    def _get_parent_classes(self, entity_id: str) -> list[tuple[str, str]]:
+        """Look up drug classes for a drug via MEMBER_OF edges in the graph.
+
+        Returns list of (class_id, class_name) tuples.
+        """
+        cypher, params = ReasoningQueries.find_drug_class(entity_id)
+        rows = self._conn.execute_read(cypher, params)
+        return [
+            (row.get("class_id", ""), row.get("class_name", ""))
+            for row in rows
+            if row.get("class_id")
+        ]
 
     # ----- Intent-specific queries (Layer 1 + Layer 2 expansion) -----
 
@@ -149,6 +229,7 @@ class ReasoningEngine:
 
         for concept in q.concepts:
             # Try drug first, then drug_class
+            found = False
             for entity_type in ("drug", "drug_class"):
                 entity = link_entity(concept, entity_type)
                 if entity is None:
@@ -173,7 +254,39 @@ class ReasoningEngine:
                     semantic_matches.append(match)
 
                 if rows:
+                    found = True
                     break  # Found results, don't try other entity types
+
+                # Class inheritance: if drug resolved but no contraindications,
+                # check parent classes before trying drug_class entity type
+                if entity_type == "drug" and entity is not None:
+                    for class_id, _class_name in self._get_parent_classes(entity.node_id):
+                        c_cypher, c_params = ReasoningQueries.find_contraindications(
+                            class_id, "DrugClass"
+                        )
+                        c_rows = self._conn.execute_read(c_cypher, c_params)
+                        for row in c_rows:
+                            match = SemanticMatch(
+                                entity_id=row.get("disease_id", ""),
+                                entity_name=row.get("disease_name", ""),
+                                entity_type="Disease",
+                                edge_type="CONTRAINDICATED_IN",
+                                strength=row.get("strength", ""),
+                                evidence_quality="",
+                                conditions_json=row.get("conditions"),
+                                source_layer="expanded",
+                            )
+                            self._evaluate_match_conditions(match, q.patient_vars)
+                            semantic_matches.append(match)
+                        if c_rows:
+                            found = True
+                            break
+                    if found:
+                        break
+
+        # Layer 3: vector fallback if no structured results
+        if not semantic_matches:
+            semantic_matches.extend(self._vector_fallback(q))
 
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
@@ -223,7 +336,36 @@ class ReasoningEngine:
                     )
                 )
 
-        return self._build_result(semantic_matches, [], q)
+            # Class inheritance: if no direct interactions, check parent classes
+            if not rows and entity.node_label == "Drug":
+                for class_id, _class_name in self._get_parent_classes(entity.node_id):
+                    c_cypher, c_params = ReasoningQueries.find_interactions(
+                        class_id, entity_label="DrugClass"
+                    )
+                    c_rows = self._conn.execute_read(c_cypher, c_params)
+                    for row in c_rows:
+                        semantic_matches.append(
+                            SemanticMatch(
+                                entity_id=row.get("entity_id", ""),
+                                entity_name=row.get("entity_name", ""),
+                                entity_type=row.get("entity_type", "Drug"),
+                                edge_type="INTERACTS_WITH",
+                                strength="",
+                                evidence_quality="",
+                                source_layer="expanded",
+                            )
+                        )
+
+        # Layer 3: vector fallback if no structured results
+        if not semantic_matches:
+            semantic_matches.extend(self._vector_fallback(q))
+
+        all_evidence = (
+            self._fetch_evidence_for_matches(semantic_matches, q)
+            if q.include_evidence and semantic_matches
+            else []
+        )
+        return self._build_result(semantic_matches, all_evidence, q)
 
     def _query_diagnostic_criteria(self, q: ClinicalQuery) -> GraphRAGResult:
         """Find diagnostic criteria via DIAGNOSED_BY edges."""
@@ -249,6 +391,9 @@ class ReasoningEngine:
                     )
                 )
 
+        # Layer 3: vector fallback, then generic query if still empty
+        if not semantic_matches:
+            semantic_matches.extend(self._vector_fallback(q))
         if not semantic_matches:
             return self._query_generic(q)
 
@@ -266,6 +411,8 @@ class ReasoningEngine:
             return self._empty_result()
 
         entity = link_entity(drug_name, "drug")
+        if entity is None:
+            entity = link_entity(drug_name, "drug_class")
         if entity is None:
             return self._empty_result()
 
@@ -291,6 +438,29 @@ class ReasoningEngine:
             self._evaluate_match_conditions(match, q.patient_vars)
             semantic_matches.append(match)
 
+        # Class inheritance: if no direct dosing, check parent classes
+        if not rows:
+            for class_id, _class_name in self._get_parent_classes(entity.node_id):
+                c_cypher, c_params = ReasoningQueries.find_dosing(class_id, disease_id)
+                c_rows = self._conn.execute_read(c_cypher, c_params)
+                for row in c_rows:
+                    match = SemanticMatch(
+                        entity_id=row.get("disease_id", class_id),
+                        entity_name=row.get("disease", drug_name),
+                        entity_type="Disease",
+                        edge_type="DOSED_FOR",
+                        strength="",
+                        evidence_quality="",
+                        conditions_json=row.get("conditions"),
+                        source_layer="expanded",
+                    )
+                    self._evaluate_match_conditions(match, q.patient_vars)
+                    semantic_matches.append(match)
+
+        # Layer 3: vector fallback if no structured results
+        if not semantic_matches:
+            semantic_matches.extend(self._vector_fallback(q))
+
         all_evidence = (
             self._fetch_evidence_for_matches(semantic_matches, q)
             if q.include_evidence and semantic_matches
@@ -305,12 +475,17 @@ class ReasoningEngine:
         for concept in q.concepts:
             entity = link_entity(concept, "drug")
             if entity is None:
+                # Try drug_class directly before expanding to members
+                entity = link_entity(concept, "drug_class")
+            if entity is None:
                 # Layer 2: concept might be a drug class — expand to members
                 expanded = self._expand_drug_class_to_monitoring(concept)
                 semantic_matches.extend(expanded)
                 continue
 
-            cypher, params = ReasoningQueries.find_monitoring(entity.node_id)
+            cypher, params = ReasoningQueries.find_monitoring(
+                entity.node_id, entity_label=entity.node_label
+            )
             rows = self._conn.execute_read(cypher, params)
 
             for row in rows:
@@ -325,8 +500,38 @@ class ReasoningEngine:
                     )
                 )
 
+            # Class inheritance: if no direct monitoring, check parent classes
+            if not rows:
+                for class_id, _class_name in self._get_parent_classes(entity.node_id):
+                    c_cypher, c_params = ReasoningQueries.find_monitoring(
+                        class_id, entity_label="DrugClass"
+                    )
+                    c_rows = self._conn.execute_read(c_cypher, c_params)
+                    for row in c_rows:
+                        semantic_matches.append(
+                            SemanticMatch(
+                                entity_id=row.get("lab_id", ""),
+                                entity_name=row.get("lab_name", ""),
+                                entity_type="Lab",
+                                edge_type="MONITORED_BY",
+                                strength="",
+                                evidence_quality="",
+                                source_layer="expanded",
+                            )
+                        )
+
         semantic_matches = self._deduplicate(semantic_matches)
-        return self._build_result(semantic_matches, [], q)
+
+        # Layer 3: vector fallback if no structured results
+        if not semantic_matches:
+            semantic_matches.extend(self._vector_fallback(q))
+
+        all_evidence = (
+            self._fetch_evidence_for_matches(semantic_matches, q)
+            if q.include_evidence and semantic_matches
+            else []
+        )
+        return self._build_result(semantic_matches, all_evidence, q)
 
     def _query_generic(self, q: ClinicalQuery) -> GraphRAGResult:
         """Generic query — search recommendations by entity + type."""
@@ -361,9 +566,9 @@ class ReasoningEngine:
                             EvidenceCitation(
                                 chunk_id="",
                                 text=row["source_text"],
-                                guideline_title=row.get("guideline", ""),
-                                doi=row.get("doi", ""),
-                                section=row.get("section", ""),
+                                guideline_title=row.get("guideline") or "",
+                                doi=row.get("doi") or "",
+                                section=row.get("section") or "",
                             )
                         )
 
@@ -544,6 +749,12 @@ class ReasoningEngine:
                 result.append(m)
         return result
 
+    @staticmethod
+    def _normalize_var_name(name: str) -> str:
+        """Normalize a variable name through alias resolution."""
+        key = name.lower()
+        return _VARIABLE_ALIASES.get(key, key)
+
     def _evaluate_match_conditions(
         self, match: SemanticMatch, patient_vars: dict[str, Any]
     ) -> None:
@@ -559,8 +770,11 @@ class ReasoningEngine:
         if not isinstance(conditions, list):
             return
 
-        # Normalize patient variable keys to lowercase for case-insensitive matching
-        norm_vars = {k.lower(): v for k, v in patient_vars.items()}
+        # Normalize patient variable keys to canonical forms via alias map
+        norm_vars: dict[str, Any] = {}
+        for k, v in patient_vars.items():
+            canonical = self._normalize_var_name(k)
+            norm_vars[canonical] = v
 
         missing: list[str] = []
         any_failed = False
@@ -581,23 +795,24 @@ class ReasoningEngine:
     ) -> bool | None:
         """Evaluate a single condition. Returns None if variable missing."""
         var = cond.get("variable", "")
-        var_lower = var.lower()
-        if var_lower not in patient_vars:
+        # Normalize condition variable name through alias map
+        var_canonical = _VARIABLE_ALIASES.get(var.lower(), var.lower())
+        if var_canonical not in patient_vars:
             return None
         op_fn = OPS.get(cond.get("operator", ""))
         if not op_fn:
             return None
         try:
-            return op_fn(float(patient_vars[var_lower]), float(cond["threshold"]))
+            return op_fn(float(patient_vars[var_canonical]), float(cond["threshold"]))
         except (ValueError, TypeError):
-            return op_fn(str(patient_vars[var_lower]), str(cond["threshold"]))
+            return op_fn(str(patient_vars[var_canonical]), str(cond["threshold"]))
 
     def _fetch_evidence_for_matches(
         self,
         matches: list[SemanticMatch],
         q: ClinicalQuery,
     ) -> list[EvidenceCitation]:
-        """Fetch Layer 2 evidence for semantic matches."""
+        """Fetch Layer 2 evidence for semantic matches, re-ranked by relevance."""
         evidence: list[EvidenceCitation] = []
         seen_chunks: set[str] = set()
 
@@ -615,13 +830,42 @@ class ReasoningEngine:
                         EvidenceCitation(
                             chunk_id="",
                             text=text,
-                            guideline_title=row.get("guideline", ""),
-                            doi=row.get("doi", ""),
-                            section=row.get("section", ""),
+                            guideline_title=row.get("guideline") or "",
+                            doi=row.get("doi") or "",
+                            section=row.get("section") or "",
                         )
                     )
 
-        return evidence
+        if len(evidence) <= 5:
+            return evidence
+
+        # Re-rank by cosine similarity to the query
+        try:
+            api_key = os.environ.get("VOYAGE_API_KEY", "")
+            query_text = f"{q.intent} {' '.join(q.concepts)}"
+            query_emb = embed_query(query_text, api_key=api_key)
+
+            # Fetch embeddings for candidate texts from Neo4j
+            texts = [ev.text for ev in evidence]
+            emb_cypher = (
+                "MATCH (ec:EvidenceChunk) "
+                "WHERE ec.text IN $texts AND ec.embedding IS NOT NULL "
+                "RETURN ec.text AS text, ec.embedding AS embedding"
+            )
+            emb_rows = self._conn.execute_read(emb_cypher, {"texts": texts})
+            text_to_emb = {r["text"]: r["embedding"] for r in emb_rows}
+
+            scored = []
+            for ev in evidence:
+                emb = text_to_emb.get(ev.text)
+                score = _cosine_similarity(query_emb, emb) if emb else 0.0
+                scored.append((ev, score))
+
+            scored.sort(key=lambda x: x[1], reverse=True)
+            return [e for e, _ in scored[:5]]
+        except Exception:
+            logger.debug("Evidence re-ranking failed, returning first 10")
+            return evidence[:10]
 
     def _build_result(
         self,
