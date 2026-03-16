@@ -102,6 +102,14 @@ TOOL_DEFINITIONS = [
             "required": ["chunk_id"],
         },
     },
+    {
+        "name": "list_available_guidelines",
+        "description": "List all clinical guidelines available in the knowledge graph. Returns guideline IDs, titles, DOIs, and years.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {},
+        },
+    },
 ]
 
 _INTENT_MAP = {
@@ -153,6 +161,14 @@ def create_mcp_server() -> Server:
             return [types.TextContent(
                 type="text",
                 text=json.dumps(rows[0] if rows else {"error": "Not found"}, indent=2),
+            )]
+
+        if name == "list_available_guidelines":
+            cypher, params = ReasoningQueries.list_guidelines()
+            rows = conn.execute_read(cypher, params)
+            return [types.TextContent(
+                type="text",
+                text=json.dumps({"guidelines": rows}, indent=2),
             )]
 
         raise ValueError(f"Unknown tool: {name}")
