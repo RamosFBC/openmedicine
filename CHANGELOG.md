@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.11.0] - 2026-03-16
+
+### Added
+- **GraphRAG Clinical Knowledge Graph** — full Neo4j-backed knowledge graph for clinical decision support with dual-layer reasoning engine (semantic edges + recommendation traversal), terminology linking (SNOMED/LOINC/ATC), and vector fallback search.
+  - **Ingestion pipeline:** Markdown parser, hierarchical chunker, LLM extraction with typed LogicNodes, entity linker, graph loader with idempotent writes, dead letter queue for failed extractions.
+  - **Reasoning engine v2:** Layer 1 (direct semantic edges), Layer 2 (multi-hop expansion), Layer 3 (vector fallback with cosine threshold), Layer 4 (hint generation). Evidence re-ranking and source layer attribution.
+  - **Edge enrichment:** Regex-based extraction of structured properties (dosing, monitoring, interactions, contraindications) with dose plausibility validation and UNKNOWN severity level.
+  - **Safety hardening:** 6 critical fixes — missing safety variables treated as uncertain, evidence quality propagation, no silent contraindication defaults, dose plausibility checks, vector similarity threshold.
+  - **MCP server v2:** 8 graph tools (drug dosing, interactions, contraindications, monitoring, treatment options, evidence chunks, available guidelines, clinical graph queries) integrated into unified MCP server.
+- **Unified MCP Server** — single Starlette app with MCP Streamable HTTP transport combining calculator, guideline, differential, and graph tools (10 tools total). API key authentication and service configuration modules.
+- **Cardiovascular renal dose adjustments** — spironolactone (MRA) and dapagliflozin (SGLT2i) with eGFR-tiered dosing and drug-specific tests.
+
+### Changed
+- **Unified server architecture** — replaced separate MCP entry points with single `open-medicine-mcp` server. Deprecated standalone graphrag MCP entry point (removal in v1.0).
+- **GraphRAG MCP tool descriptions** rewritten for agent safety and usability.
+
 ## [0.10.0] - 2026-03-13
 
 ### Added
