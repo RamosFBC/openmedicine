@@ -178,6 +178,87 @@ def test_every_drug_normal_renal(drug_name):
     assert result.value["adjusted_dose"] == drug["normal_dose"]
 
 
+# --- Cardiovascular drug-specific tests ---
+
+
+def test_spironolactone_normal_renal():
+    params = RenalDoseAdjustmentParams(drug_name="spironolactone", renal_value=60.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "no_adjustment"
+    assert result.value["metric_match"] is True
+    assert "25 mg" in result.value["adjusted_dose"]
+
+
+def test_spironolactone_ckd_stage_3b():
+    """eGFR 35 (CKD 3b) should trigger dose reduction to 12.5 mg."""
+    params = RenalDoseAdjustmentParams(drug_name="spironolactone", renal_value=35.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "dose_reduction"
+    assert "12.5" in result.value["adjusted_dose"]
+
+
+def test_spironolactone_contraindicated_low_egfr():
+    """eGFR <30 should be contraindicated per AHA/ACC guidelines."""
+    params = RenalDoseAdjustmentParams(drug_name="spironolactone", renal_value=25.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "contraindicated"
+
+
+def test_dapagliflozin_normal_renal():
+    params = RenalDoseAdjustmentParams(drug_name="dapagliflozin", renal_value=60.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "no_adjustment"
+    assert "10 mg" in result.value["adjusted_dose"]
+    assert result.value["metric_match"] is True
+
+
+def test_dapagliflozin_moderate_ckd_hf_eligible():
+    """eGFR 35 should still allow 10 mg for HF indication."""
+    params = RenalDoseAdjustmentParams(drug_name="dapagliflozin", renal_value=35.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "no_adjustment"
+    assert "10 mg" in result.value["adjusted_dose"]
+    assert any("glycemic" in w.lower() for w in result.value["warnings"])
+
+
+def test_dapagliflozin_very_low_egfr():
+    """eGFR <25 should not be recommended for initiation."""
+    params = RenalDoseAdjustmentParams(drug_name="dapagliflozin", renal_value=20.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "use_with_caution"
+
+
+def test_sacubitril_valsartan_normal_renal():
+    params = RenalDoseAdjustmentParams(drug_name="sacubitril_valsartan", renal_value=60.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "no_adjustment"
+    assert "49/51" in result.value["adjusted_dose"]
+
+
+def test_sacubitril_valsartan_severe_renal():
+    """eGFR <30 should trigger reduced starting dose of 24/26 mg BID."""
+    params = RenalDoseAdjustmentParams(drug_name="sacubitril_valsartan", renal_value=20.0, renal_metric=RenalMetric.EGFR)
+    result = calculate_renal_dose_adjustment(params)
+    assert result.value["adjustment_type"] == "dose_reduction"
+    assert "24/26" in result.value["adjusted_dose"]
+
+
+def test_sacubitril_valsartan_angioedema_warning():
+    """Angioedema warning must be present in all tiers."""
+    for rv in [60.0, 15.0]:
+        params = RenalDoseAdjustmentParams(drug_name="sacubitril_valsartan", renal_value=rv, renal_metric=RenalMetric.EGFR)
+        result = calculate_renal_dose_adjustment(params)
+        assert any("angioedema" in w.lower() for w in result.value["warnings"])
+
+
+def test_sacubitril_valsartan_acei_washout_warning():
+    """ACEi washout warning must be present in all tiers."""
+    for rv in [60.0, 15.0]:
+        params = RenalDoseAdjustmentParams(drug_name="sacubitril_valsartan", renal_value=rv, renal_metric=RenalMetric.EGFR)
+        result = calculate_renal_dose_adjustment(params)
+        assert any("36-hour" in w for w in result.value["warnings"])
+
+
 @pytest.mark.parametrize("drug_name", list(_DRUG_DB.keys()))
 def test_every_drug_low_renal(drug_name):
     """Every drug should return a non-normal result at very low renal function."""

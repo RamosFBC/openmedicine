@@ -794,5 +794,109 @@
         "warnings": ["Not recommended per FDA label", "Extremely high toxicity risk", "Consider alternative mood stabilizer"]
       }
     ]
+  },
+  "spironolactone": {
+    "drug_name": "spironolactone",
+    "brand_names": ["Aldactone", "CaroSpir"],
+    "drug_class": "mineralocorticoid receptor antagonist (MRA)",
+    "route": "PO",
+    "label_renal_metric": "egfr",
+    "normal_dose": "25 mg PO once daily; titrate to 25-50 mg once daily",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum potassium (1 week, 1 month, then q3 months)", "Serum creatinine", "eGFR"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1161/CIR.0000000000001063",
+    "source_description": "2022 AHA/ACC/HFSA Guideline for the Management of Heart Failure; Aldactone FDA-approved prescribing information.",
+    "evidence_level": "Clinical Practice Guideline",
+    "tiers": [
+      {
+        "min": 50, "max": null,
+        "dose": "25 mg PO once daily; titrate to 25-50 mg once daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Initiate only if serum potassium <5.0 mEq/L", "Monitor potassium at 1 week and 1 month after initiation"]
+      },
+      {
+        "min": 30, "max": 49,
+        "dose": "12.5 mg PO once daily or 25 mg every other day; max 25 mg daily",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": null,
+        "warnings": ["Initiate only if serum potassium <5.0 mEq/L", "Increased hyperkalemia risk with CKD stage 3", "Monitor potassium weekly for first month", "Halve dose if potassium 5.0-5.5 mEq/L; stop if >6.0 mEq/L"]
+      },
+      {
+        "min": 0, "max": 29,
+        "dose": "Contraindicated",
+        "adjustment_type": "contraindicated",
+        "dialysis_note": "Not recommended in dialysis patients",
+        "warnings": ["Contraindicated per AHA/ACC guidelines due to life-threatening hyperkalemia risk", "eGFR <30 was exclusion criterion in RALES trial"]
+      }
+    ]
+  },
+  "dapagliflozin": {
+    "drug_name": "dapagliflozin",
+    "brand_names": ["Farxiga"],
+    "drug_class": "SGLT2 inhibitor",
+    "route": "PO",
+    "label_renal_metric": "egfr",
+    "normal_dose": "10 mg PO once daily",
+    "requires_tdm": false,
+    "monitoring_parameters": ["eGFR", "Blood pressure", "Volume status", "Blood glucose (if diabetic)"],
+    "hepatic_interaction_flag": false,
+    "source_doi": "10.1056/NEJMoa1911303",
+    "source_description": "McMurray JJV et al. Dapagliflozin in Patients with Heart Failure and Reduced Ejection Fraction. N Engl J Med 2019;381:1995-2008; Farxiga FDA-approved prescribing information.",
+    "evidence_level": "Randomized Controlled Trial",
+    "tiers": [
+      {
+        "min": 45, "max": null,
+        "dose": "10 mg PO once daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": []
+      },
+      {
+        "min": 25, "max": 44,
+        "dose": "10 mg PO once daily (HF and CKD indications only)",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["No dose adjustment for HF or CKD indications", "Not recommended for glycemic control alone if eGFR <45", "Monitor volume status; increased dehydration risk with loop diuretics", "Assess eGFR before initiation"]
+      },
+      {
+        "min": 0, "max": 24,
+        "dose": "Not recommended for initiation",
+        "adjustment_type": "use_with_caution",
+        "dialysis_note": "Not studied in dialysis; avoid use",
+        "warnings": ["FDA label does not recommend initiation if eGFR <25", "May continue if already on therapy and eGFR declines below 25", "DAPA-HF/DAPA-CKD did not enroll patients with eGFR <25 at baseline"]
+      }
+    ]
+  },
+  "sacubitril_valsartan": {
+    "drug_name": "sacubitril_valsartan",
+    "brand_names": ["Entresto"],
+    "drug_class": "angiotensin receptor-neprilysin inhibitor (ARNi)",
+    "route": "PO",
+    "label_renal_metric": "egfr",
+    "normal_dose": "49/51 mg PO twice daily; titrate to 97/103 mg twice daily",
+    "requires_tdm": false,
+    "monitoring_parameters": ["Serum potassium", "Serum creatinine", "Blood pressure", "Signs of angioedema"],
+    "hepatic_interaction_flag": true,
+    "source_doi": "10.1056/NEJMoa1409077",
+    "source_description": "McMurray JJV et al. Angiotensin-Neprilysin Inhibition versus Enalapril in Heart Failure. N Engl J Med 2014;371:993-1004; Entresto FDA-approved prescribing information (NDA 207620).",
+    "evidence_level": "Randomized Controlled Trial",
+    "tiers": [
+      {
+        "min": 30, "max": null,
+        "dose": "49/51 mg PO twice daily; titrate to 97/103 mg twice daily",
+        "adjustment_type": "no_adjustment",
+        "dialysis_note": null,
+        "warnings": ["Must not co-administer with ACEi; 36-hour washout required", "Contraindicated in patients with history of angioedema"]
+      },
+      {
+        "min": 0, "max": 29,
+        "dose": "24/26 mg PO twice daily; titrate to 97/103 mg twice daily as tolerated",
+        "adjustment_type": "dose_reduction",
+        "dialysis_note": "No data in dialysis patients; use with extreme caution",
+        "warnings": ["Start at lowest dose per FDA label for severe renal impairment (eGFR <30)", "Double dose every 2-4 weeks as tolerated", "Monitor potassium and creatinine closely", "Must not co-administer with ACEi; 36-hour washout required", "Contraindicated in patients with history of angioedema"]
+      }
+    ]
   }
 }
