@@ -49,8 +49,10 @@ class SemanticMatch(BaseModel):
     conditions_json: str | None = Field(
         default=None, description="Eligibility criteria"
     )
-    conditions_met: bool = Field(
-        default=True, description="Whether patient meets criteria"
+    conditions_met: bool | None = Field(
+        default=True,
+        description="Whether patient meets criteria. True=all passed, "
+        "False=at least one failed, None=uncertain (missing variables)",
     )
     missing_variables: list[str] = Field(
         default_factory=list, description="Variables needed but not provided"
@@ -70,7 +72,11 @@ class RecommendationMatch(BaseModel):
     action_detail: str = Field(description="Human-readable explanation")
     strength: str = Field(description="Recommendation strength")
     evidence_quality: str = Field(description="Evidence quality level")
-    conditions_met: bool = Field(default=True)
+    conditions_met: bool | None = Field(
+        default=True,
+        description="Whether patient meets criteria. True=all passed, "
+        "False=at least one failed, None=uncertain (missing variables)",
+    )
     missing_variables: list[str] = Field(default_factory=list)
 
 

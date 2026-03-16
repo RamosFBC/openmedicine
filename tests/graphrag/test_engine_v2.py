@@ -495,8 +495,8 @@ class TestEvaluateConditions:
             conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {})
-        # L4 fix: missing vars ≠ failed conditions — conditions_met=True
-        assert match.conditions_met is True
+        # C1 safety fix: missing vars → conditions_met=None (uncertain)
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
 
     def test_invalid_json_ignored(self):
@@ -562,8 +562,8 @@ class TestEvaluateConditions:
 
     # --- L4: Missing vars vs failed conditions ---
 
-    def test_missing_vars_only_does_not_fail_conditions(self):
-        """Missing vars but no failed condition → conditions_met=True."""
+    def test_missing_vars_only_sets_uncertain(self):
+        """Missing vars but no failed condition → conditions_met=None (uncertain)."""
         engine, _ = _make_engine()
         conditions = json.dumps([
             {"variable": "eGFR", "operator": ">=", "threshold": 30}
@@ -574,7 +574,7 @@ class TestEvaluateConditions:
             evidence_quality="high", conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {})
-        assert match.conditions_met is True
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
 
     def test_failed_condition_sets_conditions_met_false(self):
@@ -592,7 +592,7 @@ class TestEvaluateConditions:
         assert match.conditions_met is False
 
     def test_mixed_missing_and_met_conditions(self):
-        """One met condition + one missing var → conditions_met=True."""
+        """One met condition + one missing var → conditions_met=None (uncertain)."""
         engine, _ = _make_engine()
         conditions = json.dumps([
             {"variable": "LVEF", "operator": "<=", "threshold": 40},
@@ -604,8 +604,149 @@ class TestEvaluateConditions:
             evidence_quality="high", conditions_json=conditions,
         )
         engine._evaluate_match_conditions(match, {"LVEF": 30})
-        assert match.conditions_met is True
+        assert match.conditions_met is None
         assert "eGFR" in match.missing_variables
+
+
+class TestThreeStateConditions:
+    """C1 safety fix: three-state conditions_met logic.
+
+    True  → all conditions evaluated and passed
+    None  → uncertain — missing variables prevent full evaluation
+    False → at least one condition explicitly failed
+    """
+
+    def test_all_conditions_pass_returns_true(self):
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+            {"variable": "eGFR", "operator": ">=", "threshold": 30},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 30, "eGFR": 45})
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_missing_variable_returns_none(self):
+        """A contraindication with unknown pregnancy status must NOT pass."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "pregnant", "operator": "==", "threshold": "false"},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="CONTRAINDICATED_IN", strength="strong_against",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {})
+        assert match.conditions_met is None
+        assert "pregnant" in match.missing_variables
+
+    def test_failed_condition_returns_false(self):
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 55})
+        assert match.conditions_met is False
+        assert match.missing_variables == []
+
+    def test_failed_plus_missing_returns_false(self):
+        """If any condition explicitly fails, result is False even with missing vars."""
+        engine, _ = _make_engine()
+        conditions = json.dumps([
+            {"variable": "LVEF", "operator": "<=", "threshold": 40},
+            {"variable": "eGFR", "operator": ">=", "threshold": 30},
+        ])
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=conditions,
+        )
+        engine._evaluate_match_conditions(match, {"LVEF": 55})  # fails; eGFR missing
+        assert match.conditions_met is False
+        assert "eGFR" in match.missing_variables
+
+    def test_no_conditions_stays_true(self):
+        """No conditions_json → conditions_met stays at default True."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="d1", entity_name="D", entity_type="Drug",
+            edge_type="INDICATED_FOR", strength="strong_for",
+            evidence_quality="high", conditions_json=None,
+        )
+        engine._evaluate_match_conditions(match, {})
+        assert match.conditions_met is True
+
+    def test_build_result_sort_order_with_uncertain(self):
+        """True matches rank before None (uncertain) which rank before False."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d_false", entity_name="False", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=False,
+            ),
+            SemanticMatch(
+                entity_id="d_none", entity_name="None", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=None,
+            ),
+            SemanticMatch(
+                entity_id="d_true", entity_name="True", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=True,
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.semantic_matches[0].conditions_met is True
+        assert result.semantic_matches[1].conditions_met is None
+        assert result.semantic_matches[2].conditions_met is False
+
+    def test_build_result_confidence_medium_for_uncertain_only(self):
+        """If only uncertain matches exist, confidence is medium."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d1", entity_name="D", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=None,
+                missing_variables=["eGFR"],
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "medium"
+
+    def test_build_result_confidence_high_when_true_match_exists(self):
+        """If at least one True match exists alongside None, confidence is high."""
+        engine, _ = _make_engine()
+        matches = [
+            SemanticMatch(
+                entity_id="d1", entity_name="D1", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="strong_for",
+                evidence_quality="high", conditions_met=True,
+            ),
+            SemanticMatch(
+                entity_id="d2", entity_name="D2", entity_type="Drug",
+                edge_type="INDICATED_FOR", strength="moderate_for",
+                evidence_quality="high", conditions_met=None,
+                missing_variables=["eGFR"],
+            ),
+        ]
+        q = ClinicalQuery(intent="treatment_selection", concepts=["X"])
+        result = engine._build_result(matches, [], q)
+        assert result.confidence == "high"
 
 
 class TestEvaluateCondition:
@@ -1400,7 +1541,7 @@ class TestVariableAliases:
 
         engine._evaluate_match_conditions(match, {"ejection_fraction": 35})
 
-        assert match.conditions_met is True  # known condition met
+        assert match.conditions_met is None  # uncertain: known condition met but missing var
         assert "some_unknown_var" in match.missing_variables
 
     def test_multiple_aliases_in_same_query(self):

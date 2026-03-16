@@ -787,15 +787,26 @@ class ReasoningEngine:
 
         missing: list[str] = []
         any_failed = False
+        any_missing = False
 
         for cond in conditions:
             result = self._evaluate_condition(cond, norm_vars)
             if result is None:
                 missing.append(cond.get("variable", ""))
+                any_missing = True
             elif not result:
                 any_failed = True
 
-        match.conditions_met = not any_failed
+        # Three-state logic:
+        #   False → at least one condition explicitly failed
+        #   None  → no failures, but missing variables prevent full evaluation
+        #   True  → all conditions evaluated and passed
+        if any_failed:
+            match.conditions_met = False
+        elif any_missing:
+            match.conditions_met = None
+        else:
+            match.conditions_met = True
         match.missing_variables = missing
 
     @staticmethod
@@ -883,11 +894,19 @@ class ReasoningEngine:
         q: ClinicalQuery,
     ) -> GraphRAGResult:
         """Build final result with ranking and conflict detection."""
-        # Sort by: layer priority, conditions_met (met first), then strength
+        # Sort by: layer priority, conditions_met (True best, None middle, False last),
+        # then strength. Map: True→0, None→1, False→2
+        def _conditions_sort_key(cm: bool | None) -> int:
+            if cm is True:
+                return 0
+            if cm is None:
+                return 1
+            return 2  # False
+
         semantic_matches.sort(
             key=lambda m: (
                 _LAYER_RANK.get(m.source_layer, 99),
-                not m.conditions_met,
+                _conditions_sort_key(m.conditions_met),
                 STRENGTH_RANK.get(m.strength, 99),
             )
         )
@@ -896,13 +915,18 @@ class ReasoningEngine:
         layers = sorted({m.source_layer for m in semantic_matches})
 
         # Determine confidence
-        full_matches = [m for m in semantic_matches if m.conditions_met]
+        # full_matches: conditions explicitly passed (True)
+        # uncertain_matches: missing variables prevent evaluation (None)
+        full_matches = [m for m in semantic_matches if m.conditions_met is True]
+        uncertain_matches = [m for m in semantic_matches if m.conditions_met is None]
         all_missing: list[str] = []
         for m in semantic_matches:
             all_missing.extend(m.missing_variables)
 
         if full_matches:
             confidence = "high"
+        elif uncertain_matches:
+            confidence = "medium"
         elif semantic_matches:
             confidence = "medium"
         else:
