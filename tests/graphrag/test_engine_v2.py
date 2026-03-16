@@ -190,6 +190,89 @@ class TestContraindicationEdgeProperties:
         assert match.edge_properties["severity"] == "ABSOLUTE"
 
 
+class TestDosingEdgeProperties:
+    """Verify dosing queries surface dose properties."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_dosing_properties_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "disease_id": "snomed:703272007",
+                "disease": "HFrEF",
+                "starting_dose": "12.5 mg",
+                "target_dose": "50 mg",
+                "max_dose": "50 mg",
+                "route": "oral",
+                "frequency": "once daily",
+                "titration": "double every 2 weeks",
+                "conditions": None,
+            }
+        ]
+
+        q = ClinicalQuery(intent="dosing", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["starting_dose"] == "12.5 mg"
+        assert match.edge_properties["target_dose"] == "50 mg"
+        assert match.edge_properties["max_dose"] == "50 mg"
+        assert match.edge_properties["frequency"] == "once daily"
+        assert match.edge_properties["route"] == "oral"
+        assert match.edge_properties["titration_schedule"] == "double every 2 weeks"
+
+
+class TestMonitoringEdgeProperties:
+    """Verify monitoring queries surface threshold properties."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_monitoring_thresholds_surfaced(self, mock_link):
+        mock_entity = MagicMock()
+        mock_entity.node_id = "drug:spironolactone"
+        mock_entity.node_label = "Drug"
+        mock_entity.snomed_code = "S"
+        mock_entity.rxnorm_code = None
+        mock_entity.atc_code = None
+        mock_entity.loinc_code = None
+        mock_entity.icd10_code = None
+        mock_entity.cpt_code = None
+        mock_entity.gmdn_code = None
+        mock_link.return_value = mock_entity
+
+        engine, conn = _make_engine()
+        conn.execute_read.return_value = [
+            {
+                "lab_id": "loinc:2823-3",
+                "lab_name": "Potassium",
+                "frequency": "within 1 week, then monthly",
+                "threshold_alert": "K+ >= 5.5 mEq/L",
+                "threshold_stop": "K+ >= 6.0 mEq/L",
+            }
+        ]
+
+        q = ClinicalQuery(intent="monitoring", concepts=["spironolactone"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        match = result.semantic_matches[0]
+        assert match.edge_properties["frequency"] == "within 1 week, then monthly"
+        assert match.edge_properties["threshold_alert"] == "K+ >= 5.5 mEq/L"
+        assert match.edge_properties["threshold_stop"] == "K+ >= 6.0 mEq/L"
+
+
 class TestStrengthRank:
     def test_strong_ranks_lowest(self):
         assert STRENGTH_RANK["strong_for"] < STRENGTH_RANK["moderate_for"]

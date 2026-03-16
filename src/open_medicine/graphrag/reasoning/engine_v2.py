@@ -517,6 +517,14 @@ class ReasoningEngine:
                 strength="",
                 evidence_quality="",
                 conditions_json=row.get("conditions"),
+                edge_properties={
+                    "starting_dose": row.get("starting_dose"),
+                    "target_dose": row.get("target_dose"),
+                    "max_dose": row.get("max_dose"),
+                    "route": row.get("route"),
+                    "frequency": row.get("frequency"),
+                    "titration_schedule": row.get("titration"),
+                },
             )
             self._evaluate_match_conditions(match, q.patient_vars)
             semantic_matches.append(match)
@@ -536,6 +544,14 @@ class ReasoningEngine:
                         evidence_quality="",
                         conditions_json=row.get("conditions"),
                         source_layer="expanded",
+                        edge_properties={
+                            "starting_dose": row.get("starting_dose"),
+                            "target_dose": row.get("target_dose"),
+                            "max_dose": row.get("max_dose"),
+                            "route": row.get("route"),
+                            "frequency": row.get("frequency"),
+                            "titration_schedule": row.get("titration"),
+                        },
                     )
                     self._evaluate_match_conditions(match, q.patient_vars)
                     semantic_matches.append(match)
@@ -588,6 +604,11 @@ class ReasoningEngine:
                         edge_type="MONITORED_BY",
                         strength="",
                         evidence_quality="",
+                        edge_properties={
+                            "frequency": row.get("frequency"),
+                            "threshold_alert": row.get("threshold_alert"),
+                            "threshold_stop": row.get("threshold_stop"),
+                        },
                     )
                 )
 
@@ -608,6 +629,11 @@ class ReasoningEngine:
                                 strength="",
                                 evidence_quality="",
                                 source_layer="expanded",
+                                edge_properties={
+                                    "frequency": row.get("frequency"),
+                                    "threshold_alert": row.get("threshold_alert"),
+                                    "threshold_stop": row.get("threshold_stop"),
+                                },
                             )
                         )
 
@@ -740,6 +766,11 @@ class ReasoningEngine:
                         strength="",
                         evidence_quality="",
                         source_layer="expanded",
+                        edge_properties={
+                            "frequency": row.get("frequency"),
+                            "threshold_alert": row.get("threshold_alert"),
+                            "threshold_stop": row.get("threshold_stop"),
+                        },
                     )
                 )
 
