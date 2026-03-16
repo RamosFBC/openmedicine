@@ -17,6 +17,10 @@ from open_medicine.graphrag.graph.queries_v2 import CypherStatement, LoaderQueri
 
 if TYPE_CHECKING:
     from open_medicine.graphrag.graph.connection import GraphConnection
+from open_medicine.graphrag.enrichment import (
+    parse_contraindication_properties,
+    parse_interaction_properties,
+)
 from open_medicine.graphrag.graph.schema_v2 import (
     ContraindicatedInProps,
     ContraindicationSeverity,
@@ -550,9 +554,16 @@ def _create_semantic_edge(
             )
         )
     elif edge_type == "CONTRAINDICATED_IN":
+        # Use enrichment to derive severity from action_detail text
+        ci_props = parse_contraindication_properties(extraction.action_detail)
+        severity_str = ci_props.get("severity", "").lower()
+        if severity_str in ("absolute", "relative"):
+            severity = ContraindicationSeverity(severity_str)
+        else:
+            severity = ContraindicationSeverity.UNKNOWN
         props = ContraindicatedInProps(
             strength=RecommendationStrength(extraction.strength),
-            severity=ContraindicationSeverity.ABSOLUTE,  # Default; refined by relationship properties
+            severity=severity,
             evidence_quality=EvidenceQuality(extraction.evidence_quality),
         )
         queries.append(
@@ -594,8 +605,15 @@ def _create_interacts_with(
     extraction: ExtractionResult,
 ) -> None:
     """Create INTERACTS_WITH edge between two drugs/drug classes."""
+    # Use enrichment to derive severity from action_detail text
+    ix_props = parse_interaction_properties(extraction.action_detail)
+    severity_str = ix_props.get("severity", "").lower()
+    if severity_str in ("major", "moderate", "minor"):
+        severity = InteractionSeverity(severity_str)
+    else:
+        severity = InteractionSeverity.UNKNOWN
     props = InteractsWithProps(
-        severity=InteractionSeverity.MODERATE,
+        severity=severity,
         evidence_quality=EvidenceQuality(extraction.evidence_quality),
     )
     queries.append(

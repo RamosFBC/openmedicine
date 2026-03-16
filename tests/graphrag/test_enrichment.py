@@ -72,6 +72,17 @@ class TestParseInteraction:
         result = parse_interaction_properties(text)
         assert result["severity"] == "MODERATE"
 
+    def test_severity_minor(self):
+        text = "Minor interaction with minimal clinical significance"
+        result = parse_interaction_properties(text)
+        assert result["severity"] == "MINOR"
+
+    def test_no_severity_keywords(self):
+        """When no severity keywords match, severity should be omitted."""
+        text = "These two drugs interact in some way"
+        result = parse_interaction_properties(text)
+        assert "severity" not in result
+
     def test_empty_text(self):
         assert parse_interaction_properties("") == {}
 
@@ -87,6 +98,12 @@ class TestParseContraindication:
         text = "Use with caution in patients with renal impairment"
         result = parse_contraindication_properties(text)
         assert result["severity"] == "RELATIVE"
+
+    def test_no_severity_keywords(self):
+        """When no severity keywords match, severity should be omitted."""
+        text = "This drug is restricted in certain populations"
+        result = parse_contraindication_properties(text)
+        assert "severity" not in result
 
     def test_empty_text(self):
         assert parse_contraindication_properties("") == {}

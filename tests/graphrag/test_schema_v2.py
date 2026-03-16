@@ -85,12 +85,20 @@ class TestTemporalType:
 
 class TestInteractionSeverity:
     def test_all_values(self):
-        assert {v.value for v in InteractionSeverity} == {"major", "moderate", "minor"}
+        assert {v.value for v in InteractionSeverity} == {"major", "moderate", "minor", "unknown"}
+
+    def test_unknown_exists(self):
+        assert InteractionSeverity.UNKNOWN == "unknown"
+        assert InteractionSeverity("unknown") == InteractionSeverity.UNKNOWN
 
 
 class TestContraindicationSeverity:
     def test_all_values(self):
-        assert {v.value for v in ContraindicationSeverity} == {"absolute", "relative"}
+        assert {v.value for v in ContraindicationSeverity} == {"absolute", "relative", "unknown"}
+
+    def test_unknown_exists(self):
+        assert ContraindicationSeverity.UNKNOWN == "unknown"
+        assert ContraindicationSeverity("unknown") == ContraindicationSeverity.UNKNOWN
 
 
 class TestLikelihood:

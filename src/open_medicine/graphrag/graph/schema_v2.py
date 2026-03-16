@@ -82,6 +82,7 @@ class InteractionSeverity(StrEnum):
     MAJOR = "major"
     MODERATE = "moderate"
     MINOR = "minor"
+    UNKNOWN = "unknown"
 
 
 class ContraindicationSeverity(StrEnum):
@@ -89,6 +90,7 @@ class ContraindicationSeverity(StrEnum):
 
     ABSOLUTE = "absolute"
     RELATIVE = "relative"
+    UNKNOWN = "unknown"
 
 
 class Likelihood(StrEnum):
