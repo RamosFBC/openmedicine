@@ -7,6 +7,85 @@ Falls back to empty dict when patterns don't match — safe to call on any text.
 import re
 from typing import Any
 
+# Conversion factors to normalize doses to mg
+_UNIT_TO_MG: dict[str, float] = {
+    "mg": 1.0,
+    "g": 1000.0,
+    "mcg": 0.001,
+    "mcg/kg/min": 0.001,
+    "mcg/min": 0.001,
+}
+
+
+def _extract_numeric_mg(dose_str: str) -> float | None:
+    """Extract the primary numeric value from a dose string, normalizing to mg.
+
+    Handles formats like "5 mg", "5-10 mg" (takes first number),
+    "24/26 mg" (takes first number), "200 mcg" (converts to mg).
+    Returns None if the string cannot be parsed.
+    """
+    if not dose_str:
+        return None
+
+    # Identify the unit (check longer units first)
+    unit_factor: float = 1.0
+    found_unit = False
+    for unit, factor in sorted(_UNIT_TO_MG.items(), key=lambda x: -len(x[0])):
+        if unit in dose_str.lower():
+            unit_factor = factor
+            found_unit = True
+            break
+
+    if not found_unit:
+        return None
+
+    # Extract the first numeric value (before any -, /, or "to")
+    m = re.search(r"([\d.]+)", dose_str)
+    if not m:
+        return None
+
+    try:
+        return float(m.group(1)) * unit_factor
+    except ValueError:
+        return None
+
+
+def validate_dose_consistency(props: dict[str, str]) -> list[str]:
+    """Validate dose ordering for plausibility.
+
+    Checks:
+    - starting_dose > max_dose -> error
+    - target_dose > max_dose -> error
+    - starting_dose > target_dose -> warning (could be intentional down-titration)
+
+    Returns a list of human-readable issue strings. Empty list means valid.
+    """
+    issues: list[str] = []
+
+    start_mg = _extract_numeric_mg(props.get("starting_dose", ""))
+    target_mg = _extract_numeric_mg(props.get("target_dose", ""))
+    max_mg = _extract_numeric_mg(props.get("max_dose", ""))
+
+    if start_mg is not None and max_mg is not None and start_mg > max_mg:
+        issues.append(
+            f"ERROR: starting_dose ({props['starting_dose']}) exceeds "
+            f"max_dose ({props['max_dose']})"
+        )
+
+    if target_mg is not None and max_mg is not None and target_mg > max_mg:
+        issues.append(
+            f"ERROR: target_dose ({props['target_dose']}) exceeds "
+            f"max_dose ({props['max_dose']})"
+        )
+
+    if start_mg is not None and target_mg is not None and start_mg > target_mg:
+        issues.append(
+            f"WARNING: starting_dose ({props['starting_dose']}) exceeds "
+            f"target_dose ({props['target_dose']}) — may be intentional down-titration"
+        )
+
+    return issues
+
 # Shared dose unit pattern — order matters: longer units first
 # Supports ranges with "-", "/", or "to": "0.125-0.25 mg", "0.125 to 0.25 mg"
 _DOSE_UNIT = r"[\d.,\-/]+(?:\s+to\s+[\d.,\-/]+)?\s*(?:mcg/kg/min|mcg/min|mg|mcg|g|units?|mL)"
@@ -140,6 +219,11 @@ def parse_dosing_properties(text: str) -> dict[str, str]:
         if route == "infusion":
             route = "iv"
         props["route"] = route
+
+    # Validate dose plausibility
+    issues = validate_dose_consistency(props)
+    if issues:
+        props["_validation_issues"] = "; ".join(issues)
 
     return props
 

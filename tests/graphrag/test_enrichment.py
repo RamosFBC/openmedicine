@@ -2,10 +2,12 @@
 
 from open_medicine.graphrag.enrichment import (
     PARSERS,
+    _extract_numeric_mg,
     parse_contraindication_properties,
     parse_dosing_properties,
     parse_interaction_properties,
     parse_monitoring_properties,
+    validate_dose_consistency,
 )
 
 
@@ -266,6 +268,98 @@ class TestParseContraindication:
         text = "routine use of nitrates is ineffective in HFpEF"
         result = parse_contraindication_properties(text)
         assert result["severity"] == "RELATIVE"
+
+
+class TestExtractNumericMg:
+    def test_extract_numeric_mg_basic(self):
+        assert _extract_numeric_mg("5 mg") == 5.0
+
+    def test_extract_numeric_mg_mcg(self):
+        assert _extract_numeric_mg("200 mcg") == 0.2
+
+    def test_extract_numeric_mg_range(self):
+        """For ranges like '5-10 mg', take the first number."""
+        assert _extract_numeric_mg("5-10 mg") == 5.0
+
+    def test_extract_numeric_mg_slash(self):
+        """For slash notation like '24/26 mg', take the first number."""
+        assert _extract_numeric_mg("24/26 mg") == 24.0
+
+    def test_extract_numeric_mg_no_unit(self):
+        assert _extract_numeric_mg("5 tablets") is None
+
+    def test_extract_numeric_mg_empty(self):
+        assert _extract_numeric_mg("") is None
+
+    def test_extract_numeric_mg_grams(self):
+        assert _extract_numeric_mg("2 g") == 2000.0
+
+    def test_extract_numeric_mg_mcg_kg_min(self):
+        assert _extract_numeric_mg("5 mcg/kg/min") == 0.005
+
+
+class TestValidateDoseConsistency:
+    def test_valid_dose_ordering(self):
+        props = {
+            "starting_dose": "5 mg",
+            "target_dose": "50 mg",
+            "max_dose": "200 mg",
+        }
+        issues = validate_dose_consistency(props)
+        assert issues == []
+
+    def test_starting_exceeds_max_flagged(self):
+        props = {"starting_dose": "200 mg", "max_dose": "50 mg"}
+        issues = validate_dose_consistency(props)
+        assert len(issues) == 1
+        assert "ERROR" in issues[0]
+        assert "starting_dose" in issues[0]
+        assert "max_dose" in issues[0]
+
+    def test_target_exceeds_max_flagged(self):
+        props = {"target_dose": "300 mg", "max_dose": "200 mg"}
+        issues = validate_dose_consistency(props)
+        assert len(issues) == 1
+        assert "ERROR" in issues[0]
+        assert "target_dose" in issues[0]
+
+    def test_starting_exceeds_target_warning(self):
+        props = {"starting_dose": "50 mg", "target_dose": "25 mg"}
+        issues = validate_dose_consistency(props)
+        assert len(issues) == 1
+        assert "WARNING" in issues[0]
+        assert "down-titration" in issues[0]
+
+    def test_non_numeric_doses_skip_validation(self):
+        """Slash-notation doses should parse without crashing."""
+        props = {
+            "starting_dose": "24/26 mg",
+            "target_dose": "97/103 mg",
+            "max_dose": "200 mg",
+        }
+        # Should not crash; 24 < 97 < 200 so no issues
+        issues = validate_dose_consistency(props)
+        assert issues == []
+
+    def test_empty_props(self):
+        assert validate_dose_consistency({}) == []
+
+    def test_partial_props(self):
+        """With only one dose field, no comparisons are possible."""
+        assert validate_dose_consistency({"starting_dose": "5 mg"}) == []
+
+
+class TestParseDosingValidation:
+    def test_parse_dosing_flags_inconsistency(self):
+        text = "Start at 200 mg daily, maximum dose 50 mg"
+        result = parse_dosing_properties(text)
+        assert "_validation_issues" in result
+        assert "ERROR" in result["_validation_issues"]
+
+    def test_parse_dosing_valid_no_issues(self):
+        text = "Start at 5 mg once daily, target dose of 50 mg, maximum dose 200 mg"
+        result = parse_dosing_properties(text)
+        assert "_validation_issues" not in result
 
 
 class TestParsersRegistry:
