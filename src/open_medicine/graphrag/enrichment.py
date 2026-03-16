@@ -270,6 +270,33 @@ def parse_monitoring_properties(text: str) -> dict[str, str]:
         # Store all thresholds semicolon-separated
         props["threshold_alert"] = "; ".join(t.strip() for t in thresholds)
 
+    # --- Threshold stop (discontinue/hold) ---
+    stop_patterns = [
+        # "stop if K+ >= 6.0" / "discontinue if potassium >= 6.0"
+        re.compile(
+            r"(?:stop|discontinue|hold|withhold|suspend)\s+(?:\w+\s+)?if\s+"
+            r"((?:K\+?|potassium|creatinine|eGFR|BNP|INR)"
+            r"(?:\s+(?:level|levels?))?"
+            r"\s*(?:>=?|<=?|≥|≤|>|<)\s*[\d.]+\s*"
+            r"(?:mEq/L|mg/dL|mL/min(?:/1\.73\s*m2)?|pg/mL|ng/mL)?)",
+            re.IGNORECASE,
+        ),
+        # "K+ >= 6.0 ... discontinue" (threshold before action word)
+        re.compile(
+            r"((?:K\+?|potassium|creatinine|eGFR)"
+            r"(?:\s+(?:level|levels?))?"
+            r"\s*(?:>=?|<=?|≥|≤|>|<)\s*[\d.]+\s*"
+            r"(?:mEq/L|mg/dL|mL/min(?:/1\.73\s*m2)?)?)"
+            r"[^.;]*?(?:stop|discontinue|hold|withhold)",
+            re.IGNORECASE,
+        ),
+    ]
+    for pat in stop_patterns:
+        stop_matches = pat.findall(text)
+        if stop_matches:
+            props["threshold_stop"] = "; ".join(t.strip() for t in stop_matches)
+            break
+
     return props
 
 
