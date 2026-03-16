@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "open-medicine-graphrag": {
+      "type": "stdio",
+      "command": "uv",
+      "args": ["run", "--env-file", ".env", "open-medicine-mcp"],
+      "cwd": "/Users/feliperamos/Documents/professional/opensource-medicine/openmedicine"
+    }
+  }
+}
