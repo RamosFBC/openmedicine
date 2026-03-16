@@ -2668,3 +2668,53 @@ class TestVectorOnlyConfidenceDowngrade:
         q = ClinicalQuery(intent="treatment_selection", concepts=["test"])
         result = engine._build_result(matches, [], q)
         assert result.confidence == "medium"
+
+
+class TestConceptVariableInference:
+    """Concepts like 'heart_failure_reduced_ef' should inject implied patient vars."""
+
+    def test_infer_vars_from_hfref_concept(self):
+        engine, _ = _make_engine()
+        inferred = engine._infer_vars_from_concepts(["heart_failure_reduced_ef"])
+        assert inferred.get("hf_type") == "HFrEF"
+
+    def test_infer_vars_from_hfpef_concept(self):
+        engine, _ = _make_engine()
+        inferred = engine._infer_vars_from_concepts(["heart_failure_preserved_ef"])
+        assert inferred.get("hf_type") == "HFpEF"
+
+    def test_infer_vars_patient_vars_take_precedence(self):
+        """Explicit patient vars must override inferred vars."""
+        engine, _ = _make_engine()
+        inferred = engine._infer_vars_from_concepts(["heart_failure_reduced_ef"])
+        patient_vars = {"hf_type": "HFmrEF", "lvef": 45}
+        merged = {**inferred, **patient_vars}
+        # Patient explicitly said HFmrEF -- that should win
+        assert merged["hf_type"] == "HFmrEF"
+
+    def test_concept_inferred_vars_fill_missing_conditions(self):
+        """With concept inference, HF_type should no longer be missing."""
+        engine, _ = _make_engine()
+        match = SemanticMatch(
+            entity_id="atc:A10BK",
+            entity_name="SGLT2 Inhibitor",
+            entity_type="DrugClass",
+            edge_type="INDICATED_FOR",
+            strength="strong_for",
+            evidence_quality="high",
+            conditions_json=json.dumps([
+                {"variable": "LVEF", "operator": "<=", "threshold": 40, "unit": "%"},
+                {"variable": "HF_type", "operator": "==", "threshold": "HFrEF", "unit": None},
+            ]),
+        )
+        inferred = engine._infer_vars_from_concepts(["heart_failure_reduced_ef"])
+        patient_vars = {"lvef": 28}
+        merged = {**inferred, **patient_vars}
+        engine._evaluate_match_conditions(match, merged)
+        assert match.conditions_met is True
+        assert match.missing_variables == []
+
+    def test_no_inference_for_unknown_concepts(self):
+        engine, _ = _make_engine()
+        inferred = engine._infer_vars_from_concepts(["some_random_condition"])
+        assert inferred == {}

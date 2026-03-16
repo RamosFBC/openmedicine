@@ -79,6 +79,19 @@ _VARIABLE_ALIASES: dict[str, str] = {
     "bmi": "body_mass_index",
 }
 
+# Maps resolved concept/disease names to implied patient variables.
+# When a query concept resolves to one of these, inject the variables
+# into patient_vars so condition evaluation can proceed without
+# reporting them as "missing".
+_CONCEPT_IMPLIED_VARS: dict[str, dict[str, str | float | bool]] = {
+    "heart_failure_reduced_ef": {"hf_type": "HFrEF"},
+    "hfref": {"hf_type": "HFrEF"},
+    "heart_failure_preserved_ef": {"hf_type": "HFpEF"},
+    "hfpef": {"hf_type": "HFpEF"},
+    "heart_failure_mildly_reduced_ef": {"hf_type": "HFmrEF"},
+    "hfmref": {"hf_type": "HFmrEF"},
+}
+
 # Maps query intents to Layer 1 query methods
 _INTENT_TO_QUERY = {
     "treatment_selection": "_query_treatments",
@@ -116,6 +129,12 @@ class ReasoningEngine:
         5. If empty, auto-retry with fuzzy-matched concepts
         6. Return ranked results
         """
+        # Infer patient variables from query concepts
+        inferred = self._infer_vars_from_concepts(q.concepts)
+        if inferred:
+            merged = {**inferred, **q.patient_vars}
+            q = q.model_copy(update={"patient_vars": merged})
+
         result = self._execute_query(q)
 
         # Auto-retry with fuzzy-matched concepts if no results
@@ -889,6 +908,21 @@ class ReasoningEngine:
                 seen.add(key)
                 result.append(m)
         return result
+
+    @staticmethod
+    def _infer_vars_from_concepts(
+        concepts: list[str],
+    ) -> dict[str, str | float | bool]:
+        """Infer patient variables from query concepts.
+
+        E.g., querying for 'heart_failure_reduced_ef' implies hf_type=HFrEF.
+        """
+        inferred: dict[str, str | float | bool] = {}
+        for concept in concepts:
+            key = concept.lower().replace(" ", "_")
+            implied = _CONCEPT_IMPLIED_VARS.get(key, {})
+            inferred.update(implied)
+        return inferred
 
     @staticmethod
     def _normalize_var_name(name: str) -> str:
