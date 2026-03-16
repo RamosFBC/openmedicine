@@ -2807,3 +2807,97 @@ class TestTreatmentDosingEnrichment:
         )
         assert hf is not None
         assert hf.edge_properties == {}
+
+
+class TestInteractionSeverityPropagation:
+    """Class-level ABSOLUTE severity must propagate even when drug has direct interactions."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_class_absolute_overrides_drug_major(self, mock_link):
+        """If drug has MAJOR interaction and its class has ABSOLUTE, result must include ABSOLUTE."""
+        engine, conn = _make_engine()
+
+        mock_drug = MagicMock()
+        mock_drug.node_id = "rxnorm:lisinopril"
+        mock_drug.node_label = "Drug"
+        mock_drug.snomed_code = None
+        mock_drug.rxnorm_code = "rxnorm:lisinopril"
+        mock_drug.atc_code = None
+        mock_drug.loinc_code = None
+        mock_drug.icd10_code = None
+        mock_drug.cpt_code = None
+        mock_drug.gmdn_code = None
+        mock_link.return_value = mock_drug
+
+        # Drug-level query returns MAJOR interaction with ARNi
+        drug_rows = [
+            {
+                "entity_id": "atc:C09DX",
+                "entity_name": "ARNi",
+                "entity_type": "DrugClass",
+                "severity": "MAJOR",
+                "evidence_quality": "high",
+                "mechanism": "angioedema risk",
+                "clinical_effect": "potentially life-threatening",
+            }
+        ]
+        # Class lookup returns ACEi class
+        class_rows = [{"class_id": "atc:C09A", "class_name": "ACE Inhibitor"}]
+        # Class-level query returns ABSOLUTE interaction with ARNi
+        class_interaction_rows = [
+            {
+                "entity_id": "atc:C09DX",
+                "entity_name": "ARNi",
+                "entity_type": "DrugClass",
+                "severity": "ABSOLUTE",
+                "evidence_quality": "high",
+                "mechanism": "concomitant use causes angioedema",
+                "clinical_effect": "life-threatening angioedema",
+            }
+        ]
+        conn.execute_read.side_effect = [drug_rows, class_rows, class_interaction_rows]
+
+        q = ClinicalQuery(intent="interaction", concepts=["lisinopril"], include_evidence=False)
+        result = engine.query(q)
+
+        # After dedup, the ABSOLUTE severity must win
+        arni_matches = [m for m in result.semantic_matches if m.entity_id == "atc:C09DX"]
+        assert len(arni_matches) == 1, f"Expected 1 deduplicated match, got {len(arni_matches)}"
+        assert arni_matches[0].edge_properties.get("severity") == "ABSOLUTE", (
+            f"Expected ABSOLUTE from class propagation, got {arni_matches[0].edge_properties.get('severity')}"
+        )
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_duplicate_when_same_severity(self, mock_link):
+        """If drug and class both have MAJOR for same target, deduplicate to one."""
+        engine, conn = _make_engine()
+
+        mock_drug = MagicMock()
+        mock_drug.node_id = "rxnorm:lisinopril"
+        mock_drug.node_label = "Drug"
+        mock_drug.snomed_code = None
+        mock_drug.rxnorm_code = "rxnorm:lisinopril"
+        mock_drug.atc_code = None
+        mock_drug.loinc_code = None
+        mock_drug.icd10_code = None
+        mock_drug.cpt_code = None
+        mock_drug.gmdn_code = None
+        mock_link.return_value = mock_drug
+
+        same_row = {
+            "entity_id": "atc:C09DX",
+            "entity_name": "ARNi",
+            "entity_type": "DrugClass",
+            "severity": "MAJOR",
+            "evidence_quality": "high",
+            "mechanism": "angioedema risk",
+            "clinical_effect": "potentially life-threatening",
+        }
+        class_rows = [{"class_id": "atc:C09A", "class_name": "ACE Inhibitor"}]
+        conn.execute_read.side_effect = [[same_row], class_rows, [same_row]]
+
+        q = ClinicalQuery(intent="interaction", concepts=["lisinopril"], include_evidence=False)
+        result = engine.query(q)
+
+        arni_matches = [m for m in result.semantic_matches if m.entity_id == "atc:C09DX"]
+        assert len(arni_matches) == 1, f"Expected 1 deduplicated match, got {len(arni_matches)}"

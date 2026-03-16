@@ -441,8 +441,10 @@ class ReasoningEngine:
                     )
                 )
 
-            # Class inheritance: if no direct interactions, check parent classes
-            if not rows and entity.node_label == "Drug":
+            # Class inheritance: ALWAYS check parent classes for a Drug entity
+            # and merge results. This ensures ABSOLUTE severity from class-level
+            # edges propagates even when the drug has direct interactions.
+            if entity.node_label == "Drug":
                 for class_id, _class_name in self._get_parent_classes(entity.node_id):
                     c_cypher, c_params = ReasoningQueries.find_interactions(
                         class_id, entity_label="DrugClass"
@@ -921,16 +923,25 @@ class ReasoningEngine:
 
     # ----- Helpers -----
 
+    _SEVERITY_RANK = {"ABSOLUTE": 3, "MAJOR": 2, "MINOR": 1}
+
     @staticmethod
     def _deduplicate(matches: list[SemanticMatch]) -> list[SemanticMatch]:
-        """Deduplicate by (entity_id, edge_type), keeping first occurrence."""
-        seen: set[tuple[str, str]] = set()
+        """Deduplicate by (entity_id, edge_type), keeping highest severity for interactions."""
+        seen: dict[tuple[str, str], int] = {}
         result: list[SemanticMatch] = []
         for m in matches:
             key = (m.entity_id, m.edge_type)
+            sev = ReasoningEngine._SEVERITY_RANK.get(
+                (m.edge_properties or {}).get("severity", ""), 0
+            )
             if key not in seen:
-                seen.add(key)
+                seen[key] = len(result)
                 result.append(m)
+            elif sev > ReasoningEngine._SEVERITY_RANK.get(
+                (result[seen[key]].edge_properties or {}).get("severity", ""), 0
+            ):
+                result[seen[key]] = m
         return result
 
     @staticmethod
