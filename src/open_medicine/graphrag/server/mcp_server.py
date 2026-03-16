@@ -10,10 +10,9 @@ import mcp.types as types
 
 from open_medicine.graphrag.config import get_settings
 from open_medicine.graphrag.graph.connection import GraphConnection
-from open_medicine.graphrag.graph.queries import ReasoningQueries
-from open_medicine.graphrag.reasoning.engine import ReasoningEngine
-from open_medicine.graphrag.reasoning.fallback import FallbackEngine
-from open_medicine.graphrag.reasoning.types import ClinicalQuery
+from open_medicine.graphrag.graph.queries_v2 import ReasoningQueries
+from open_medicine.graphrag.reasoning.engine_v2 import ReasoningEngine
+from open_medicine.graphrag.reasoning.types_v2 import ClinicalQuery
 
 TOOL_DEFINITIONS = [
     {
@@ -119,12 +118,9 @@ def create_mcp_server() -> Server:
     server = Server("open-medicine-graphrag")
     conn = GraphConnection(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
     engine = ReasoningEngine(conn)
-    fallback = FallbackEngine(conn, voyage_api_key=settings.voyage_api_key)
 
     def _query(q: ClinicalQuery) -> str:
         result = engine.query(q)
-        if not result.matches and result.confidence == "low":
-            result = fallback.query(q)
         return result.model_dump_json(indent=2)
 
     @server.list_tools()
