@@ -108,6 +108,7 @@ def load_extractions_from_jsonl(jsonl_path: Path, guideline_id: str) -> list[Ext
                 conditions=obj.get("conditions", []),
                 concepts=concepts,
                 relationships=relationships,
+                structured_properties=obj.get("structured_properties", {}),
                 source_chunk_id=obj.get("source_chunk_id", ""),
                 guideline_id=obj.get("guideline_id", guideline_id),
                 page=obj.get("page", 0),

@@ -63,6 +63,7 @@ class ExtractionResult:
     conditions: list[dict] = field(default_factory=list)  # PopulationCriterion-like dicts
     concepts: list[ConceptRef] = field(default_factory=list)
     relationships: list[ExtractedRelationship] = field(default_factory=list)
+    structured_properties: dict = field(default_factory=dict)  # Type-specific props (doses, severities, etc.)
     source_chunk_id: str = ""
     guideline_id: str = ""
     page: int = 0

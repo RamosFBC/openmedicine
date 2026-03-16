@@ -110,14 +110,22 @@ print(f'\nResolved: {passed}/{len(terms)}')
 
 Based on the results above, assign grades for each section:
 
-| Section | A | B | C | F |
-|---------|---|---|---|---|
-| Edge Properties | >80% fields populated | 60-80% | 40-60% | <40% |
-| Structure | All checks pass | Warnings only | 1 critical fail | >1 critical |
-| Scenarios | 100% pass | >85% pass | >70% pass | <70% |
-| Terminology | 100% resolve | >90% | >75% | <75% |
+| Section | A+ | A | B | C | F |
+|---------|----|----|---|---|---|
+| Edge Properties | ≥95% fields populated | 90-95% | 80-90% | 60-80% | <60% |
+| Structure | All checks pass | All checks pass | Warnings only | 1 critical fail | >1 critical |
+| Scenarios | 100% pass | 100% pass | >85% pass | >70% pass | <70% |
+| Terminology | 100% resolve | 100% resolve | >90% | >80% | <80% |
 
-**Overall grade**: Average of section grades (A=4, B=3, C=2, F=0).
+**Critical A+ requirements** (must ALL be true to award A+ overall):
+- DOSED_FOR.starting_dose ≥ 90%
+- DOSED_FOR.frequency ≥ 80%
+- CONTRAINDICATED_IN.severity = 100%
+- INTERACTS_WITH.severity = 100%
+- MONITORED_BY.threshold_alert ≥ 30%
+- No cross-contamination (combination product doses applied to monotherapy drugs)
+
+**Overall grade**: Average of section grades (A+=5, A=4, B=3, C=2, F=0). A+ overall requires meeting ALL critical A+ requirements above.
 
 Print the score card in this format:
 

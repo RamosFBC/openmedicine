@@ -539,7 +539,14 @@ def _create_semantic_edge(
     target: LinkedEntity,
     extraction: ExtractionResult,
 ) -> None:
-    """Create a typed semantic edge (Layer 1)."""
+    """Create a typed semantic edge (Layer 1).
+
+    Reads structured_properties from the extraction to populate edge
+    properties. Falls back to defaults when properties are absent
+    (backward-compatible with old extractions).
+    """
+    sp = extraction.structured_properties
+
     if edge_type == "INDICATED_FOR":
         props = IndicatedForProps(
             strength=RecommendationStrength(extraction.strength),
@@ -556,7 +563,7 @@ def _create_semantic_edge(
     elif edge_type == "CONTRAINDICATED_IN":
         # Use enrichment to derive severity from action_detail text
         ci_props = parse_contraindication_properties(extraction.action_detail)
-        severity_str = ci_props.get("severity", "").lower()
+        severity_str = (sp.get("severity") or ci_props.get("severity", "")).lower()
         if severity_str in ("absolute", "relative"):
             severity = ContraindicationSeverity(severity_str)
         else:
@@ -565,6 +572,9 @@ def _create_semantic_edge(
             strength=RecommendationStrength(extraction.strength),
             severity=severity,
             evidence_quality=EvidenceQuality(extraction.evidence_quality),
+            conditions_json=json.dumps(extraction.conditions)
+            if extraction.conditions
+            else None,
         )
         queries.append(
             LoaderQueries.create_contraindicated_in(
@@ -572,8 +582,13 @@ def _create_semantic_edge(
             )
         )
     elif edge_type == "DOSED_FOR":
-        # Extract dosing properties from relationship properties if available
         dosed_props = DosedForProps(
+            starting_dose=sp.get("starting_dose"),
+            target_dose=sp.get("target_dose"),
+            max_dose=sp.get("max_dose"),
+            route=sp.get("route"),
+            frequency=sp.get("frequency"),
+            titration_schedule=sp.get("titration_schedule"),
             conditions_json=json.dumps(extraction.conditions)
             if extraction.conditions
             else None,
@@ -584,7 +599,14 @@ def _create_semantic_edge(
             )
         )
     elif edge_type == "MONITORED_BY":
-        mon_props = MonitoredByProps()
+        mon_props = MonitoredByProps(
+            frequency=sp.get("frequency"),
+            threshold_alert=sp.get("threshold_alert"),
+            threshold_stop=sp.get("threshold_stop"),
+            conditions_json=json.dumps(extraction.conditions)
+            if extraction.conditions
+            else None,
+        )
         queries.append(
             LoaderQueries.create_monitored_by(
                 source.node_id, target.node_id, mon_props
@@ -605,9 +627,10 @@ def _create_interacts_with(
     extraction: ExtractionResult,
 ) -> None:
     """Create INTERACTS_WITH edge between two drugs/drug classes."""
+    sp = extraction.structured_properties
     # Use enrichment to derive severity from action_detail text
     ix_props = parse_interaction_properties(extraction.action_detail)
-    severity_str = ix_props.get("severity", "").lower()
+    severity_str = (sp.get("severity") or ix_props.get("severity", "")).lower()
     if severity_str in ("major", "moderate", "minor"):
         severity = InteractionSeverity(severity_str)
     else:
@@ -615,6 +638,8 @@ def _create_interacts_with(
     props = InteractsWithProps(
         severity=severity,
         evidence_quality=EvidenceQuality(extraction.evidence_quality),
+        mechanism=sp.get("mechanism"),
+        clinical_effect=sp.get("clinical_effect"),
     )
     queries.append(
         LoaderQueries.create_interacts_with(
@@ -696,7 +721,12 @@ def _create_semantic_edge_from_relationship(
     seen: dict[str, LinkedEntity],
     extraction: ExtractionResult,
 ) -> None:
-    """Create a semantic edge from an explicitly extracted relationship."""
+    """Create a semantic edge from an explicitly extracted relationship.
+
+    Relationship-level properties (rel.properties) override extraction-level
+    structured_properties when both are present. This allows per-edge
+    specificity (e.g., different doses for different drugs in the same extraction).
+    """
     # Ensure both entities exist
     src_ref = ConceptRef(rel.source_name, rel.source_type, "subject")
     tgt_ref = ConceptRef(rel.target_name, rel.target_type, "target")
@@ -706,4 +736,23 @@ def _create_semantic_edge_from_relationship(
     if rel.rel_type == "MEMBER_OF" and src.entity_type == "drug":
         queries.append(LoaderQueries.create_member_of(src.node_id, tgt.node_id))
     elif rel.rel_type in _EDGE_DERIVATION.values():
-        _create_semantic_edge(queries, rel.rel_type, src, tgt, extraction)
+        # Merge: extraction.structured_properties as base, rel.properties as override
+        if rel.properties:
+            merged = ExtractionResult(
+                rec_id=extraction.rec_id,
+                rec_type=extraction.rec_type,
+                action=extraction.action,
+                action_detail=extraction.action_detail,
+                strength=extraction.strength,
+                evidence_quality=extraction.evidence_quality,
+                conditions=extraction.conditions,
+                concepts=extraction.concepts,
+                relationships=extraction.relationships,
+                structured_properties={**extraction.structured_properties, **rel.properties},
+                source_chunk_id=extraction.source_chunk_id,
+                guideline_id=extraction.guideline_id,
+                page=extraction.page,
+            )
+            _create_semantic_edge(queries, rel.rel_type, src, tgt, merged)
+        else:
+            _create_semantic_edge(queries, rel.rel_type, src, tgt, extraction)
