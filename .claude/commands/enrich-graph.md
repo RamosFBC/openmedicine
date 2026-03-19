@@ -16,9 +16,15 @@ Default guideline_id: `aha_acc_hf_2022`
 
 Parse the guideline_id from `$ARGUMENTS` (default to `aha_acc_hf_2022` if empty).
 
-### Phase 1: Full Guideline Audit (Graph vs Source)
+### Phase 0: Mandatory Backup
 
-Read the **complete guideline markdown** and compare its clinical content against what is currently in the graph. This is the critical step that drives the entire enrichment.
+Before any graph mutations, invoke the `openmedicine-graph-safety` skill to create a backup. This is REQUIRED — if backup fails, STOP.
+
+### Phase 1: Gap Analysis (Graph vs Source)
+
+**If a gap report exists** (from a prior `/hunt-graph-gaps` run), read it from `data/cache/graphrag/{guideline_id}/gap_report.json` and skip to Phase 2. The gap report already contains the full inventory of missing edges, empty properties, and missing nodes.
+
+**If no gap report exists**, perform the full audit below. This is the critical step that drives the entire enrichment.
 
 #### Step 1.1: Read the guideline markdown
 
@@ -252,7 +258,7 @@ Repeat Phase 1.2 (graph query) and compare against the gap report. Check:
 
 #### Step 4.2: Post-enrichment quality gate
 
-Run the quality gate from `/ingest-guideline` Phase 4.8:
+Run the A+ quality gate. Thresholds are defined in the "Data Completeness Standard (A+)" section of CLAUDE.md — same validation as `/ingest-guideline` Phase 4.8:
 
 ```bash
 uv run python -c "

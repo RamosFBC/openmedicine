@@ -233,7 +233,48 @@ Every graph must meet **A+ quality** before being considered production-ready. E
 1. `/ingest-guideline` — Extract and load nodes + edges (Phase 1–4.6)
 2. `/enrich-graph` — Apply structured properties to edges (REQUIRED Phase 4.7)
 3. Post-enrichment quality gate — Verify thresholds are met (Phase 4.8)
-4. `/audit-graph` — Full quality audit with score card
+4. `/hunt-graph-gaps` — Content completeness validation (REQUIRED)
+5. `/fix-graph-gaps` — Fix any gaps found (if needed)
+6. `/audit-graph` — Full quality audit with score card
+7. `/run-scenarios` — Clinical decision-making validation
+
+Or use `/build-graph` to run the entire pipeline automatically.
+
+### Clinical Completeness Standard (Autonomous Care)
+
+A graph is only fit for autonomous clinical care when an AI agent can answer **every clinical question** the source guideline addresses — without hallucinating, without gaps, without missing safety-critical data. Edge property coverage (A+ standard above) is necessary but NOT sufficient.
+
+**The completeness standard asks:** For every actionable recommendation in the source guideline, does the graph contain the data an agent needs to act on it?
+
+**Seven dimensions of completeness:**
+
+| Dimension | What It Means | How to Verify |
+|-----------|--------------|---------------|
+| **Treatment coverage** | Every drug/device recommended for a condition has an INDICATED_FOR edge | Count source recommendations vs INDICATED_FOR edges |
+| **Safety coverage** | Every contraindication has a CONTRAINDICATED_IN edge with severity; every dangerous interaction has INTERACTS_WITH with severity | Zero contraindications without severity; zero known-dangerous interactions missing |
+| **Dosing coverage** | Every drug with a specified dose has a DOSED_FOR edge with starting_dose, target_dose, or max_dose | Compare dosing tables in source against DOSED_FOR edges |
+| **Monitoring coverage** | Every monitoring requirement has a MONITORED_BY edge with frequency and thresholds | Compare monitoring sections against MONITORED_BY edges |
+| **Condition coverage** | Patient eligibility criteria (LVEF, eGFR, NYHA, etc.) are captured as edge conditions | Spot-check that condition-dependent recommendations include conditions_json |
+| **Diagnostic coverage** | Classification criteria and staging thresholds are captured | Compare diagnostic sections against DIAGNOSED_BY edges |
+| **Evidence traceability** | Every recommendation links to an EvidenceChunk with source text | Zero recommendations without SOURCED_FROM edges |
+
+**Completeness thresholds (A+ minimum):**
+
+| Dimension | A+ | A | B | F |
+|-----------|-----|---|---|---|
+| Treatment coverage | ≥ 95% of source recommendations captured | 90-95% | 80-90% | < 80% |
+| Safety coverage | 100% of contraindications + interactions captured | 100% | ≥ 90% | < 90% |
+| Dosing coverage | ≥ 90% of source dosing data captured | 85-90% | 75-85% | < 75% |
+| Monitoring coverage | ≥ 85% of monitoring requirements captured | 80-85% | 70-80% | < 70% |
+| Condition coverage | ≥ 80% of conditional recommendations have conditions | 70-80% | 60-70% | < 60% |
+| Diagnostic coverage | ≥ 80% of diagnostic criteria captured | 70-80% | 60-70% | < 60% |
+| Evidence traceability | 100% of recommendations have source text | 100% | ≥ 95% | < 95% |
+
+**Safety is non-negotiable:** If ANY contraindication or dangerous interaction is missing from the graph, the graph CANNOT be graded above B regardless of other scores. Missing safety data can cause patient harm.
+
+**How to measure:** Run `/hunt-graph-gaps` which compares the source guideline against JSONL extractions and the live graph. The gap report classifies each clinical fact as COMPLETE, EXTRACTION_GAP, LOADING_GAP, ENRICHMENT_GAP, PROPERTY_GAP, or TERMINOLOGY_GAP. Content coverage = COMPLETE / (COMPLETE + all gaps).
+
+**Relationship to edge property coverage:** The A+ edge property standard (above) checks that *existing* edges have populated fields. The completeness standard checks that *all required edges exist in the first place*. Both must pass for A+ overall.
 
 ### Graph Safety
 

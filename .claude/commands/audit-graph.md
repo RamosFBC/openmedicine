@@ -108,7 +108,7 @@ print(f'\nResolved: {passed}/{len(terms)}')
 
 ### Section 5: Score Card
 
-Based on the results above, assign grades for each section:
+Based on the results above, assign grades for each section. Grading thresholds are defined in the "Data Completeness Standard (A+)" section of CLAUDE.md:
 
 | Section | A+ | A | B | C | F |
 |---------|----|----|---|---|---|

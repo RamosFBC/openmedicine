@@ -19,8 +19,9 @@ Example:
 
 1. Parse arguments: `$ARGUMENTS` contains `<file> <id> <doi>`
 2. Verify the markdown file exists
-3. Clear previous extraction cache for this guideline: `data/cache/graphrag/{guideline_id}/`
-4. Ensure Neo4j indexes exist by running:
+3. **Mandatory backup** — invoke the `openmedicine-graph-safety` skill to snapshot the current graph state before any mutations. This is NOT optional. If backup fails, STOP.
+4. Clear previous extraction cache for this guideline: `data/cache/graphrag/{guideline_id}/`
+5. Ensure Neo4j indexes exist by running:
    ```bash
    uv run python -c "
    from dotenv import load_dotenv; load_dotenv()
@@ -338,7 +339,7 @@ classifications, and the graph cannot support clinical decision-making.
 
 ### Phase 4.8: Post-Enrichment Quality Gate (REQUIRED)
 
-After enrichment, run this validation to ensure A+ edge property coverage:
+After enrichment, run this validation to ensure A+ edge property coverage. Thresholds are defined in the "Data Completeness Standard (A+)" section of CLAUDE.md — that is the single source of truth. Validation script:
 
 ```bash
 uv run python -c "
