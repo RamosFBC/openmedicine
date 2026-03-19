@@ -3220,3 +3220,62 @@ class TestConceptDecomposition:
         assert "Heart Failure" in result
         assert "Sacubitril" in result
         assert "Valsartan" in result
+
+
+class TestCorrectionMetadata:
+    """Test that correction attempts are tracked in the result."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_corrections_tracked(self, mock_link, mock_embed):
+        """Result should list which corrections were attempted."""
+        mock_embed.side_effect = Exception("no key")
+        mock_link.return_value = None
+
+        conn = MagicMock()
+        conn.execute_read.return_value = []
+
+        engine = ReasoningEngine(conn)
+        q = ClinicalQuery(intent="contraindication", concepts=["UnknownDrug123"])
+        result = engine.query(q)
+
+        assert hasattr(result, "corrections_attempted")
+        assert isinstance(result.corrections_attempted, list)
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_no_corrections_when_results_sufficient(self, mock_link, mock_embed):
+        """No corrections tracked when initial results are sufficient."""
+        mock_embed.side_effect = Exception("no key")
+        entity = MagicMock()
+        entity.node_id = "drug:carvedilol"
+        entity.node_label = "Drug"
+        mock_link.return_value = entity
+
+        conn = MagicMock()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "disease:hfref",
+                "entity_name": "HFrEF",
+                "entity_type": "Disease",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "conditions": None,
+                "starting_dose": "3.125mg",
+                "target_dose": "25mg",
+                "max_dose": "25mg",
+                "frequency": "BID",
+                "severity": None,
+                "mechanism": None,
+                "clinical_effect": None,
+                "threshold_alert": None,
+                "threshold_stop": None,
+                "reason": None,
+            }
+        ]
+
+        engine = ReasoningEngine(conn)
+        q = ClinicalQuery(intent="dosing", concepts=["Carvedilol"])
+        result = engine.query(q)
+
+        assert result.corrections_attempted == []

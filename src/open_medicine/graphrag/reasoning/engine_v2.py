@@ -136,11 +136,13 @@ class ReasoningEngine:
             q = q.model_copy(update={"patient_vars": merged})
 
         result = self._execute_query(q)
+        corrections: list[str] = []
 
         # Auto-retry with fuzzy-matched concepts if no results
         if not result.semantic_matches and not result.recommendation_matches:
             retried_concepts = self._fuzzy_resolve_concepts(q.concepts)
             if retried_concepts and retried_concepts != q.concepts:
+                corrections.append("fuzzy_retry")
                 retry_q = ClinicalQuery(
                     intent=q.intent,
                     concepts=retried_concepts,
@@ -159,12 +161,12 @@ class ReasoningEngine:
         ):
             escalated_q = self._try_class_escalation(q)
             if escalated_q is not None:
+                corrections.append("class_escalation")
                 correction_result = self._execute_query(escalated_q)
                 for m in correction_result.semantic_matches:
                     m.source_layer = "expanded"
                 result.semantic_matches.extend(correction_result.semantic_matches)
                 result.semantic_matches = self._deduplicate(result.semantic_matches)
-                # Re-evaluate confidence if we found results
                 if correction_result.semantic_matches:
                     result.confidence = correction_result.confidence
 
@@ -172,6 +174,7 @@ class ReasoningEngine:
         if self._needs_correction(result, q.min_results_threshold):
             decomposed = self._decompose_concepts(q.concepts)
             if decomposed != q.concepts:
+                corrections.append("concept_decomposition")
                 decomposed_q = q.model_copy(update={"concepts": decomposed})
                 correction_result = self._execute_query(decomposed_q)
                 for m in correction_result.semantic_matches:
@@ -181,6 +184,7 @@ class ReasoningEngine:
                 if correction_result.semantic_matches:
                     result.confidence = correction_result.confidence
 
+        result.corrections_attempted = corrections
         return result
 
     def _execute_query(self, q: ClinicalQuery) -> GraphRAGResult:

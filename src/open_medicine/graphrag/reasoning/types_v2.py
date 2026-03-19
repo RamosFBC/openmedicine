@@ -121,6 +121,10 @@ class GraphRAGResult(BaseModel):
         default_factory=list,
         description="Reformulation suggestions when results are empty",
     )
+    corrections_attempted: list[str] = Field(
+        default_factory=list,
+        description="Self-correction strategies attempted: fuzzy_retry, class_escalation, concept_decomposition",
+    )
     data_coverage: Literal["full", "partial", "none"] = Field(
         default="full",
         description=(
