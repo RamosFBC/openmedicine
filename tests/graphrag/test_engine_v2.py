@@ -3200,3 +3200,23 @@ class TestClassEscalationCorrection:
         assert len(result.semantic_matches) > 0
         assert any("prevention" in m.entity_name.lower() or "Beta" in m.entity_name
                     for m in result.semantic_matches)
+
+
+class TestConceptDecomposition:
+    """Test splitting combination drug names into components."""
+
+    def test_decompose_slash_separated(self):
+        result = ReasoningEngine._decompose_concepts(["Sacubitril/Valsartan"])
+        assert "Sacubitril" in result
+        assert "Valsartan" in result
+        assert "Sacubitril/Valsartan" in result  # keep original too
+
+    def test_no_decomposition_simple_name(self):
+        result = ReasoningEngine._decompose_concepts(["Carvedilol"])
+        assert result == ["Carvedilol"]
+
+    def test_preserves_non_drug_concepts(self):
+        result = ReasoningEngine._decompose_concepts(["Heart Failure", "Sacubitril/Valsartan"])
+        assert "Heart Failure" in result
+        assert "Sacubitril" in result
+        assert "Valsartan" in result

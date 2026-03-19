@@ -168,6 +168,19 @@ class ReasoningEngine:
                 if correction_result.semantic_matches:
                     result.confidence = correction_result.confidence
 
+        # Self-correction: concept decomposition
+        if self._needs_correction(result, q.min_results_threshold):
+            decomposed = self._decompose_concepts(q.concepts)
+            if decomposed != q.concepts:
+                decomposed_q = q.model_copy(update={"concepts": decomposed})
+                correction_result = self._execute_query(decomposed_q)
+                for m in correction_result.semantic_matches:
+                    m.source_layer = "expanded"
+                result.semantic_matches.extend(correction_result.semantic_matches)
+                result.semantic_matches = self._deduplicate(result.semantic_matches)
+                if correction_result.semantic_matches:
+                    result.confidence = correction_result.confidence
+
         return result
 
     def _execute_query(self, q: ClinicalQuery) -> GraphRAGResult:
@@ -226,6 +239,24 @@ class ReasoningEngine:
             include_evidence=q.include_evidence,
             min_results_threshold=q.min_results_threshold,
         )
+
+    @staticmethod
+    def _decompose_concepts(concepts: list[str]) -> list[str]:
+        """Split combination drug names into components.
+
+        "Sacubitril/Valsartan" → ["Sacubitril/Valsartan", "Sacubitril", "Valsartan"]
+        Keeps the original concept for exact matching, adds components for broader search.
+        """
+        result: list[str] = []
+        changed = False
+        for concept in concepts:
+            result.append(concept)
+            if "/" in concept:
+                parts = [p.strip() for p in concept.split("/") if p.strip()]
+                if len(parts) >= 2:
+                    result.extend(parts)
+                    changed = True
+        return result if changed else concepts
 
     # ----- Class-level inheritance -----
 
