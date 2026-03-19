@@ -5,6 +5,32 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.12.0] - 2026-03-19
+
+### Added
+- **Self-correcting retrieval loop** — when initial graph retrieval returns insufficient or low-confidence results, the engine automatically applies correction strategies before returning:
+  - **Result quality evaluator** (`_needs_correction`) — detects empty results, all-conditions-failed, below-threshold counts, and vector-only results.
+  - **Class-level escalation** — for generic intents, re-queries with the parent drug class when drug-level queries return nothing.
+  - **Concept decomposition** — splits combination drugs (e.g., "Sacubitril/Valsartan") into components for broader search.
+  - **Correction metadata** — `corrections_attempted` field on `GraphRAGResult` tracks which strategies were applied.
+- **Patient variable inference** — engine infers clinical variables from query concepts (e.g., querying "HFrEF" implies `hf_type=HFrEF`, `LVEF<=40`).
+- **Treatment dosing enrichment** — treatment_selection results now include dosing summary from DOSED_FOR edges.
+- **Maintenance infrastructure** — maintenance commands, skills, staleness checker, and 10 clinical test scenarios for HF guideline.
+- **`--runslow` test flag** — fast test runs skip Hypothesis fuzz and integration tests by default.
+
+### Fixed
+- **Two-tier K+ thresholds for MRA monitoring** — alert at ≥5.0, stop at ≥5.5 mEq/L.
+- **eGFR ≥ 20 condition for SGLT2i** — treatment_selection now requires eGFR ≥ 20 per guideline.
+- **Generic handler condition evaluation** — conditions are now evaluated in the generic query handler.
+- **Class-level interaction severity propagation** — ABSOLUTE severity from drug class always overrides MAJOR from individual drugs.
+- **Vector fallback condition evaluation** — conditions are now evaluated on vector-sourced results.
+- **Titration schedule extraction** — loader fallback for titration_schedule field.
+- **Terminology databases updated** — added Sotagliflozin, expanded drug/disease/lab entries.
+
+### Changed
+- Generic query handler uses `_build_result` for consistent data_coverage reporting.
+- Project totals: 93 calculators, 43 guidelines, 14 differentials, 3242 tests.
+
 ## [0.11.0] - 2026-03-16
 
 ### Added
