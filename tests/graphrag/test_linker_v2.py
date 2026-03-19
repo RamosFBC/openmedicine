@@ -67,11 +67,11 @@ class TestLinkEntity:
         assert result.snomed_code == "267036007"
 
     def test_unknown_drug_returns_minimal(self):
-        result = link_entity("Sotagliflozin", "drug")
+        result = link_entity("Zibortentan", "drug")
         assert result is not None
-        assert result.canonical_name == "Sotagliflozin"
+        assert result.canonical_name == "Zibortentan"
         assert result.node_label == "Drug"
-        assert result.node_id == "drug:sotagliflozin"
+        assert result.node_id == "drug:zibortentan"
         assert result.snomed_code is None
 
     def test_unknown_entity_type(self):
