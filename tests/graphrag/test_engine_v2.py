@@ -3111,3 +3111,92 @@ class TestResultEvaluator:
             retrieval_layers_used=["vector"],
         )
         assert ReasoningEngine._needs_correction(result, min_results=1) is True
+
+
+class TestClassEscalationCorrection:
+    """Test class-level escalation as a self-correction strategy."""
+
+    def test_try_class_escalation_finds_parent(self):
+        """_try_class_escalation maps drug names to their parent class names."""
+        conn = MagicMock()
+        # Parent class lookup returns a result
+        conn.execute_read.return_value = [
+            {"class_id": "atc:C07", "class_name": "Beta Blocker"}
+        ]
+        engine = ReasoningEngine(conn)
+
+        q = ClinicalQuery(intent="prevention", concepts=["Carvedilol"])
+        with patch("open_medicine.graphrag.reasoning.engine_v2.link_entity") as mock_link:
+            mock_link.return_value = type("E", (), {
+                "node_id": "drug:carvedilol", "entity_type": "Drug",
+            })()
+            escalated = engine._try_class_escalation(q)
+
+        assert escalated is not None
+        assert "Beta Blocker" in escalated.concepts
+
+    def test_try_class_escalation_no_parent(self):
+        """Returns None when no parent class found."""
+        conn = MagicMock()
+        conn.execute_read.return_value = []  # no parent classes
+        engine = ReasoningEngine(conn)
+
+        q = ClinicalQuery(intent="prevention", concepts=["UnknownDrug"])
+        with patch("open_medicine.graphrag.reasoning.engine_v2.link_entity") as mock_link:
+            mock_link.return_value = None
+            escalated = engine._try_class_escalation(q)
+
+        assert escalated is None
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_generic_intent_escalates_to_class(self, mock_link, mock_embed):
+        """Generic intent with empty drug results triggers class escalation."""
+        mock_embed.side_effect = Exception("no key")
+
+        call_count = {"link": 0}
+
+        def link_side_effect(name, etype):
+            call_count["link"] += 1
+            if name == "Carvedilol" and etype == "drug":
+                return type("E", (), {
+                    "node_id": "drug:carvedilol", "entity_type": "Drug",
+                    "node_label": "Drug",
+                })()
+            if name == "Beta Blocker" and etype in ("drug", "drug_class"):
+                return type("E", (), {
+                    "node_id": "atc:C07", "entity_type": "DrugClass",
+                    "node_label": "DrugClass",
+                })()
+            return None
+
+        mock_link.side_effect = link_side_effect
+
+        conn = MagicMock()
+        conn.execute_read.side_effect = [
+            [],  # generic query for drug:carvedilol → empty
+            [{"class_id": "atc:C07", "class_name": "Beta Blocker"}],  # parent class lookup
+            [  # generic query for atc:C07 → has results
+                {
+                    "rec_id": "rec:bb_prevention",
+                    "action": "Beta blockers for prevention",
+                    "rec_type": "prevention",
+                    "detail": "Class-level recommendation",
+                    "strength": "moderate_for",
+                    "evidence_quality": "moderate",
+                    "conditions_json": None,
+                    "source_text": None,
+                }
+            ],
+        ]
+
+        engine = ReasoningEngine(conn)
+        q = ClinicalQuery(
+            intent="prevention",
+            concepts=["Carvedilol"],
+            include_evidence=False,
+        )
+        result = engine.query(q)
+        assert len(result.semantic_matches) > 0
+        assert any("prevention" in m.entity_name.lower() or "Beta" in m.entity_name
+                    for m in result.semantic_matches)

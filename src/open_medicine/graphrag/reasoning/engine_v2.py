@@ -151,6 +151,23 @@ class ReasoningEngine:
                 )
                 result = self._execute_query(retry_q)
 
+        # Self-correction: class escalation (only for generic intents —
+        # specialized handlers already do their own class escalation)
+        if (
+            q.intent not in _INTENT_TO_QUERY
+            and self._needs_correction(result, q.min_results_threshold)
+        ):
+            escalated_q = self._try_class_escalation(q)
+            if escalated_q is not None:
+                correction_result = self._execute_query(escalated_q)
+                for m in correction_result.semantic_matches:
+                    m.source_layer = "expanded"
+                result.semantic_matches.extend(correction_result.semantic_matches)
+                result.semantic_matches = self._deduplicate(result.semantic_matches)
+                # Re-evaluate confidence if we found results
+                if correction_result.semantic_matches:
+                    result.confidence = correction_result.confidence
+
         return result
 
     def _execute_query(self, q: ClinicalQuery) -> GraphRAGResult:
@@ -180,6 +197,35 @@ class ReasoningEngine:
                     continue
             resolved.append(concept)
         return resolved if changed else concepts
+
+    # ----- Self-correction strategies -----
+
+    def _try_class_escalation(self, q: ClinicalQuery) -> ClinicalQuery | None:
+        """If concepts are drugs, try re-querying with their parent drug classes."""
+        escalated_concepts: list[str] = []
+        changed = False
+        for concept in q.concepts:
+            entity = link_entity(concept, "drug")
+            if entity is not None:
+                parents = self._get_parent_classes(entity.node_id)
+                if parents:
+                    class_id, class_name = parents[0]
+                    escalated_concepts.append(class_name)
+                    changed = True
+                    continue
+            escalated_concepts.append(concept)
+
+        if not changed:
+            return None
+
+        return ClinicalQuery(
+            intent=q.intent,
+            concepts=escalated_concepts,
+            patient_vars=q.patient_vars,
+            guideline_filter=q.guideline_filter,
+            include_evidence=q.include_evidence,
+            min_results_threshold=q.min_results_threshold,
+        )
 
     # ----- Class-level inheritance -----
 
