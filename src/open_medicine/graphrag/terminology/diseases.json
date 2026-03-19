@@ -10,19 +10,19 @@
     "id": "snomed:703272007",
     "snomed_code": "703272007",
     "icd10_code": "I50.2",
-    "aliases": ["heart failure with reduced ejection fraction", "systolic heart failure"]
+    "aliases": ["heart failure with reduced ejection fraction", "systolic heart failure", "heart_failure_reduced_ef", "heart failure reduced ef"]
   },
   "HFpEF": {
     "id": "snomed:446221000",
     "snomed_code": "446221000",
     "icd10_code": "I50.3",
-    "aliases": ["heart failure with preserved ejection fraction", "diastolic heart failure"]
+    "aliases": ["heart failure with preserved ejection fraction", "diastolic heart failure", "heart_failure_preserved_ef", "heart failure preserved ef"]
   },
   "HFmrEF": {
     "id": "snomed:788950000",
     "snomed_code": "788950000",
     "icd10_code": "I50.4",
-    "aliases": ["heart failure with mildly reduced ejection fraction"]
+    "aliases": ["heart failure with mildly reduced ejection fraction", "heart_failure_mildly_reduced_ef", "heart failure mildly reduced ef"]
   },
   "Atrial Fibrillation": {
     "id": "snomed:49436004",
@@ -119,5 +119,29 @@
     "snomed_code": "41291007",
     "icd10_code": "T78.3",
     "aliases": ["angioedema"]
+  },
+  "Bradycardia": {
+    "id": "snomed:48867003",
+    "snomed_code": "48867003",
+    "icd10_code": "R00.1",
+    "aliases": ["bradycardia", "slow heart rate", "sinus bradycardia"]
+  },
+  "Atrioventricular Block": {
+    "id": "disease:atrioventricular_block",
+    "snomed_code": "233917008",
+    "icd10_code": "I44",
+    "aliases": ["AV block", "heart block", "atrioventricular block"]
+  },
+  "Diabetic Ketoacidosis": {
+    "id": "disease:diabetic_ketoacidosis",
+    "snomed_code": "420422005",
+    "icd10_code": "E10.1",
+    "aliases": ["DKA", "diabetic ketoacidosis", "euglycemic ketoacidosis", "euglycemic DKA"]
+  },
+  "Genitourinary Infection": {
+    "id": "disease:genitourinary_infection",
+    "snomed_code": "197938003",
+    "icd10_code": "N39.0",
+    "aliases": ["genitourinary infection", "genital infection", "UTI", "urinary tract infection"]
   }
 }

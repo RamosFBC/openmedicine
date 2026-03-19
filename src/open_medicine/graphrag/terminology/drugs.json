@@ -324,5 +324,102 @@
       "Glucophage",
       "metformin"
     ]
+  },
+  "Nebivolol": {
+    "id": "rxnorm:31555",
+    "rxnorm_code": "31555",
+    "snomed_code": "395808005",
+    "atc_code": "C07AB12",
+    "aliases": [
+      "Bystolic",
+      "nebivolol"
+    ]
+  },
+  "Sotagliflozin": {
+    "id": "rxnorm:2169276",
+    "rxnorm_code": "2169276",
+    "atc_code": "A10BK06",
+    "aliases": [
+      "Inpefa",
+      "sotagliflozin"
+    ]
+  },
+  "Canagliflozin": {
+    "id": "rxnorm:1373458",
+    "rxnorm_code": "1373458",
+    "snomed_code": "703681005",
+    "atc_code": "A10BK02",
+    "aliases": [
+      "Invokana",
+      "canagliflozin"
+    ]
+  },
+  "Dofetilide": {
+    "id": "rxnorm:135447",
+    "rxnorm_code": "135447",
+    "snomed_code": "372506002",
+    "atc_code": "C01BD04",
+    "aliases": [
+      "Tikosyn",
+      "dofetilide"
+    ]
+  },
+  "Ferric Carboxymaltose": {
+    "id": "rxnorm:809871",
+    "rxnorm_code": "809871",
+    "atc_code": "B03AC28",
+    "aliases": [
+      "Injectafer",
+      "ferric carboxymaltose",
+      "IV iron"
+    ]
+  },
+  "Bromocriptine": {
+    "id": "rxnorm:1760",
+    "rxnorm_code": "1760",
+    "snomed_code": "387039007",
+    "atc_code": "G02CB01",
+    "aliases": [
+      "Parlodel",
+      "bromocriptine"
+    ]
+  },
+  "Patiromer": {
+    "id": "rxnorm:1721536",
+    "rxnorm_code": "1721536",
+    "atc_code": "V03AE09",
+    "aliases": [
+      "Veltassa",
+      "patiromer"
+    ]
+  },
+  "Sodium Zirconium Cyclosilicate": {
+    "id": "rxnorm:2001488",
+    "rxnorm_code": "2001488",
+    "atc_code": "V03AE10",
+    "aliases": [
+      "Lokelma",
+      "SZC",
+      "sodium zirconium cyclosilicate"
+    ]
+  },
+  "Vericiguat": {
+    "id": "rxnorm:2395088",
+    "rxnorm_code": "2395088",
+    "atc_code": "C01DX21",
+    "aliases": [
+      "Verquvo",
+      "vericiguat"
+    ]
+  },
+  "Tafamidis": {
+    "id": "rxnorm:1876803",
+    "rxnorm_code": "1876803",
+    "atc_code": "N07XX08",
+    "aliases": [
+      "Vyndaqel",
+      "Vyndamax",
+      "tafamidis"
+    ]
   }
 }

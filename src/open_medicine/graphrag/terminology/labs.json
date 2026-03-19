@@ -150,5 +150,37 @@
     "unit": "%",
     "reference_range": "55-70",
     "aliases": ["left ventricular ejection fraction", "ejection fraction", "EF", "lvef"]
+  },
+  "Magnesium": {
+    "id": "loinc:19123-9",
+    "loinc_code": "19123-9",
+    "snomed_code": "104866001",
+    "unit": "mg/dL",
+    "reference_range": "1.7-2.2",
+    "aliases": ["serum magnesium", "Mg2+", "Mg", "magnesium"]
+  },
+  "Heart Rate": {
+    "id": "loinc:8867-4",
+    "loinc_code": "8867-4",
+    "snomed_code": "364075005",
+    "unit": "bpm",
+    "reference_range": "60-100",
+    "aliases": ["heart rate", "HR", "pulse", "pulse rate"]
+  },
+  "Thyroid Stimulating Hormone": {
+    "id": "loinc:3016-3",
+    "loinc_code": "3016-3",
+    "snomed_code": "61167004",
+    "unit": "mIU/L",
+    "reference_range": "0.4-4.0",
+    "aliases": ["TSH", "thyroid stimulating hormone", "thyrotropin"]
+  },
+  "Chest X-Ray": {
+    "id": "loinc:36643-5",
+    "loinc_code": "36643-5",
+    "snomed_code": "399208008",
+    "unit": "",
+    "reference_range": "",
+    "aliases": ["CXR", "chest x-ray", "chest radiograph"]
   }
 }
