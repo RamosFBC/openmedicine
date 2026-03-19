@@ -819,7 +819,7 @@ class ReasoningEngine:
                     if row.get("source_text"):
                         all_evidence.append(
                             EvidenceCitation(
-                                chunk_id="",
+                                chunk_id=row.get("chunk_id") or "",
                                 text=row["source_text"],
                                 guideline_title=row.get("guideline") or "",
                                 doi=row.get("doi") or "",
@@ -830,15 +830,7 @@ class ReasoningEngine:
                 if rows:
                     break
 
-        confidence = "high" if semantic_matches else "low"
-        hints = self._generate_hints(q) if not semantic_matches else []
-        return GraphRAGResult(
-            source="graph_traversal",
-            semantic_matches=semantic_matches,
-            evidence=all_evidence,
-            confidence=confidence,
-            hints=hints,
-        )
+        return self._build_result(semantic_matches, all_evidence, q)
 
     # ----- Layer 2: Multi-hop expansion -----
 

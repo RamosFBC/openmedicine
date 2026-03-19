@@ -722,8 +722,9 @@ class TestQueryMonitoring:
 
 
 class TestQueryGeneric:
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("skip"))
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
-    def test_tries_entity_types_until_match(self, mock_link):
+    def test_tries_entity_types_until_match(self, mock_link, _mock_embed):
         # Return None for drug, drug_class, then match on disease
         disease = MagicMock()
         disease.node_id = "disease_hf"
@@ -2026,10 +2027,11 @@ class TestVariableAliases:
 class TestFuzzyAutoRetry:
     """Tests for automatic retry with fuzzy-matched concepts."""
 
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query", side_effect=Exception("skip"))
     @patch("open_medicine.graphrag.reasoning.engine_v2.get_drug_class_members", return_value=[])
     @patch("open_medicine.graphrag.reasoning.engine_v2.fuzzy_match")
     @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
-    def test_fuzzy_auto_retry_on_empty_results(self, mock_link, mock_fuzzy, _mock_members):
+    def test_fuzzy_auto_retry_on_empty_results(self, mock_link, mock_fuzzy, _mock_members, _mock_embed):
         """When initial query returns empty with misspelling, auto-retry with fuzzy match."""
         # "spironolacton" (misspelled) → fuzzy suggests "Spironolactone"
         mock_fuzzy.return_value = [("Spironolactone", "drug")]

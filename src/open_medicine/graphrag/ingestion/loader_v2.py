@@ -498,14 +498,24 @@ def _derive_semantic_edges(
             if new_subjects:
                 subjects = new_subjects
         elif extraction.rec_type == "diagnostic_criteria":
+            # Diseases → subjects, labs/procedures → targets
+            # Extractors sometimes invert roles, so scan both lists
             new_subjects = []
+            new_targets = list(targets)
             for e in subjects:
                 if e.entity_type == "disease":
                     new_subjects.append(e)
                 elif e.entity_type in ("lab", "procedure"):
-                    targets.append(e)
+                    new_targets.append(e)
+            for e in targets:
+                if e.entity_type == "disease":
+                    new_subjects.append(e)
+                elif e.entity_type in ("lab", "procedure"):
+                    if e not in new_targets:
+                        new_targets.append(e)
             if new_subjects:
                 subjects = new_subjects
+                targets = new_targets
         elif extraction.rec_type == "interaction":
             # Separate drugs/drug_classes into two groups by entity type
             # to pair drugs with interacting drug_classes (and vice versa)

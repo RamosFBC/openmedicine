@@ -230,7 +230,7 @@ def create_mcp_server() -> Server:
     conn = GraphConnection(settings.neo4j_uri, settings.neo4j_user, settings.neo4j_password)
     engine = ReasoningEngine(conn)
 
-    def _query(q: ClinicalQuery) -> str:
+    def _query_sync(q: ClinicalQuery) -> str:
         result = engine.query(q)
         return result.model_dump_json(indent=2)
 
@@ -252,15 +252,17 @@ def create_mcp_server() -> Server:
                 concepts=get_concepts(args),
                 patient_vars=args.get("patient_vars", {}),
             )
-            return [types.TextContent(type="text", text=_query(q))]
+            text = await asyncio.to_thread(_query_sync, q)
+            return [types.TextContent(type="text", text=text)]
 
         if name == "query_clinical_graph":
             q = ClinicalQuery(**{k: v for k, v in args.items() if v is not None})
-            return [types.TextContent(type="text", text=_query(q))]
+            text = await asyncio.to_thread(_query_sync, q)
+            return [types.TextContent(type="text", text=text)]
 
         if name == "fetch_evidence_chunk":
             cypher, params = ReasoningQueries.get_evidence_chunk(args["chunk_id"])
-            rows = conn.execute_read(cypher, params)
+            rows = await asyncio.to_thread(conn.execute_read, cypher, params)
             return [types.TextContent(
                 type="text",
                 text=json.dumps(rows[0] if rows else {"error": "Not found"}, indent=2),
@@ -268,7 +270,7 @@ def create_mcp_server() -> Server:
 
         if name == "list_available_guidelines":
             cypher, params = ReasoningQueries.list_guidelines()
-            rows = conn.execute_read(cypher, params)
+            rows = await asyncio.to_thread(conn.execute_read, cypher, params)
             return [types.TextContent(
                 type="text",
                 text=json.dumps({"guidelines": rows}, indent=2),

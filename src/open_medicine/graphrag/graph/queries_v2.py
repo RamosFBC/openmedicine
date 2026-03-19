@@ -859,13 +859,15 @@ class ReasoningQueries:
         """All recommendations that reference a specific entity."""
         cypher = (
             f"MATCH (rec:Recommendation)-[:RECOMMENDS]->(tgt:{entity_label} {{id: $eid}}) "
-            "OPTIONAL MATCH (rec)-[:SOURCED_FROM]->(ec:EvidenceChunk) "
-            "OPTIONAL MATCH (rec)-[:DEFINED_BY]->(g:Guideline) "
         )
         params: dict = {"eid": entity_id}
         if rec_type:
             cypher += "WHERE rec.type = $rtype "
             params["rtype"] = rec_type
+        cypher += (
+            "OPTIONAL MATCH (rec)-[:SOURCED_FROM]->(ec:EvidenceChunk) "
+            "OPTIONAL MATCH (rec)-[:DEFINED_BY]->(g:Guideline) "
+        )
         cypher += (
             "RETURN rec.id AS rec_id, rec.type AS rec_type, "
             "rec.action AS action, rec.action_detail AS detail, "

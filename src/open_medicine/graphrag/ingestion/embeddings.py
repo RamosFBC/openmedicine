@@ -1,8 +1,17 @@
 from __future__ import annotations
+import hashlib
+import threading
 import time
 import httpx
 
 VOYAGE_API_URL = "https://api.voyageai.com/v1/embeddings"
+
+# LRU-style cache for query embeddings. Keyed by (text, model) hash.
+# Avoids redundant Voyage AI API calls when multiple concurrent agents
+# query the same drug/condition terms.
+_embedding_cache: dict[str, list[float]] = {}
+_cache_lock = threading.Lock()
+_CACHE_MAX_SIZE = 512
 
 
 def embed_texts(
@@ -59,9 +68,27 @@ def embed_query(
 
     Uses a shorter timeout (10s) and no retries since this is called
     during interactive queries where latency matters.
+
+    Results are cached in-memory to avoid redundant API calls when
+    multiple concurrent agents query the same terms.
     """
+    cache_key = hashlib.sha256(f"{model}:{text}".encode()).hexdigest()
+
+    with _cache_lock:
+        if cache_key in _embedding_cache:
+            return _embedding_cache[cache_key]
+
     results = embed_texts(
         [text], api_key=api_key, model=model,
         input_type="query", max_retries=1, timeout=10.0,
     )
-    return results[0]
+    embedding = results[0]
+
+    with _cache_lock:
+        if len(_embedding_cache) >= _CACHE_MAX_SIZE:
+            # Evict oldest entry (first inserted)
+            oldest = next(iter(_embedding_cache))
+            del _embedding_cache[oldest]
+        _embedding_cache[cache_key] = embedding
+
+    return embedding

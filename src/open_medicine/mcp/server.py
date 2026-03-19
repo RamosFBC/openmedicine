@@ -104,7 +104,7 @@ async def handle_call_tool(
             return [types.TextContent(type="text", text=f"Error executing {calc_id}: {e}")]
 
     if name in _GRAPH_TOOL_NAMES:
-        result_text = handle_graph_tool_call(name, args)
+        result_text = await asyncio.to_thread(handle_graph_tool_call, name, args)
         return [types.TextContent(type="text", text=result_text)]
 
     raise ValueError(f"Unknown tool: {name}")

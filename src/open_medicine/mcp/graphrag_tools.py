@@ -279,9 +279,10 @@ def get_graph_engine(force_reinit: bool = False) -> Any | None:
 
 
 def handle_graph_tool_call(name: str, arguments: dict[str, Any]) -> str:
-    """Dispatch a graph tool call and return a JSON string result.
+    """Dispatch a graph tool call and return a JSON string result (sync).
 
     If the graph engine is unavailable, returns a JSON error message.
+    Called from the MCP server via asyncio.to_thread() for concurrency.
     """
     engine = get_graph_engine()
     if engine is None:
