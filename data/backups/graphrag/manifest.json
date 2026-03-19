@@ -1,0 +1,208 @@
+[
+  {
+    "timestamp": "2026-03-16T04:21:36",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "patch-dosing-monitoring-fixes",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32
+      },
+      "edges": {
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35
+      }
+    },
+    "backup_file": "data/backups/graphrag/aha_acc_hf_2022/2026-03-16T04:21:36.jsonl"
+  },
+  {
+    "timestamp": "2026-03-16T12:38:01",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "enrich-graph",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32,
+        "Disease": 76,
+        "Lab": 26,
+        "Procedure": 38,
+        "Device": 7,
+        "Guideline": 1,
+        "EvidenceChunk": 461
+      },
+      "edges": {
+        "INDICATED_FOR": 252,
+        "CONTRAINDICATED_IN": 69,
+        "INTERACTS_WITH": 23,
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35
+      }
+    },
+    "backup_file": "data/backups/graphrag/aha_acc_hf_2022/2026-03-16T12:38:01.jsonl"
+  },
+  {
+    "timestamp": "2026-03-16T17:07:14",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "reingest-sections-7_3_3-7_3_4",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32,
+        "Disease": 76,
+        "Lab": 26,
+        "Procedure": 38,
+        "Device": 7,
+        "Guideline": 1,
+        "EvidenceChunk": 461,
+        "Recommendation": 536
+      },
+      "edges": {
+        "INDICATED_FOR": 252,
+        "CONTRAINDICATED_IN": 69,
+        "INTERACTS_WITH": 23,
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35,
+        "SOURCED_FROM": 536,
+        "RECOMMENDS": 1781
+      }
+    },
+    "backup_file": "data/backups/graphrag/aha_acc_hf_2022/2026-03-16T17-07-14.jsonl"
+  },
+  {
+    "timestamp": "2026:03:17T11-01-53",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "fix-dosing-accuracy-errors",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32,
+        "Disease": 76,
+        "Lab": 26,
+        "Procedure": 38,
+        "Device": 7,
+        "Guideline": 1,
+        "EvidenceChunk": 461,
+        "Recommendation": 536,
+        "PatientVariable": 96,
+        "Symptom": 4
+      },
+      "edges": {
+        "INDICATED_FOR": 252,
+        "CONTRAINDICATED_IN": 69,
+        "INTERACTS_WITH": 23,
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35,
+        "SOURCED_FROM": 536,
+        "RECOMMENDS": 1781,
+        "EVALUATES": 885,
+        "FOR_CONDITION": 731,
+        "DEFINED_BY": 536,
+        "MEMBER_OF": 19,
+        "CONFLICTS_WITH": 14,
+        "MEASURES": 5
+      }
+    },
+    "backup_file": "data/backups/graphrag/aha_acc_hf_2022/2026-03-17T11-01-53.jsonl"
+  },
+  {
+    "timestamp": "2026-03-17T12:15:00",
+    "operation": "fix-graph-gaps",
+    "guideline_id": "aha_acc_hf_2022",
+    "nodes": {
+      "Drug": 84,
+      "DrugClass": 32,
+      "Disease": 77,
+      "Lab": 26,
+      "Procedure": 38,
+      "Device": 7,
+      "Guideline": 1,
+      "EvidenceChunk": 461,
+      "Recommendation": 536,
+      "PatientVariable": 96,
+      "Symptom": 4
+    },
+    "edges": {
+      "INDICATED_FOR": 252,
+      "CONTRAINDICATED_IN": 73,
+      "INTERACTS_WITH": 23,
+      "DOSED_FOR": 48,
+      "MONITORED_BY": 35,
+      "SOURCED_FROM": 536,
+      "RECOMMENDS": 1781,
+      "EVALUATES": 885,
+      "FOR_CONDITION": 731,
+      "DEFINED_BY": 536,
+      "MEMBER_OF": 19,
+      "CONFLICTS_WITH": 14,
+      "MEASURES": 5
+    }
+  },
+  {
+    "timestamp": "2026-03-17T14:00:00",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "converge-graph-backup",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32,
+        "Disease": 77,
+        "Lab": 26,
+        "Procedure": 38,
+        "Device": 7,
+        "Guideline": 1,
+        "EvidenceChunk": 461,
+        "Recommendation": 536
+      },
+      "edges": {
+        "INDICATED_FOR": 252,
+        "CONTRAINDICATED_IN": 73,
+        "INTERACTS_WITH": 23,
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35,
+        "SOURCED_FROM": 536,
+        "RECOMMENDS": 1781,
+        "EVALUATES": 885,
+        "FOR_CONDITION": 731,
+        "DEFINED_BY": 536,
+        "MEMBER_OF": 19
+      }
+    },
+    "backup_file": "data/backups/graphrag/aha_acc_hf_2022/2026-03-17T14-00-00.jsonl"
+  },
+  {
+    "timestamp": "2026-03-19T03:01:03",
+    "guideline_id": "aha_acc_hf_2022",
+    "operation": "fix-graph-gaps-critical-monitoring-diagnostics",
+    "snapshot_before": {
+      "nodes": {
+        "Drug": 84,
+        "DrugClass": 32,
+        "Disease": 77,
+        "Lab": 26,
+        "Procedure": 38,
+        "Device": 7,
+        "Guideline": 1,
+        "EvidenceChunk": 461,
+        "Recommendation": 536,
+        "PatientVariable": 96,
+        "Symptom": 4
+      },
+      "edges": {
+        "INDICATED_FOR": 252,
+        "CONTRAINDICATED_IN": 73,
+        "INTERACTS_WITH": 23,
+        "DOSED_FOR": 48,
+        "MONITORED_BY": 35,
+        "SOURCED_FROM": 536,
+        "DIAGNOSED_BY": 87,
+        "RECOMMENDS": 1781,
+        "EVALUATES": 885,
+        "FOR_CONDITION": 731,
+        "DEFINED_BY": 536,
+        "MEMBER_OF": 19,
+        "CONFLICTS_WITH": 14,
+        "MEASURES": 5
+      }
+    }
+  }
+]

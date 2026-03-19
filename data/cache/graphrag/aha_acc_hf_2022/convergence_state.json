@@ -1,0 +1,177 @@
+{
+  "guideline_id": "aha_acc_hf_2022",
+  "source_path": "data/guidelines/aha_acc_hf_2022.md",
+  "started_at": "2026-03-17T14:00:00Z",
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2026-03-17T14:05:00Z",
+      "evaluation": {
+        "overall_grade": "A",
+        "grade_numeric": 4.0,
+        "meets_a_plus": false,
+        "weakest_dimension": "diagnostic_coverage",
+        "blocking_dimensions": ["diagnostic_coverage"],
+        "clinical_completeness": {
+          "treatment_coverage": {"score": 0.95, "grade": "A+"},
+          "safety_coverage": {"score": 1.0, "grade": "A+"},
+          "dosing_coverage": {"score": 0.96, "grade": "A+"},
+          "monitoring_coverage": {"score": 0.95, "grade": "A+"},
+          "condition_coverage": {"score": 0.99, "grade": "A+"},
+          "diagnostic_coverage": {"score": 0.0, "grade": "F"},
+          "evidence_traceability": {"score": 1.0, "grade": "A+"}
+        },
+        "edge_property_coverage": {
+          "DOSED_FOR": {"starting_dose": {"rate": 1.0}, "frequency": {"rate": 1.0}, "max_dose": {"rate": 0.667}},
+          "CONTRAINDICATED_IN": {"severity": {"rate": 1.0}},
+          "INTERACTS_WITH": {"severity": {"rate": 1.0}},
+          "MONITORED_BY": {"threshold_alert": {"rate": 1.0}, "frequency": {"rate": 1.0}}
+        }
+      },
+      "overall_grade": "A",
+      "grade_numeric": 4.0,
+      "meets_a_plus": false,
+      "weakest_dimension": "diagnostic_coverage",
+      "blocking_dimensions": ["diagnostic_coverage"],
+      "fixes_applied": [
+        {"type": "code_fix", "target": "loader_v2.py diagnostic_criteria role inversion", "description": "Fixed _derive_semantic_edges to scan both subjects and targets for diseases/labs/procedures"},
+        {"type": "edge_creation", "target": "DIAGNOSED_BY", "description": "Created 81 DIAGNOSED_BY edges from 64 diagnostic_criteria extractions"},
+        {"type": "edge_creation", "target": "DIAGNOSED_BY", "description": "Created 6 additional DIAGNOSED_BY edges for HF stages A/C/D"}
+      ],
+      "fix_duration_seconds": 480
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2026-03-17T14:15:00Z",
+      "evaluation": {
+        "overall_grade": "A+",
+        "grade_numeric": 5.0,
+        "meets_a_plus": true,
+        "weakest_dimension": "diagnostic_coverage",
+        "blocking_dimensions": [],
+        "clinical_completeness": {
+          "treatment_coverage": {"score": 0.95, "grade": "A+"},
+          "safety_coverage": {"score": 1.0, "grade": "A+"},
+          "dosing_coverage": {"score": 0.96, "grade": "A+"},
+          "monitoring_coverage": {"score": 0.95, "grade": "A+"},
+          "condition_coverage": {"score": 0.992, "grade": "A+"},
+          "diagnostic_coverage": {"score": 0.844, "grade": "A+"},
+          "evidence_traceability": {"score": 1.0, "grade": "A+"}
+        },
+        "edge_property_coverage": {
+          "DOSED_FOR": {"starting_dose": {"rate": 1.0}, "frequency": {"rate": 1.0}, "max_dose": {"rate": 0.667}},
+          "CONTRAINDICATED_IN": {"severity": {"rate": 1.0}},
+          "INTERACTS_WITH": {"severity": {"rate": 1.0}},
+          "MONITORED_BY": {"threshold_alert": {"rate": 1.0}, "frequency": {"rate": 1.0}}
+        },
+        "safety_checks": {
+          "angioedema_acei_absolute": true,
+          "angioedema_arni_absolute": true,
+          "acei_arni_interaction_major": true,
+          "no_cross_contamination": true
+        },
+        "terminology_resolution": {"tested": 20, "resolved": 20, "failures": []},
+        "scenario_pass_rate": {"status": "UNTESTED"}
+      },
+      "overall_grade": "A+",
+      "grade_numeric": 5.0,
+      "meets_a_plus": true,
+      "weakest_dimension": "diagnostic_coverage",
+      "blocking_dimensions": [],
+      "fixes_applied": [],
+      "fix_duration_seconds": 0
+    },
+    {
+      "iteration": 3,
+      "timestamp": "2026-03-18T00:00:00Z",
+      "evaluation": {
+        "overall_grade": "A+",
+        "grade_numeric": 5.0,
+        "meets_a_plus": true,
+        "weakest_dimension": "diagnostic_coverage",
+        "blocking_dimensions": [],
+        "clinical_completeness": {
+          "treatment_coverage": {"score": 0.95, "grade": "A+"},
+          "safety_coverage": {"score": 1.0, "grade": "A+"},
+          "dosing_coverage": {"score": 0.92, "grade": "A+"},
+          "monitoring_coverage": {"score": 0.85, "grade": "A+"},
+          "condition_coverage": {"score": 0.99, "grade": "A+"},
+          "diagnostic_coverage": {"score": 0.85, "grade": "A+"},
+          "evidence_traceability": {"score": 1.0, "grade": "A+"}
+        },
+        "edge_property_coverage": {
+          "DOSED_FOR": {"starting_dose": {"rate": 1.0}, "frequency": {"rate": 1.0}, "max_dose": {"rate": 0.667}},
+          "CONTRAINDICATED_IN": {"severity": {"rate": 1.0}},
+          "INTERACTS_WITH": {"severity": {"rate": 1.0}},
+          "MONITORED_BY": {"threshold_alert": {"rate": 1.0}, "frequency": {"rate": 1.0}}
+        },
+        "safety_checks": {
+          "angioedema_acei_absolute": true,
+          "acei_arni_interaction_major": true,
+          "no_cross_contamination": true
+        },
+        "terminology_resolution": {"tested": 20, "resolved": 20, "failures": []},
+        "scenario_pass_rate": {"total": 21, "passed": 21, "failed": 0, "failures": [], "status": "TESTED"}
+      },
+      "overall_grade": "A+",
+      "grade_numeric": 5.0,
+      "meets_a_plus": true,
+      "weakest_dimension": "diagnostic_coverage",
+      "blocking_dimensions": [],
+      "fixes_applied": [],
+      "fix_duration_seconds": 0
+    },
+    {
+      "iteration": 4,
+      "timestamp": "2026-03-19T03:00:00Z",
+      "evaluation": {
+        "overall_grade": "A+",
+        "grade_numeric": 5.0,
+        "meets_a_plus": true,
+        "weakest_dimension": "diagnostic_coverage",
+        "blocking_dimensions": [],
+        "clinical_completeness": {
+          "treatment_coverage": {"score": 0.95, "grade": "A+"},
+          "safety_coverage": {"score": 1.0, "grade": "A+"},
+          "dosing_coverage": {"score": 0.92, "grade": "A+"},
+          "monitoring_coverage": {"score": 0.92, "grade": "A+", "note": "improved from 55% to 92% with amiodarone/loop diuretic/beta blocker/ivabradine monitoring"},
+          "condition_coverage": {"score": 0.99, "grade": "A+"},
+          "diagnostic_coverage": {"score": 0.85, "grade": "A+", "note": "30% of DIAGNOSED_BY edges now have explicit thresholds"},
+          "evidence_traceability": {"score": 1.0, "grade": "A+"}
+        },
+        "edge_property_coverage": {
+          "DOSED_FOR": {"total": 49, "starting_dose": {"rate": 1.0}, "frequency": {"rate": 1.0}, "max_dose": {"rate": 0.673}},
+          "CONTRAINDICATED_IN": {"total": 73, "severity": {"rate": 1.0}},
+          "INTERACTS_WITH": {"total": 23, "severity": {"rate": 1.0}},
+          "MONITORED_BY": {"total": 46, "threshold_alert": {"rate": 1.0}, "frequency": {"rate": 1.0}, "conditions_json": {"rate": 0.98}}
+        },
+        "safety_checks": {
+          "angioedema_acei_absolute": true,
+          "angioedema_arni_absolute": true,
+          "acei_arni_interaction_major": true,
+          "no_cross_contamination": true
+        },
+        "terminology_resolution": {"tested": 20, "resolved": 20, "failures": []},
+        "scenario_pass_rate": {"total": 162, "passed": 162, "failed": 0, "failures": [], "status": "TESTED"}
+      },
+      "overall_grade": "A+",
+      "grade_numeric": 5.0,
+      "meets_a_plus": true,
+      "weakest_dimension": "diagnostic_coverage",
+      "blocking_dimensions": [],
+      "fixes_applied": [
+        {"type": "terminology", "target": "drugs.json", "description": "Added 11 drugs: Nebivolol, Sotagliflozin, Canagliflozin, Dofetilide, Ferric Carboxymaltose, Bromocriptine, Patiromer, SZC, Vericiguat, Tafamidis"},
+        {"type": "terminology", "target": "labs.json", "description": "Added 4 labs: Magnesium, Heart Rate, TSH, Chest X-Ray"},
+        {"type": "edge_creation", "target": "MONITORED_BY", "description": "Created 11 new monitoring edges: Amiodarone->TSH/LFTs, Loop Diuretic->K+/Na+/Mg2+/Cr/eGFR, Beta Blocker->HR/SBP, Ivabradine->HR/SBP"},
+        {"type": "property_patch", "target": "DIAGNOSED_BY.threshold", "description": "Populated thresholds on 26/87 edges: HFrEF<=40%, HFpEF>=50%, HFmrEF 41-49%, cardiogenic shock criteria"},
+        {"type": "property_patch", "target": "MONITORED_BY.conditions_json", "description": "Populated conditions_json on 45/46 edges (98%): patient eligibility, treatment phase, lab thresholds"},
+        {"type": "edge_creation", "target": "DOSED_FOR", "description": "Created Bromocriptine->PPCM dosing (2.5mg BID)"}
+      ],
+      "fix_duration_seconds": 600
+    }
+  ],
+  "current_grade": "A+",
+  "current_grade_numeric": 5.0,
+  "stall_count": 0,
+  "status": "converged"
+}
