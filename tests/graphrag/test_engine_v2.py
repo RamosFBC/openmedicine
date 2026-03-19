@@ -3279,3 +3279,65 @@ class TestCorrectionMetadata:
         result = engine.query(q)
 
         assert result.corrections_attempted == []
+
+
+class TestSelfCorrectionIntegration:
+    """End-to-end tests for the self-correction pipeline."""
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_correction_does_not_run_when_results_sufficient(self, mock_link, mock_embed):
+        """If Layer 1 returns good results, no correction is attempted."""
+        mock_embed.side_effect = Exception("no key")
+        entity = MagicMock()
+        entity.node_id = "drug:carvedilol"
+        entity.node_label = "Drug"
+        mock_link.return_value = entity
+
+        conn = MagicMock()
+        conn.execute_read.return_value = [
+            {
+                "entity_id": "disease:hfref",
+                "entity_name": "HFrEF",
+                "entity_type": "Disease",
+                "strength": "strong_for",
+                "evidence_quality": "high",
+                "conditions": None,
+                "starting_dose": "3.125mg",
+                "target_dose": "25mg",
+                "max_dose": "25mg",
+                "frequency": "BID",
+                "severity": None,
+                "mechanism": None,
+                "clinical_effect": None,
+                "threshold_alert": None,
+                "threshold_stop": None,
+                "reason": None,
+            }
+        ]
+
+        engine = ReasoningEngine(conn)
+        q = ClinicalQuery(intent="dosing", concepts=["Carvedilol"])
+        result = engine.query(q)
+
+        assert len(result.semantic_matches) >= 1
+        assert result.corrections_attempted == []
+
+    @patch("open_medicine.graphrag.reasoning.engine_v2.embed_query")
+    @patch("open_medicine.graphrag.reasoning.engine_v2.link_entity")
+    def test_max_correction_attempts_bounded(self, mock_link, mock_embed):
+        """Correction strategies are bounded — no infinite loops."""
+        mock_embed.side_effect = Exception("no key")
+        mock_link.return_value = None
+
+        conn = MagicMock()
+        conn.execute_read.return_value = []
+
+        engine = ReasoningEngine(conn)
+        q = ClinicalQuery(intent="contraindication", concepts=["TotallyFakeDrug"])
+        result = engine.query(q)
+
+        # Should attempt corrections but not loop forever
+        assert len(result.corrections_attempted) <= 3
+        # Should still indicate low confidence
+        assert result.confidence == "low"
