@@ -3027,3 +3027,87 @@ class TestVariableNormalization:
 
     def test_unknown_passes_through(self):
         assert ReasoningEngine._normalize_var_name("weight_kg") == "weight_kg"
+
+
+class TestResultEvaluator:
+    """Test the result quality evaluator that decides whether to self-correct."""
+
+    def test_sufficient_high_confidence(self):
+        """Full results with conditions_met=True → no correction needed."""
+        result = GraphRAGResult(
+            semantic_matches=[
+                SemanticMatch(
+                    entity_id="drug:carvedilol",
+                    entity_name="Carvedilol",
+                    entity_type="Drug",
+                    edge_type="INDICATED_FOR",
+                    strength="strong_for",
+                    evidence_quality="high",
+                    conditions_met=True,
+                )
+            ],
+            confidence="high",
+        )
+        assert ReasoningEngine._needs_correction(result, min_results=1) is False
+
+    def test_empty_results_needs_correction(self):
+        """Zero results → needs correction."""
+        result = GraphRAGResult(semantic_matches=[], confidence="low")
+        assert ReasoningEngine._needs_correction(result, min_results=1) is True
+
+    def test_all_conditions_failed_needs_correction(self):
+        """All matches have conditions_met=False → needs correction."""
+        result = GraphRAGResult(
+            semantic_matches=[
+                SemanticMatch(
+                    entity_id="drug:x",
+                    entity_name="X",
+                    entity_type="Drug",
+                    edge_type="INDICATED_FOR",
+                    strength="strong_for",
+                    evidence_quality="high",
+                    conditions_met=False,
+                )
+            ],
+            confidence="medium",
+        )
+        assert ReasoningEngine._needs_correction(result, min_results=1) is True
+
+    def test_below_min_results_threshold(self):
+        """Fewer results than threshold → needs correction."""
+        result = GraphRAGResult(
+            semantic_matches=[
+                SemanticMatch(
+                    entity_id="drug:x",
+                    entity_name="X",
+                    entity_type="Drug",
+                    edge_type="INDICATED_FOR",
+                    strength="strong_for",
+                    evidence_quality="high",
+                    conditions_met=True,
+                )
+            ],
+            confidence="high",
+        )
+        # Wants at least 3, got 1
+        assert ReasoningEngine._needs_correction(result, min_results=3) is True
+
+    def test_vector_only_at_low_confidence(self):
+        """Only vector results with low confidence → needs correction."""
+        result = GraphRAGResult(
+            semantic_matches=[
+                SemanticMatch(
+                    entity_id="drug:x",
+                    entity_name="X",
+                    entity_type="Drug",
+                    edge_type="INDICATED_FOR",
+                    strength="",
+                    evidence_quality="",
+                    source_layer="vector",
+                    conditions_met=True,
+                )
+            ],
+            confidence="medium",
+            retrieval_layers_used=["vector"],
+        )
+        assert ReasoningEngine._needs_correction(result, min_results=1) is True

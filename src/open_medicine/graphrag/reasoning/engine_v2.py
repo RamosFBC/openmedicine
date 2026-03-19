@@ -952,6 +952,26 @@ class ReasoningEngine:
         return result
 
     @staticmethod
+    def _needs_correction(result: GraphRAGResult, min_results: int = 1) -> bool:
+        """Evaluate whether a query result needs self-correction.
+
+        Returns True when:
+        - Zero results
+        - All matches have conditions_met=False (none applicable to patient)
+        - Fewer passing matches than min_results
+        - Only vector-sourced results (low structural confidence)
+        """
+        passing = [m for m in result.semantic_matches if m.conditions_met is not False]
+        if not passing:
+            return True
+        if len(passing) < min_results:
+            return True
+        # Vector-only results are semantically approximate
+        if all(m.source_layer == "vector" for m in passing):
+            return True
+        return False
+
+    @staticmethod
     def _infer_vars_from_concepts(
         concepts: list[str],
     ) -> dict[str, str | float | bool]:
