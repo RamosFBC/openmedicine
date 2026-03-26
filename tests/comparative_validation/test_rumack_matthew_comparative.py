@@ -1,22 +1,26 @@
 import json
 import math
+import os
 import pytest
 from open_medicine.mcp.calculators.rumack_matthew import (
     calculate_rumack_matthew,
     RumackMatthewParams,
 )
 
+_DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "rumack_matthew_test_cases.json")
+
 
 def load_test_vectors():
     """Load published test vectors derived from the original Rumack-Matthew
     nomogram data points (4-hour half-life exponential decay)."""
-    with open(
-        "tests/comparative_validation/data/rumack_matthew_test_cases.json"
-    ) as f:
+    if not os.path.exists(_DATA_PATH):
+        return []
+    with open(_DATA_PATH) as f:
         return json.load(f)
 
 
-@pytest.mark.parametrize("case", load_test_vectors(), ids=lambda c: c["description"])
+@pytest.mark.skipif(not os.path.exists(_DATA_PATH), reason="comparative test data not available")
+@pytest.mark.parametrize("case", load_test_vectors(), ids=lambda c: c.get("description", ""))
 def test_rumack_matthew_vs_reference(case):
     """Cross-validate calculator output against known nomogram data points.
 

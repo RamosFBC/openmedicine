@@ -8,7 +8,7 @@ from open_medicine.mcp.server import handle_list_tools, handle_call_tool
 
 @pytest.fixture
 def tools():
-    return asyncio.get_event_loop().run_until_complete(handle_list_tools())
+    return asyncio.run(handle_list_tools())
 
 
 class TestToolRegistration:
@@ -44,7 +44,7 @@ class TestToolRegistration:
 
 class TestCalculatorToolExecution:
     def test_search_calculators_returns_results(self):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             handle_call_tool("search_clinical_calculators", {"query": "kidney"})
         )
         assert len(result) == 1
@@ -52,7 +52,7 @@ class TestCalculatorToolExecution:
         assert "matches" in data
 
     def test_execute_unknown_calculator_returns_error(self):
-        result = asyncio.get_event_loop().run_until_complete(
+        result = asyncio.run(
             handle_call_tool("execute_clinical_calculator", {
                 "calculator_id": "nonexistent",
                 "parameters": {}
@@ -64,7 +64,7 @@ class TestCalculatorToolExecution:
 class TestGraphToolDegradation:
     def test_graph_tool_returns_unavailable_when_no_engine(self):
         with patch("open_medicine.mcp.graphrag_tools.get_graph_engine", return_value=None):
-            result = asyncio.get_event_loop().run_until_complete(
+            result = asyncio.run(
                 handle_call_tool("check_drug_dosing", {"drug": "lisinopril"})
             )
             data = json.loads(result[0].text)
@@ -72,6 +72,6 @@ class TestGraphToolDegradation:
 
     def test_unknown_tool_raises(self):
         with pytest.raises(ValueError, match="Unknown tool"):
-            asyncio.get_event_loop().run_until_complete(
+            asyncio.run(
                 handle_call_tool("nonexistent_tool", {})
             )

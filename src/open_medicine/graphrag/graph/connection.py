@@ -1,11 +1,20 @@
 from __future__ import annotations
 import platform
 from typing import Any
-import neo4j
+
+try:
+    import neo4j
+except ImportError:
+    neo4j = None  # type: ignore[assignment]
 
 
 class GraphConnection:
     def __init__(self, uri: str, user: str, password: str) -> None:
+        if neo4j is None:
+            raise ImportError(
+                "neo4j package is required for GraphConnection. "
+                "Install it with: uv sync --extra graphrag"
+            )
         # macOS Python can't verify Neo4j Aura's certificate chain;
         # use neo4j+ssc:// (skip certificate verification) on Darwin.
         if platform.system() == "Darwin" and "neo4j+s://" in uri:
