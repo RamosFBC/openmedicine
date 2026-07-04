@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report incorrect clinical output, crashes, or unexpected behavior
+about: Report incorrect calculator output, crashes, or unexpected behavior
 title: "[BUG] "
 labels: bug
 assignees: ''
@@ -10,9 +10,9 @@ assignees: ''
 
 A clear description of the bug.
 
-## Calculator/Guideline Affected
+## Calculator Affected
 
-Which tool is producing incorrect results? (e.g., `calculate_chadsvasc`, guideline `acc_aha_af_2023/anticoagulation`)
+Which calculator or MCP tool is producing incorrect results? (e.g., `calculate_chadsvasc`, `execute_clinical_calculator`)
 
 ## Steps to Reproduce
 
@@ -31,7 +31,7 @@ print(result.value)  # Got: X, Expected: Y
 
 ## Clinical Reference (if applicable)
 
-If reporting a clinical accuracy issue, please cite the source (DOI, guideline section, page number).
+If reporting a clinical accuracy issue, please cite the source DOI, study, or reference.
 
 ## Environment
 

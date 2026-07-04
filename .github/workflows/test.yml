@@ -23,7 +23,7 @@ jobs:
         run: uv python install ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: uv sync --extra test --extra graphrag
+        run: uv sync --extra test
 
       - name: Run tests
         run: uv run python -m pytest -v

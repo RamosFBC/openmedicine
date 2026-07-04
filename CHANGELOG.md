@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.13.0] - 2026-07-04
+
+### Changed
+- Refocused Open Medicine as a calculator-only stdio MCP server.
+- MCP surface now exposes only `search_clinical_calculators` and `execute_clinical_calculator`.
+- Removed guideline retrieval, differential diagnosis, semantic embeddings, HTTP service APIs, and GraphRAG/Neo4j functionality from the package.
+- Removed GraphRAG/service optional dependencies and console scripts.
+- Updated README, contributor docs, Dockerfile, and MCP config for the calculator-only release.
+
 ## [0.12.0] - 2026-03-19
 
 ### Added

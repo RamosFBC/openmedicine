@@ -1,29 +1,24 @@
 import asyncio
 import json
 
-from mcp.server import Server, NotificationOptions
+from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
 
+from open_medicine import __version__
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.search_utils import tokenized_search
-from open_medicine.mcp.graphrag_tools import (
-    GRAPHRAG_TOOL_DEFINITIONS,
-    handle_graph_tool_call,
-)
-
-_GRAPH_TOOL_NAMES = {t["name"] for t in GRAPHRAG_TOOL_DEFINITIONS}
 
 server = Server("open-medicine")
 
 
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
-    tools = [
+    return [
         types.Tool(
             name="search_clinical_calculators",
-            description="Searches the internal registry for available clinical calculators based on keywords. Returns the calculator ID and its required JSON Schema.",
+            description="Searches the calculator registry by keyword and returns calculator IDs with their required JSON Schemas.",
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -37,28 +32,23 @@ async def handle_list_tools() -> list[types.Tool]:
         ),
         types.Tool(
             name="execute_clinical_calculator",
-            description="Executes a specific clinical calculator using its ID and a validated JSON dictionary of parameters matching its schema.",
+            description="Executes a medical calculator by ID using a validated JSON parameter payload.",
             inputSchema={
                 "type": "object",
                 "properties": {
                     "calculator_id": {
                         "type": "string",
-                        "description": "The exact ID string of the calculator returned from the search_clinical_calculators tool.",
+                        "description": "The exact calculator ID returned by search_clinical_calculators.",
                     },
                     "parameters": {
                         "type": "object",
-                        "description": "A flat JSON payload containing the exact key-value pairs requested by the calculator's JSON schema.",
+                        "description": "A flat JSON payload matching the calculator's JSON Schema.",
                     },
                 },
                 "required": ["calculator_id", "parameters"],
             },
         ),
     ]
-    for t in GRAPHRAG_TOOL_DEFINITIONS:
-        tools.append(
-            types.Tool(name=t["name"], description=t["description"], inputSchema=t["inputSchema"])
-        )
-    return tools
 
 
 @server.call_tool()
@@ -79,11 +69,9 @@ async def handle_call_tool(
             for calc_id, tool_def in CALCULATOR_REGISTRY.items()
         ]
         results = tokenized_search(query, items)
-        for r in results:
-            r.pop("_score", None)
-        return [
-            types.TextContent(type="text", text=json.dumps({"matches": results}, indent=2))
-        ]
+        for result in results:
+            result.pop("_score", None)
+        return [types.TextContent(type="text", text=json.dumps({"matches": results}, indent=2))]
 
     if name == "execute_clinical_calculator":
         calc_id = args.get("calculator_id")
@@ -95,17 +83,14 @@ async def handle_call_tool(
                     text=f"Error: Unknown calculator_id '{calc_id}'. Please use search_clinical_calculators first.",
                 )
             ]
+
         tool_def = CALCULATOR_REGISTRY[calc_id]
         try:
             model_instance = tool_def.pydantic_model(**params_dict)
             result = tool_def.execute_function(model_instance)
             return [types.TextContent(type="text", text=result.model_dump_json(indent=2))]
-        except Exception as e:
-            return [types.TextContent(type="text", text=f"Error executing {calc_id}: {e}")]
-
-    if name in _GRAPH_TOOL_NAMES:
-        result_text = await asyncio.to_thread(handle_graph_tool_call, name, args)
-        return [types.TextContent(type="text", text=result_text)]
+        except Exception as exc:
+            return [types.TextContent(type="text", text=f"Error executing {calc_id}: {exc}")]
 
     raise ValueError(f"Unknown tool: {name}")
 
@@ -117,7 +102,7 @@ async def main_async():
             write_stream,
             InitializationOptions(
                 server_name="open-medicine",
-                server_version="0.11.0",
+                server_version=__version__,
                 capabilities=server.get_capabilities(
                     notification_options=NotificationOptions(),
                     experimental_capabilities={},

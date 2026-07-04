@@ -1,2 +1,3 @@
-"""Open Medicine"""
-__version__ = "0.2.1"
+"""Open Medicine: MCP server for deterministic medical calculators."""
+
+__version__ = "0.13.0"

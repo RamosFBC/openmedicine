@@ -206,16 +206,3 @@ class TestSearchIntegration:
                         "calculate_heparin_dosing", "calculate_warfarin_initiation",
                         "calculate_edoxaban_dosing"}
         assert len(set(calc_ids) & anticoag_ids) >= 1
-
-    def test_guideline_search_works(self):
-        """Guideline search should return results for common queries."""
-        from open_medicine.mcp.guideline_engine import search_guidelines
-        results = search_guidelines("atrial fibrillation")
-        assert len(results) >= 1
-
-    def test_differential_search_works(self):
-        """Differential search should return results for common queries."""
-        from open_medicine.mcp.differentials.engine import search_differentials
-        results = search_differentials("chest pain")
-        assert len(results) >= 1
-

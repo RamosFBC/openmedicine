@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "open-medicine"
-version = "0.12.0"
-description = "Evidence-Based Clinical Reasoning for AI Agents — deterministic calculators, clinical guidelines, and MCP tools backed by DOI-traceable evidence."
+version = "0.13.0"
+description = "MCP server for deterministic, DOI-traceable medical calculators and clinical scores."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -32,14 +32,12 @@ classifiers = [
     "Typing :: Typed"
 ]
 keywords = [
-    "clinical-decision-support",
-    "evidence-based-medicine",
-    "fhir",
     "mcp",
+    "medical-calculators",
+    "clinical-scores",
+    "clinical-decision-support",
     "healthcare",
-    "calculators",
-    "guidelines",
-    "ai-agents"
+    "calculators"
 ]
 
 [project.urls]
@@ -53,28 +51,9 @@ test = [
     "hypothesis>=6.0.0",
     "ascvd>=0.5"
 ]
-embeddings = [
-    "httpx>=0.27.0",
-]
-graphrag = [
-    "neo4j>=5.0.0",
-    "fastapi>=0.110.0",
-    "uvicorn>=0.30.0",
-    "httpx>=0.27.0",
-    "anthropic>=0.40.0",
-    "pydantic-settings>=2.0.0",
-]
-service = [
-    "uvicorn>=0.30.0",
-    "sse-starlette>=1.6.0",
-    "pydantic-settings>=2.0.0",
-]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/open_medicine"]
 
 [project.scripts]
 open-medicine-mcp = "open_medicine.mcp.server:main"
-open-medicine-graphrag = "open_medicine.graphrag.server.mcp_server:main"
-open-medicine-graphrag-ingest = "open_medicine.graphrag.ingest:main"
-open-medicine-server = "open_medicine.server.__main__:main"

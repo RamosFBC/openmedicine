@@ -1,30 +1,24 @@
 # Open Medicine
 
-**Evidence-Based Clinical Reasoning for AI Agents**
+**MCP server for deterministic medical calculators and clinical scores.**
 
 [![PyPI](https://img.shields.io/pypi/v/open-medicine)](https://pypi.org/project/open-medicine/)
 [![Python](https://img.shields.io/pypi/pyversions/open-medicine)](https://pypi.org/project/open-medicine/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-*LLMs hallucinate medical math and guidelines. Open Medicine stops them.*
+Open Medicine provides a lightweight MCP server focused only on medical calculators. It exposes deterministic, typed calculator execution for AI agents, with DOI-traceable evidence returned in each `ClinicalResult`.
 
-Open Medicine is an open-source Python library and **MCP Server** that provides **deterministic, DOI-traceable clinical reasoning** for AI agents. Every calculator, score, and guideline returns its scientific source—forcing agents to rely on verified clinical standards rather than latent knowledge.
-
-## Why Open Medicine? 
-If you ask an LLM to evaluate a clinical plan, it might casually agree with "aggressive fluid resuscitation" for a variceal bleed. This is a common, deadly hallucination. 
-
-By plugging the `open-medicine-mcp` server into your agent (via LangChain, AutoGPT, Claude Desktop, etc.), the agent can query the actual **NICE CG141 Guidance** and correct the plan: *"Modify. Guidelines mandate a cautious, restrictive transfusion strategy (target Hgb 7-8 g/dL). Aggressive fluids will increase portal pressure."*
+This release removes guideline retrieval, differential diagnosis, semantic embeddings, HTTP service APIs, and GraphRAG/Neo4j functionality. The package is now intentionally narrow: discover a calculator, validate parameters, execute it, and return a structured clinical result.
 
 ## Quick Start
 
-### 1. Install the Library
-Open Medicine requires Python >= 3.10. Install the library via pip. This will automatically add the `open-medicine-mcp` executable to your system PATH.
+### Install
+
 ```bash
 pip install open-medicine
 ```
 
-### 2. Configure Your MCP Client
-Add the `open-medicine-mcp` server to your MCP client's configuration file (e.g., `claude_desktop_config.json` for Claude Desktop):
+### Configure your MCP client
 
 ```json
 {
@@ -36,20 +30,22 @@ Add the `open-medicine-mcp` server to your MCP client's configuration file (e.g.
   }
 }
 ```
-*(This uses `uvx` to automatically manage the virtual environment and fetch the latest version.)*
 
-### 3. Test with MCP Inspector
-Alternatively, you can test the toolkit using the standard MCP testing tool:
+### Test with MCP Inspector
+
 ```bash
 npx @modelcontextprotocol/inspector open-medicine-mcp
 ```
 
-### 4. Standalone Python Library
-```bash
-pip install open-medicine
-```
+## MCP Tools
 
-#### Deterministic Clinical Calculators
+Open Medicine exposes exactly two MCP tools:
+
+- `search_clinical_calculators` — search the calculator registry by keyword and return calculator IDs plus JSON Schemas.
+- `execute_clinical_calculator` — execute a calculator by ID with validated JSON parameters.
+
+## Python Usage
+
 ```python
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
 
@@ -60,79 +56,35 @@ result = calculate_chadsvasc(CHADSVAScParams(
     congestive_heart_failure=False,
     stroke_tia_thromboembolism=True,
     vascular_disease=False,
-    female_sex=False
+    female_sex=False,
 ))
 
-print(result.value)             # 4
-print(result.interpretation)    # "CHA2DS2-VASc score is 4. High risk..."
-print(result.evidence.source_doi)  # "10.1161/CIR.0000000000001193"
+print(result.value)
+print(result.interpretation)
+print(result.evidence.source_doi)
 ```
-
-#### Renal Dose Adjustment (Multi-Drug Lookup)
-```python
-from open_medicine.mcp.calculators.renal_dose_adjustment import (
-    calculate_renal_dose_adjustment, RenalDoseAdjustmentParams, RenalMetric
-)
-
-result = calculate_renal_dose_adjustment(RenalDoseAdjustmentParams(
-    drug_name="vancomycin",
-    renal_value=25.0,
-    renal_metric=RenalMetric.CRCL,
-))
-
-print(result.value["adjusted_dose"])     # "15-20 mg/kg IV q24-48h; dose by levels"
-print(result.value["adjustment_type"])   # "interval_extension"
-print(result.evidence.source_doi)        # "10.1093/cid/ciz895"
-print(result.value["warnings"])          # ["Extended interval dosing", ...]
-```
-
-#### Guideline Retrieval
-```python
-from open_medicine.mcp.guideline_engine import search_guidelines, retrieve_guideline
-
-# Search by topic
-matches = search_guidelines("atrial fibrillation anticoagulation")
-
-# Retrieve specific section
-result = retrieve_guideline("acc_aha_af_2023", "anticoagulation")
-print(result.evidence.source_doi)  # "10.1161/CIR.0000000000001193"
-```
-
-## Available Tools (MCP)
-
-| Tool | Purpose |
-|------|---------|
-| `search_clinical_calculators` | Find calculators by keyword (e.g., "GI bleed") |
-| `execute_clinical_calculator` | Run a calculator with JSON schema validation |
-| `search_guidelines` | Find guideline sections by topic |
-| `retrieve_guideline` | Retrieve curated, DOI-backed guideline content |
 
 ## Current Coverage
 
-**Calculators (93):** AA Gradient, ABCD2, AIMS65, Anion Gap, APACHE II, Apgar, Apixaban Dosing, ASCVD, AUDIT-C, BISAP, Bishop, BMI, BSA (Mosteller), CAGE, CAM-ICU, Canadian C-Spine, Caprini, Centor/McIsaac, CHA₂DS₂-VASc, Charlson Comorbidity, Child-Pugh, CIWA-Ar, CKD-EPI, Clinical Frailty Scale, Cockcroft-Gault, Corrected Calcium, Corrected QT, Corrected Sodium, COWS, CRB-65, CURB-65, Dabigatran Dosing, DAS28, Duke Criteria, ECOG, Edoxaban Dosing, Enoxaparin Dosing, EPDS, FIB-4, Fisher Grade, 4Ts HIT, Framingham, FRAX, GAD-7, GCS, Glasgow-Blatchford, GOLD COPD, GRACE, HAS-BLED, HEART Score, Heparin Dosing, Hunt & Hess, Insulin Basal Dosing, IPSS, Karnofsky, LRINEC, Maintenance IV Fluids, MASCC, MELD-Na, MEWS, NAFLD Fibrosis, Naranjo ADR, NEWS2, NIHSS, Osmolar Gap, Ottawa Ankle, Padua, Parkland, Pediatric GCS, PERC, PEWS, PHQ-9, PSI/PORT, qSOFA, Ranson's, RASS, RCRI, **Renal Dose Adjustment (20 drugs)**, Rivaroxaban Dosing, Rockall, Revised Trauma Score (RTS), Rumack-Matthew, Serum Osmolality, SOFA, STOP-BANG, TBSA, TIMI STEMI, TIMI UA/NSTEMI, Warfarin Initiation, Wells' DVT, Wells' PE, Winter's Formula.
+The calculator registry includes 92 clinical calculators and scores across cardiovascular risk, anticoagulant dosing, renal function, ICU severity, neurology, trauma, GI bleeding, hepatology, pulmonary/VTE risk, psychiatry screening, pediatrics, obstetrics, oncology, toxicology, and fluid/electrolyte calculations.
 
-**Guidelines (43):** Including
-- ACC/AHA AF 2023 (`acc_aha_af_2023`)
-- KDIGO CKD 2024 (`kdigo_ckd_2024`)
-- BTS CAP 2009 (`bts_cap_2009`)
-- TIMI UA/NSTEMI 2000 (`timi_ua_nstemi_2000`)
-- ACC/AHA ASCVD 2013 (`acc_aha_ascvd_2013`)
-- Sepsis-3 2016 (`sepsis3_2016`)
-- Wells PE 2000 (`wells_pe_2000`)
-- GOLD COPD 2024 (`gold_copd_2024`)
-- AHA/ACC Chest Pain 2021 (`aha_acc_chest_pain_2021`)
-- AHA/ASA Ischemic Stroke 2019 (`aha_asa_stroke_2019`)
-- AASLD Cirrhosis 2023 (`aasld_cirrhosis_2023`)
-- ESC ACS 2023 (`esc_acs_2023`)
-- NICE UGIB 2012 (`nice_ugib_2012`)
-- RCP NEWS2 2017 (`rcp_news2_2017`)
+Examples include CHA₂DS₂-VASc, HAS-BLED, Wells DVT/PE, PERC, HEART, TIMI, GRACE, qSOFA, NEWS2, SOFA, APACHE II, GCS, NIHSS, MELD-Na, Child-Pugh, FIB-4, CKD-EPI, Cockcroft-Gault, renal dose adjustment, BMI, BSA, corrected sodium/calcium/QTc, anion gap, osmolar gap, Winter's formula, CURB-65, PSI/PORT, AIMS65, Glasgow-Blatchford, RCRI, Charlson, PHQ-9, GAD-7, CAGE, AUDIT-C, CIWA-Ar, COWS, Apgar, Pediatric GCS, PEWS, TBSA, and more.
+
+## Development
+
+```bash
+uv sync --extra test
+uv run python -m pytest -v
+uv run open-medicine-mcp
+uv build
+```
 
 ## Design Principles
 
-- **Deterministic**: Same input → same output. No LLM calls, no randomness.
-- **Evidence-Backed**: Every `ClinicalResult` includes a `source_doi` and evidence level.
-- **FHIR-Compatible**: Outputs include LOINC/SNOMED codes for direct integration with EHR systems.
-- **Strictly Typed**: Pydantic models validate all clinical inputs at the boundary.
+- **Calculator-only MCP surface:** no guideline, differential, embedding, GraphRAG, Neo4j, or HTTP service dependencies.
+- **Deterministic:** same input produces the same output.
+- **Typed:** Pydantic models validate all calculator inputs.
+- **Evidence-backed:** calculator outputs include DOI-backed evidence metadata when available.
 
 ## License
 

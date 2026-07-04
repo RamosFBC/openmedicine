@@ -1,9 +1,10 @@
-"""Tests for unified MCP server — verify all 10 tools are listed."""
-import pytest
+"""Tests for the calculator-only MCP server."""
 import asyncio
 import json
-from unittest.mock import patch
-from open_medicine.mcp.server import handle_list_tools, handle_call_tool
+
+import pytest
+
+from open_medicine.mcp.server import handle_call_tool, handle_list_tools
 
 
 @pytest.fixture
@@ -13,33 +14,30 @@ def tools():
 
 class TestToolRegistration:
     def test_tool_count(self, tools):
-        """Should have 10 tools (2 calculator + 8 graph)."""
-        assert len(tools) == 10
+        assert len(tools) == 2
 
     def test_calculator_tools_present(self, tools):
-        names = [t.name for t in tools]
-        assert "search_clinical_calculators" in names
-        assert "execute_clinical_calculator" in names
+        names = [tool.name for tool in tools]
+        assert names == ["search_clinical_calculators", "execute_clinical_calculator"]
 
-    def test_graph_tools_present(self, tools):
-        names = [t.name for t in tools]
-        assert "check_drug_dosing" in names
-        assert "check_contraindications" in names
-        assert "check_drug_interaction" in names
-        assert "check_monitoring_requirements" in names
-        assert "find_treatment_options" in names
-        assert "query_clinical_graph" in names
-        assert "fetch_evidence_chunk" in names
-        assert "list_available_guidelines" in names
-
-    def test_removed_tools_not_present(self, tools):
-        """Guidelines, differentials, and semantic search removed."""
-        names = [t.name for t in tools]
-        assert "search_guidelines" not in names
-        assert "retrieve_guideline" not in names
-        assert "search_differential_diagnosis" not in names
-        assert "get_differential_diagnosis" not in names
-        assert "search_medical_knowledge" not in names
+    def test_non_calculator_tools_not_present(self, tools):
+        names = [tool.name for tool in tools]
+        removed_tools = {
+            "search_guidelines",
+            "retrieve_guideline",
+            "search_differential_diagnosis",
+            "get_differential_diagnosis",
+            "search_medical_knowledge",
+            "check_drug_dosing",
+            "check_contraindications",
+            "check_drug_interaction",
+            "check_monitoring_requirements",
+            "find_treatment_options",
+            "query_clinical_graph",
+            "fetch_evidence_chunk",
+            "list_available_guidelines",
+        }
+        assert removed_tools.isdisjoint(names)
 
 
 class TestCalculatorToolExecution:
@@ -50,28 +48,31 @@ class TestCalculatorToolExecution:
         assert len(result) == 1
         data = json.loads(result[0].text)
         assert "matches" in data
+        assert data["matches"]
+
+    def test_execute_calculator_returns_clinical_result(self):
+        result = asyncio.run(
+            handle_call_tool(
+                "execute_clinical_calculator",
+                {
+                    "calculator_id": "calculate_bmi",
+                    "parameters": {"weight_kg": 70, "height_cm": 175},
+                },
+            )
+        )
+        data = json.loads(result[0].text)
+        assert data["value"] == pytest.approx(22.9, abs=0.01)
+        assert data["evidence"]["source_doi"]
 
     def test_execute_unknown_calculator_returns_error(self):
         result = asyncio.run(
-            handle_call_tool("execute_clinical_calculator", {
-                "calculator_id": "nonexistent",
-                "parameters": {}
-            })
-        )
-        assert "Error" in result[0].text or "Unknown" in result[0].text
-
-
-class TestGraphToolDegradation:
-    def test_graph_tool_returns_unavailable_when_no_engine(self):
-        with patch("open_medicine.mcp.graphrag_tools.get_graph_engine", return_value=None):
-            result = asyncio.run(
-                handle_call_tool("check_drug_dosing", {"drug": "lisinopril"})
+            handle_call_tool(
+                "execute_clinical_calculator",
+                {"calculator_id": "nonexistent", "parameters": {}},
             )
-            data = json.loads(result[0].text)
-            assert data["status"] == "unavailable"
+        )
+        assert "Unknown calculator_id" in result[0].text
 
     def test_unknown_tool_raises(self):
         with pytest.raises(ValueError, match="Unknown tool"):
-            asyncio.run(
-                handle_call_tool("nonexistent_tool", {})
-            )
+            asyncio.run(handle_call_tool("nonexistent_tool", {}))
