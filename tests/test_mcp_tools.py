@@ -1,9 +1,11 @@
 """Tests for the calculator-only MCP server."""
 import asyncio
+import importlib.util
 import json
 
 import pytest
 
+from open_medicine.mcp import ClinicalResult, Evidence
 from open_medicine.mcp.server import handle_call_tool, handle_list_tools
 
 
@@ -38,6 +40,14 @@ class TestToolRegistration:
             "list_available_guidelines",
         }
         assert removed_tools.isdisjoint(names)
+
+    def test_non_mcp_namespaces_not_packaged(self):
+        assert importlib.util.find_spec("open_medicine.foundation") is None
+        assert importlib.util.find_spec("open_medicine.workbench") is None
+
+    def test_result_types_live_under_mcp_namespace(self):
+        assert ClinicalResult.__module__ == "open_medicine.mcp.base"
+        assert Evidence.__module__ == "open_medicine.mcp.base"
 
 
 class TestCalculatorToolExecution:

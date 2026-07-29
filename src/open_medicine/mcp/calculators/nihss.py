@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 # Related guidelines: aha_asa_stroke_2019 (initial_assessment, thrombolysis, thrombectomy sections)
 

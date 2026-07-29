@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 # Related guidelines: gold_copd_2024 (spirometric_grading, abe_assessment, initial_pharmacotherapy)
 

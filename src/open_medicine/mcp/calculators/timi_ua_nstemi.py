@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 # Related guidelines: timi_ua_nstemi_2000 (risk_assessment section)
 

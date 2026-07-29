@@ -1,6 +1,6 @@
 # No related guidelines in current registry
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 
 class BishopParams(BaseModel):

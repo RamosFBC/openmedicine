@@ -1,6 +1,6 @@
 # Related guidelines: kdigo_aki_2012 (definition_and_staging section)
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 class CockcroftGaultParams(BaseModel):
     """Parameters to calculate the Cockcroft-Gault Creatinine Clearance (CrCl)."""

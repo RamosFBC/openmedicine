@@ -3,7 +3,7 @@
 # Related guidelines: aha_asa_sah_2023 (initial_assessment section)
 # Related guidelines: idsa_meningitis_2017 (diagnosis section)
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 class GCSParams(BaseModel):
     """Parameters to calculate the Glasgow Coma Scale (GCS)."""

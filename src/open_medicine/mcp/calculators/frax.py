@@ -1,7 +1,7 @@
 import math
 from typing import Optional
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 # Related guidelines: endocrine_osteoporosis_2020 (risk_assessment_and_diagnosis, pharmacotherapy sections)
 # NOTE: The exact FRAX algorithm is proprietary. This implementation uses a

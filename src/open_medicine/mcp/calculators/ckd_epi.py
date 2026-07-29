@@ -1,7 +1,7 @@
 # Related guidelines: kdigo_ckd_2024 (evaluation section), kdigo_aki_2012 (definition_and_staging section)
 import math
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 class CKDEPIParams(BaseModel):
     """Parameters to calculate the 2021 race-free CKD-EPI GFR."""

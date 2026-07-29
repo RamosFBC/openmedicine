@@ -1,7 +1,7 @@
 # Related guidelines: (none currently in registry; no dedicated PEWS guideline)
 from enum import Enum
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 
 class PEWSAgeGroup(str, Enum):

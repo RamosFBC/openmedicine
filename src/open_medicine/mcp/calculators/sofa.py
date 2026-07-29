@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 # Related guidelines: sepsis3_2016 (sepsis_definition section), ssc_sepsis_2021 (screening_and_early_management, hemodynamics_and_vasopressors sections)
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "open-medicine"
-version = "0.13.0"
+version = "0.13.1"
 description = "MCP server for deterministic, DOI-traceable medical calculators and clinical scores."
 readme = "README.md"
 license = "MIT"

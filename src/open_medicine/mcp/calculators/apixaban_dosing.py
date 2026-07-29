@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 class ApixabanDosingParams(BaseModel):
     """Parameters to calculate Apixaban dosing in non-valvular atrial fibrillation."""

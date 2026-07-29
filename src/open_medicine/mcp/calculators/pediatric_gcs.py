@@ -1,6 +1,6 @@
 # Related guidelines: btf_tbi_2016 (icp_monitoring_and_thresholds, surgical_and_medical_management sections)
 from pydantic import BaseModel, Field
-from open_medicine.foundation.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalResult, Evidence
 
 
 class PediatricGCSParams(BaseModel):
