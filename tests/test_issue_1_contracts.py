@@ -2,7 +2,6 @@ import asyncio
 import hashlib
 import json
 from pathlib import Path
-import tomllib
 
 import pytest
 from pydantic import BaseModel, ValidationError
@@ -20,11 +19,8 @@ def _payload(result):
 
 
 def test_package_caps_mcp_before_breaking_v2():
-    project = tomllib.loads(Path("pyproject.toml").read_text())["project"]
-    mcp_requirement = next(
-        requirement for requirement in project["dependencies"] if requirement.startswith("mcp")
-    )
-    assert "<2" in mcp_requirement
+    project_text = Path("pyproject.toml").read_text()
+    assert '"mcp>=1.0.0,<2.0.0"' in project_text
 
 
 def test_evidence_supports_document_provenance_without_a_doi():
