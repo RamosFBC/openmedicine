@@ -64,8 +64,9 @@ contain a stable `code`, a human-readable `message`, and optional safe `details`
 Unknown calculators, invalid parameters, and execution failures returned by the
 MCP server use the same stable error shape. Successful results require a value
 and no errors; non-successful results require no value and at least one error.
-Every clinical result requires an evidence object, although its `source_doi` may
-be `null` when authoritative non-DOI provenance is supplied.
+Every clinical result requires an evidence object. Successful clinical rules use
+a DOI or authoritative document provenance when available; error outcomes explicitly
+may say no evidence available.
 
 ## Safety Changes in v0.14
 
@@ -105,7 +106,7 @@ print(result.evidence.source_doi)
 
 ## Current Coverage
 
-The calculator registry includes 92 clinical calculators and scores across cardiovascular risk, anticoagulant dosing, renal function, ICU severity, neurology, trauma, GI bleeding, hepatology, pulmonary/VTE risk, psychiatry screening, pediatrics, obstetrics, oncology, toxicology, and fluid/electrolyte calculations.
+The calculator registry includes 93 clinical calculators and scores across cardiovascular risk, anticoagulant dosing, renal function, ICU severity, neurology, trauma, GI bleeding, hepatology, pulmonary/VTE risk, psychiatry screening, pediatrics, obstetrics, oncology, toxicology, and fluid/electrolyte calculations.
 
 Examples include CHA₂DS₂-VASc, HAS-BLED, Wells DVT/PE, PERC, HEART, TIMI, GRACE, qSOFA, NEWS2, SOFA, APACHE II, GCS, NIHSS, MELD-Na, Child-Pugh, FIB-4, CKD-EPI, Cockcroft-Gault, renal dose adjustment, BMI, BSA, corrected sodium/calcium/QTc, anion gap, osmolar gap, Winter's formula, CURB-65, PSI/PORT, AIMS65, Glasgow-Blatchford, RCRI, Charlson, PHQ-9, GAD-7, CAGE, AUDIT-C, CIWA-Ar, COWS, Apgar, Pediatric GCS, PEWS, TBSA, and more.
 

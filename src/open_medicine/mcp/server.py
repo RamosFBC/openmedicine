@@ -18,12 +18,19 @@ def _schema_hash(schema: dict) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode()).hexdigest()
 
 
-def _error(code: str, message: str, details=None) -> str:
-    payload = {
+def _error(code: str, message: str, details=None) -> dict:
+    return {
         "status": "error",
         "errors": [{"code": code, "message": message, "details": details}],
     }
-    return json.dumps(payload, indent=2)
+
+
+def _result(payload: dict, *, is_error: bool = False) -> types.CallToolResult:
+    return types.CallToolResult(
+        content=[types.TextContent(type="text", text=json.dumps(payload, indent=2))],
+        structuredContent=payload,
+        isError=is_error,
+    )
 
 
 server = Server("open-medicine")
@@ -82,7 +89,7 @@ async def handle_list_tools() -> list[types.Tool]:
 @server.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict | None
-) -> list[types.TextContent | types.ImageContent | types.EmbeddedResource]:
+) -> types.CallToolResult:
     args = arguments or {}
 
     if name == "search_clinical_calculators":
@@ -106,54 +113,51 @@ async def handle_call_tool(
         for result in results:
             result.pop("_score", None)
         payload = {"package_version": __version__, "matches": results}
-        return [
-            types.TextContent(type="text", text=json.dumps(payload, indent=2))
-        ]
+        return _result(payload)
 
     if name == "execute_clinical_calculator":
         calc_id = args.get("calculator_id")
         params_dict = args.get("parameters", {})
         if not calc_id or calc_id not in CALCULATOR_REGISTRY:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=_error("unknown_calculator", f"Unknown calculator_id '{calc_id}'."),
-                )
-            ]
+            return _result(
+                _error("unknown_calculator", f"Unknown calculator_id '{calc_id}'."),
+                is_error=True,
+            )
 
         tool_def = CALCULATOR_REGISTRY[calc_id]
         try:
             model_instance = tool_def.pydantic_model(**params_dict)
             result = tool_def.execute_function(model_instance)
-            return [
-                types.TextContent(type="text", text=result.model_dump_json(indent=2))
-            ]
+            payload = result.model_dump(mode="json")
+            return _result(
+                payload,
+                is_error=payload.get("status") in {"error", "insufficient_data"},
+            )
         except ValidationError as exc:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=_error(
-                        "validation_error",
-                        "Calculator parameters failed validation.",
-                        exc.errors(
-                            include_url=False,
-                            include_context=False,
-                            include_input=False,
-                        ),
-                    ),
-                )
+            safe_details = [
+                {key: error[key] for key in ("type", "loc", "msg") if key in error}
+                for error in exc.errors(include_url=False)
             ]
+            for detail in safe_details:
+                if "loc" in detail:
+                    detail["loc"] = list(detail["loc"])
+            return _result(
+                _error(
+                    "validation_error",
+                    "Calculator parameters failed validation.",
+                    safe_details,
+                ),
+                is_error=True,
+            )
         except Exception as exc:
-            return [
-                types.TextContent(
-                    type="text",
-                    text=_error(
-                        "execution_error",
-                        "Calculator execution failed.",
-                        {"exception_type": type(exc).__name__},
-                    ),
-                )
-            ]
+            return _result(
+                _error(
+                    "execution_error",
+                    "Calculator execution failed.",
+                    {"exception_type": type(exc).__name__},
+                ),
+                is_error=True,
+            )
 
     raise ValueError(f"Unknown tool: {name}")
 

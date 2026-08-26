@@ -323,7 +323,7 @@ class TestRASSToFHIR:
     def test_to_fhir_value_is_score(self):
         result = calculate_rass(RASSParams(score=-3))
         fhir = result.to_fhir(subject_reference="Patient/123")
-        assert fhir["valueQuantity"]["value"] == -3
+        assert fhir["valueInteger"] == -3
 
 
 class TestRASSClinicalBoundaries:

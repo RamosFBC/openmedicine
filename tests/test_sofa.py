@@ -33,7 +33,7 @@ def test_sofa_severe_patient():
     assert fhir_obs["status"] == "final"
     assert fhir_obs["subject"]["reference"] == "Patient/123"
     assert fhir_obs["encounter"]["reference"] == "Encounter/456"
-    assert fhir_obs["valueQuantity"]["value"] == 24
+    assert fhir_obs["valueInteger"] == 24
     assert fhir_obs["code"]["coding"][0]["code"] == "69442-2"
     assert fhir_obs["code"]["coding"][0]["system"] == "http://loinc.org"
     assert "Evidence:" in fhir_obs["note"][0]["text"]

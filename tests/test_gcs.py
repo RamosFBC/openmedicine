@@ -1,5 +1,27 @@
 from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
 
+
+def test_gcs_uses_official_structured_assessment_terms_and_schema_descriptions():
+    expected = {
+        "eye": ["none", "to pressure", "to sound", "spontaneous"],
+        "verbal": ["none", "sounds", "words", "confused", "orientated"],
+        "motor": [
+            "none", "extension", "abnormal flexion", "normal flexion",
+            "localising", "obey commands",
+        ],
+    }
+    schema = GCSParams.model_json_schema()["properties"]
+    maxima = {"eye": 4, "verbal": 5, "motor": 6}
+    for component, terms in expected.items():
+        for score, term in enumerate(terms, start=1):
+            kwargs = {
+                "eye_response": 4, "verbal_response": 5, "motor_response": 6
+            }
+            kwargs[f"{component}_response"] = score
+            assert calculate_gcs(GCSParams(**kwargs)).component_breakdown[component]["term"] == term
+        description = schema[f"{component}_response"]["description"]
+        assert all(f"{score}={term}" in description for score, term in enumerate(terms, 1))
+
 def test_gcs_mild_injury():
     # E4, V5, M6 = 15 (Fully awake/Normal)
     params = GCSParams(eye_response=4, verbal_response=5, motor_response=6)

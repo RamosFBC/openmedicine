@@ -19,9 +19,9 @@ class CHADSVAScParams(BaseModel):
     )
     age: int = Field(
         ...,
-        ge=0,
+        ge=18,
         le=120,
-        description="Required patient age in completed years (0-120).",
+        description="Required adult patient age in completed years (18-120).",
     )
     diabetes: Optional[bool] = Field(
         ...,

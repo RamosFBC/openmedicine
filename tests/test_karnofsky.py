@@ -200,6 +200,6 @@ def test_karnofsky_to_fhir_export():
     fhir = result.to_fhir(subject_reference="Patient/123")
     assert fhir["resourceType"] == "Observation"
     assert fhir["status"] == "final"
-    assert fhir["valueQuantity"]["value"] == 60
+    assert fhir["valueInteger"] == 60
     assert fhir["code"]["coding"][0]["code"] == "89243-0"
     assert fhir["code"]["coding"][0]["system"] == "http://loinc.org"

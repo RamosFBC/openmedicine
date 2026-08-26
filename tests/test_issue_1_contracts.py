@@ -15,7 +15,18 @@ from open_medicine.mcp.server import handle_call_tool
 
 
 def _payload(result):
-    return json.loads(result[0].text)
+    return result.structuredContent
+
+
+def test_hotfix_version_and_documentation_contracts():
+    assert __version__ == "0.14.1"
+    assert 'version = "0.14.1"' in Path("pyproject.toml").read_text()
+    assert 'name = "open-medicine"\nversion = "0.14.1"' in Path("uv.lock").read_text()
+    readme = Path("README.md").read_text()
+    contributing = Path("CONTRIBUTING.md").read_text()
+    assert "93 clinical calculators" in readme
+    assert "error outcomes explicitly\nmay say no evidence available" in readme
+    assert "error outcomes\n  explicitly may say no evidence available" in contributing
 
 
 def test_package_caps_mcp_before_breaking_v2():
@@ -32,7 +43,10 @@ def test_evidence_supports_document_provenance_without_a_doi():
     assert evidence.source_doi is None
     assert evidence.authority == "FDA"
 
-    result = ClinicalResult(value=1, interpretation="ok", evidence=evidence)
+    result = ClinicalResult(
+        value=1, interpretation="ok", evidence=evidence,
+        fhir_code="test", fhir_system="urn:test",
+    )
     note = result.to_fhir("Patient/1")["note"][0]["text"]
     assert "Evidence: Label" in note
     assert "Level: regulatory" in note
@@ -97,6 +111,8 @@ def test_non_success_fhir_uses_data_absent_reason(status, expected_absent_code):
         value=None,
         interpretation="No numeric result is available.",
         evidence=Evidence(level="test", description="test evidence"),
+        fhir_code="test",
+        fhir_system="urn:test",
     )
 
     observation = result.to_fhir("Patient/1")
@@ -136,7 +152,7 @@ def test_model_validator_failure_is_json_safe_without_raw_exception_details():
         },
     }))
 
-    serialized = result[0].text
+    serialized = result.content[0].text
     data = json.loads(serialized)
     error = data["errors"][0]
     assert error["code"] == "validation_error"
@@ -195,7 +211,7 @@ def test_execution_failure_does_not_serialize_exception_secrets():
                 {"calculator_id": calculator_id, "parameters": {}},
             )
         )
-        serialized = result[0].text
+        serialized = result.content[0].text
         data = json.loads(serialized)
         assert data["errors"][0] == {
             "code": "execution_error",
