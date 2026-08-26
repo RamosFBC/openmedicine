@@ -1,7 +1,7 @@
 import math
 from enum import Enum
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 # Related guidelines: acr_ra_2021 (disease activity assessment)
 
@@ -57,6 +57,8 @@ def calculate_das28(params: DAS28Params) -> ClinicalResult:
     if params.variant == DAS28Variant.ESR:
         if params.esr is None:
             return ClinicalResult(
+                status=ResultStatus.INSUFFICIENT_DATA,
+                errors=[ClinicalError(code="missing_esr", message="ESR is required for DAS28-ESR.")],
                 value=None,
                 interpretation="DAS28-ESR requires an ESR value. Please provide the erythrocyte sedimentation rate (mm/hr).",
                 evidence=Evidence(
@@ -70,6 +72,8 @@ def calculate_das28(params: DAS28Params) -> ClinicalResult:
             )
         if params.esr <= 0:
             return ClinicalResult(
+                status=ResultStatus.ERROR,
+                errors=[ClinicalError(code="invalid_esr", message="ESR must be greater than 0.")],
                 value=None,
                 interpretation="DAS28-ESR cannot be calculated: ESR must be greater than 0 mm/hr.",
                 evidence=Evidence(
@@ -84,6 +88,8 @@ def calculate_das28(params: DAS28Params) -> ClinicalResult:
     else:
         if params.crp is None:
             return ClinicalResult(
+                status=ResultStatus.INSUFFICIENT_DATA,
+                errors=[ClinicalError(code="missing_crp", message="CRP is required for DAS28-CRP.")],
                 value=None,
                 interpretation="DAS28-CRP requires a CRP value. Please provide the C-reactive protein level (mg/L).",
                 evidence=Evidence(
@@ -97,6 +103,8 @@ def calculate_das28(params: DAS28Params) -> ClinicalResult:
             )
         if params.crp < 0:
             return ClinicalResult(
+                status=ResultStatus.ERROR,
+                errors=[ClinicalError(code="invalid_crp", message="CRP must be non-negative.")],
                 value=None,
                 interpretation="DAS28-CRP cannot be calculated: CRP must be >= 0 mg/L.",
                 evidence=Evidence(

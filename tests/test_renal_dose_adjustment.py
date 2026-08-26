@@ -66,7 +66,7 @@ def test_boundary_just_above():
 
 def test_metric_mismatch_egfr_for_crcl_drug():
     """Providing eGFR for a drug whose label uses CrCl should flag mismatch."""
-    params = RenalDoseAdjustmentParams(drug_name="vancomycin", renal_value=80.0, renal_metric=RenalMetric.EGFR)
+    params = RenalDoseAdjustmentParams(drug_name="vancomycin", renal_value=80.0, renal_metric=RenalMetric.EGFR, strict_metric=False)
     result = calculate_renal_dose_adjustment(params)
     assert result.value["metric_match"] is False
     assert result.value["metric_mismatch_warning"] is not None
@@ -87,8 +87,9 @@ def test_metric_match_egfr_for_egfr_drug():
 def test_drug_not_found():
     params = RenalDoseAdjustmentParams(drug_name="nonexistent_drug", renal_value=80.0, renal_metric=RenalMetric.CRCL)
     result = calculate_renal_dose_adjustment(params)
-    assert result.value["adjustment_type"] == "drug_not_found"
-    assert "available_drugs" in result.value
+    assert result.status.value == "error"
+    assert result.errors[0].code == "drug_not_found"
+    assert "available_drugs" in result.errors[0].details
 
 
 # --- Case insensitivity ---

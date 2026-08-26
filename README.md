@@ -6,7 +6,7 @@
 [![Python](https://img.shields.io/pypi/pyversions/open-medicine)](https://pypi.org/project/open-medicine/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Open Medicine provides a lightweight MCP server focused only on medical calculators. It exposes deterministic, typed calculator execution for AI agents, with DOI-traceable evidence returned in each `ClinicalResult`.
+Open Medicine provides a lightweight MCP server focused only on medical calculators. It exposes deterministic, typed calculator execution for AI agents, with source-traceable evidence returned in each `ClinicalResult`. DOI metadata is preserved when a source has a DOI; regulatory labels and other authoritative documents can instead carry document-level provenance.
 
 This release removes guideline retrieval, differential diagnosis, semantic embeddings, HTTP service APIs, and GraphRAG/Neo4j functionality. The package is now intentionally narrow: discover a calculator, validate parameters, execute it, and return a structured clinical result.
 
@@ -41,8 +41,47 @@ npx @modelcontextprotocol/inspector open-medicine-mcp
 
 Open Medicine exposes exactly two MCP tools:
 
-- `search_clinical_calculators` — search the calculator registry by keyword and return calculator IDs plus JSON Schemas.
-- `execute_clinical_calculator` — execute a calculator by ID with validated JSON parameters.
+- `search_clinical_calculators` — search the calculator registry by keyword and return calculator IDs, package version, JSON Schemas, and deterministic schema hashes.
+- `execute_clinical_calculator` — execute a calculator by ID with validated JSON parameters and stable machine-readable error codes.
+
+## Result Contract
+
+Successful and non-successful calculator outcomes share a typed result envelope:
+
+```json
+{
+  "status": "success",
+  "errors": [],
+  "value": 2,
+  "component_breakdown": {},
+  "interpretation": "...",
+  "evidence": {"source_doi": null, "level": "...", "description": "..."}
+}
+```
+
+`status` is one of `success`, `insufficient_data`, or `error`. Structured errors
+contain a stable `code`, a human-readable `message`, and optional safe `details`.
+Unknown calculators, invalid parameters, and execution failures returned by the
+MCP server use the same stable error shape. Successful results require a value
+and no errors; non-successful results require no value and at least one error.
+Every clinical result requires an evidence object, although its `source_doi` may
+be `null` when authoritative non-DOI provenance is supplied.
+
+## Safety Changes in v0.14
+
+- **CHA₂DS₂-VASc:** all clinical factors must be explicit. Use JSON `null` for
+  unknown data; the calculator returns `insufficient_data` and no score.
+- **GCS:** provide either each component score or a corresponding
+  `*_non_testable_reason`. If any component is non-testable, no total is reported.
+- **Renal dose adjustment:** CrCl/eGFR mismatches fail closed by default and
+  return no dose. `strict_metric=false` preserves the legacy warning-only mode
+  for deliberate compatibility testing.
+- **Cockcroft–Gault:** required `weight_type` is explicit and currently limited to
+  `"actual"`; the interpretation states the steady-state and body-size limits.
+- **CKD-EPI:** required `renal_function_stable` records the steady-state context.
+
+These calculators return calculations and bounded interpretations, not autonomous
+treatment decisions. Clinical action remains the responsibility of qualified humans.
 
 ## Python Usage
 
@@ -84,7 +123,8 @@ uv build
 - **Calculator-only MCP surface:** no guideline, differential, embedding, GraphRAG, Neo4j, or HTTP service dependencies.
 - **Deterministic:** same input produces the same output.
 - **Typed:** Pydantic models validate all calculator inputs.
-- **Evidence-backed:** calculator outputs include DOI-backed evidence metadata when available.
+- **Evidence-backed:** calculator outputs include DOI or document-level provenance metadata when available.
+- **Fail closed:** unknown clinical inputs and incompatible renal metrics do not silently become normal values or dosing outputs.
 
 ## License
 

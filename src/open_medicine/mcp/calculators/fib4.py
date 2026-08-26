@@ -1,6 +1,6 @@
 import math
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class FIB4Params(BaseModel):
@@ -18,6 +18,8 @@ def calculate_fib4(params: FIB4Params) -> ClinicalResult:
     """
     if params.alt <= 0 or params.platelets <= 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_denominator", message="ALT and platelets must be greater than 0.")],
             value=None,
             interpretation="FIB-4 cannot be calculated: ALT and platelets must be > 0.",
             evidence=Evidence(

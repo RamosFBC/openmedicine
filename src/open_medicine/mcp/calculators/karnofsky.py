@@ -1,6 +1,6 @@
 # Related guidelines: none
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 # Mapping of KPS scores to their standard definitions
@@ -54,6 +54,8 @@ def calculate_karnofsky(params: KarnofskyParams) -> ClinicalResult:
     # Validate that the score is a multiple of 10
     if score % 10 != 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_score_increment", message="KPS score must use increments of 10.")],
             value=None,
             interpretation=(
                 f"Invalid KPS score: {score}. The Karnofsky Performance Status "

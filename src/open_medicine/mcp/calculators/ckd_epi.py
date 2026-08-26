@@ -1,13 +1,22 @@
-# Related guidelines: kdigo_ckd_2024 (evaluation section), kdigo_aki_2012 (definition_and_staging section)
+# Related guidelines: kdigo_ckd_2024 (evaluation section), kdigo_aki_2012
+# (definition_and_staging section)
 import math
 from pydantic import BaseModel, Field
 from open_medicine.mcp.base import ClinicalResult, Evidence
 
 class CKDEPIParams(BaseModel):
     """Parameters to calculate the 2021 race-free CKD-EPI GFR."""
-    age: int = Field(..., description="Age in years")
+    age: int = Field(..., description="Age in years", ge=18, le=120)
     is_female: bool = Field(..., description="Is the patient female?")
-    serum_creatinine: float = Field(..., description="Serum creatinine in mg/dL")
+    serum_creatinine: float = Field(
+        ..., description="Serum creatinine in mg/dL", gt=0, le=100
+    )
+    renal_function_stable: bool = Field(
+        ...,
+        description=(
+            "Whether serum creatinine and renal function are clinically stable"
+        ),
+    )
 
 def calculate_ckd_epi(params: CKDEPIParams) -> ClinicalResult:
     """
@@ -42,9 +51,15 @@ def calculate_ckd_epi(params: CKDEPIParams) -> ClinicalResult:
     elif 60 <= egfr_rounded < 90:
         interpretation = f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G2: Mildly decreased."
     elif 45 <= egfr_rounded < 60:
-        interpretation = f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G3a: Mildly to moderately decreased."
+        interpretation = (
+            f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G3a: Mildly to "
+            "moderately decreased."
+        )
     elif 30 <= egfr_rounded < 45:
-        interpretation = f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G3b: Moderately to severely decreased."
+        interpretation = (
+            f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G3b: Moderately to "
+            "severely decreased."
+        )
     elif 15 <= egfr_rounded < 30:
         interpretation = f"eGFR is {egfr_rounded} mL/min/1.73m2. Stage G4: Severely decreased."
     else:
@@ -53,9 +68,19 @@ def calculate_ckd_epi(params: CKDEPIParams) -> ClinicalResult:
     evidence = Evidence(
         source_doi="10.1056/NEJMoa2102953",
         level="Validation Study",
-        description="New Creatinine- and Cystatin C-Based Equations to Estimate GFR without Race (CKD-EPI 2021)"
+        description=(
+            "New Creatinine- and Cystatin C-Based Equations to Estimate GFR "
+            "without Race (CKD-EPI 2021)"
+        ),
     )
 
+    if params.renal_function_stable:
+        interpretation += " Equation interpretation assumes stable renal function."
+    else:
+        interpretation += (
+            " Renal function is reported as unstable; this steady-state estimate "
+            "may be unreliable."
+        )
     return ClinicalResult(
         value=egfr_rounded,
         interpretation=interpretation,

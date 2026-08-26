@@ -4,8 +4,8 @@ build-backend = "hatchling.build"
 
 [project]
 name = "open-medicine"
-version = "0.13.1"
-description = "MCP server for deterministic, DOI-traceable medical calculators and clinical scores."
+version = "0.14.0"
+description = "MCP server for deterministic, source-traceable medical calculators and clinical scores."
 readme = "README.md"
 license = "MIT"
 authors = [
@@ -14,7 +14,7 @@ authors = [
 requires-python = ">=3.10"
 dependencies = [
     "pydantic>=2.0.0",
-    "mcp>=1.0.0"
+    "mcp>=1.0.0,<2.0.0"
 ]
 classifiers = [
     "Development Status :: 4 - Beta",

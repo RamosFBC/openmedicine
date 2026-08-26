@@ -1,8 +1,10 @@
 import json
-from pathlib import Path
 from enum import Enum
+from pathlib import Path
+
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class RenalMetric(str, Enum):
@@ -12,9 +14,21 @@ class RenalMetric(str, Enum):
 
 class RenalDoseAdjustmentParams(BaseModel):
     """Parameters for renal dose adjustment lookup."""
-    drug_name: str = Field(..., description="Generic drug name (e.g., 'vancomycin', 'gabapentin')")
-    renal_value: float = Field(..., description="Renal function value (CrCl in mL/min or eGFR in mL/min/1.73m2)")
-    renal_metric: RenalMetric = Field(..., description="Which renal metric is provided: 'crcl' or 'egfr'")
+    drug_name: str = Field(
+        ..., description="Generic drug name (e.g., 'vancomycin', 'gabapentin')"
+    )
+    renal_value: float = Field(
+        ...,
+        ge=0,
+        description="Renal function value (CrCl in mL/min or eGFR in mL/min/1.73m2)",
+    )
+    renal_metric: RenalMetric = Field(
+        ..., description="Which renal metric is provided: 'crcl' or 'egfr'"
+    )
+    strict_metric: bool = Field(
+        True,
+        description="Reject a renal metric other than the product label metric",
+    )
 
 
 # Load drug database once at module level
@@ -44,11 +58,22 @@ def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> Clinic
     # Drug not found
     if drug_key not in _DRUG_DB:
         return ClinicalResult(
-            value={"adjustment_type": "drug_not_found", "available_drugs": available_drugs},
-            interpretation=f"Drug '{params.drug_name}' not found. Available drugs: {', '.join(available_drugs)}",
+            status=ResultStatus.ERROR,
+            errors=[
+                ClinicalError(
+                    code="drug_not_found",
+                    message=f"Drug '{params.drug_name}' not found.",
+                    details={"available_drugs": available_drugs},
+                )
+            ],
+            value=None,
+            interpretation=(
+                f"Drug '{params.drug_name}' not found. Available drugs: "
+                f"{', '.join(available_drugs)}"
+            ),
             evidence=Evidence(
-                source_doi="N/A",
-                level="N/A",
+                source_doi=None,
+                level="No evidence available",
                 description="Drug not in renal dose adjustment database.",
             ),
         )
@@ -56,7 +81,30 @@ def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> Clinic
     drug = _DRUG_DB[drug_key]
     label_metric = drug["label_renal_metric"]
     metric_match = params.renal_metric.value == label_metric
-    mismatch_warning = None if metric_match else _build_mismatch_warning(params.renal_metric, label_metric)
+    mismatch_warning = None
+    if not metric_match:
+        mismatch_warning = _build_mismatch_warning(params.renal_metric, label_metric)
+    if not metric_match and params.strict_metric:
+        return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[
+                ClinicalError(
+                    code="renal_metric_mismatch",
+                    message=mismatch_warning,
+                    details={
+                        "provided_metric": params.renal_metric.value,
+                        "required_metric": label_metric,
+                    },
+                )
+            ],
+            value=None,
+            interpretation=mismatch_warning,
+            evidence=Evidence(
+                source_doi=drug["source_doi"],
+                level=drug["evidence_level"],
+                description=drug["source_description"],
+            ),
+        )
 
     # Find matching tier (tiers ordered descending by min, first match wins)
     matched_tier = None
@@ -100,7 +148,8 @@ def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> Clinic
 
     interpretation = (
         f"For {drug['drug_name']} ({', '.join(drug['brand_names'])}) with "
-        f"{params.renal_metric.value.upper()} {params.renal_value} {_get_unit(params.renal_metric)}: "
+        f"{params.renal_metric.value.upper()} {params.renal_value} "
+        f"{_get_unit(params.renal_metric)}: "
         f"Recommended dose: {matched_tier['dose']}. "
         f"Adjustment: {matched_tier['adjustment_type']}."
     )

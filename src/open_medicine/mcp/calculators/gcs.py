@@ -1,51 +1,147 @@
-# Related guidelines: btf_tbi_2016 (icp_monitoring_and_thresholds, surgical_and_medical_management sections)
-# Related guidelines: aha_asa_ich_2022 (surgical_and_icu_management section)
-# Related guidelines: aha_asa_sah_2023 (initial_assessment section)
-# Related guidelines: idsa_meningitis_2017 (diagnosis section)
-from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from typing import Optional
+
+from pydantic import BaseModel, Field, model_validator
+
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
+
 
 class GCSParams(BaseModel):
-    """Parameters to calculate the Glasgow Coma Scale (GCS)."""
-    eye_response: int = Field(..., description="Eye Opening (E) score from 1 to 4. Scoring: 4 = Spontaneous, 3 = To verbal command/speech, 2 = To pain, 1 = No response.", ge=1, le=4)
-    verbal_response: int = Field(..., description="Verbal Response (V) score from 1 to 5. Scoring: 5 = Oriented and converses, 4 = Confused conversation, 3 = Inappropriate words, 2 = Incomprehensible sounds, 1 = No response.", ge=1, le=5)
-    motor_response: int = Field(..., description="Motor Response (M) score from 1 to 6. Scoring: 6 = Obeys commands, 5 = Localizes to pain, 4 = Withdraws from pain, 3 = Abnormal flexion (decorticate posturing), 2 = Extension (decerebrate posturing), 1 = No response.", ge=1, le=6)
+    eye_response: Optional[int] = Field(
+        None,
+        ge=1,
+        le=4,
+        description=(
+            "Eye response score (1-4), or null when the component is non-testable; "
+            "provide eye_non_testable_reason when null."
+        ),
+    )
+    eye_non_testable_reason: Optional[str] = Field(
+        None,
+        description=(
+            "Reason the eye component is non-testable (for example, orbital swelling); "
+            "required when eye_response is null, otherwise null."
+        ),
+    )
+    verbal_response: Optional[int] = Field(
+        None,
+        ge=1,
+        le=5,
+        description=(
+            "Verbal response score (1-5), or null when the component is non-testable; "
+            "provide verbal_non_testable_reason when null."
+        ),
+    )
+    verbal_non_testable_reason: Optional[str] = Field(
+        None,
+        description=(
+            "Reason the verbal component is non-testable (for example, intubation); "
+            "required when verbal_response is null, otherwise null."
+        ),
+    )
+    motor_response: Optional[int] = Field(
+        None,
+        ge=1,
+        le=6,
+        description=(
+            "Motor response score (1-6), or null when the component is non-testable; "
+            "provide motor_non_testable_reason when null."
+        ),
+    )
+    motor_non_testable_reason: Optional[str] = Field(
+        None,
+        description=(
+            "Reason the motor component is non-testable (for example, paralysis); "
+            "required when motor_response is null, otherwise null."
+        ),
+    )
+
+    @model_validator(mode="after")
+    def score_xor_reason(self):
+        for name in ("eye", "verbal", "motor"):
+            score = getattr(self, f"{name}_response")
+            reason = getattr(self, f"{name}_non_testable_reason")
+            if (score is None) == (reason is None or not reason.strip()):
+                raise ValueError(
+                    f"{name} requires exactly one of score or non-testable reason"
+                )
+        return self
+
+
+_TERMS = {
+    "eye": {4: "spontaneous", 3: "to sound", 2: "to pressure", 1: "none"},
+    "verbal": {5: "oriented", 4: "confused", 3: "words", 2: "sounds", 1: "none"},
+    "motor": {
+        6: "obeys commands",
+        5: "localizing",
+        4: "normal flexion",
+        3: "abnormal flexion",
+        2: "extension",
+        1: "none",
+    },
+}
+
 
 def calculate_gcs(params: GCSParams) -> ClinicalResult:
-    """
-    Calculates the Glasgow Coma Scale (GCS) based on the three neurological responses.
-    This assesses the level of consciousness following brain injury.
-    Scale ranges from 3 (deep coma) to 15 (fully awake).
-    """
-    total_score = params.eye_response + params.verbal_response + params.motor_response
-    
-    # Stratification logic for brain injury severity
-    if 13 <= total_score <= 15:
-        severity = "Mild"
-        meaning = "Indicates mild brain injury or concussion. Patient is generally alert."
-    elif 9 <= total_score <= 12:
-        severity = "Moderate"
-        meaning = "Indicates moderate brain injury."
-    else: # 3 to 8
-        severity = "Severe"
-        meaning = "Indicates severe brain injury, often consistent with coma status. Intubation strongly considered for GCS ≤ 8."
+    components, scores = {}, []
+    for name in ("eye", "verbal", "motor"):
+        score = getattr(params, f"{name}_response")
+        reason = getattr(params, f"{name}_non_testable_reason")
+        components[name] = {
+            "score": score,
+            "term": _TERMS[name].get(score),
+            "non_testable_reason": reason,
+        }
+        if score is not None:
+            scores.append(score)
 
-    interpretation = (
-        f"GCS Total Score: {total_score} (E{params.eye_response} V{params.verbal_response} M{params.motor_response}). "
-        f"Classification: {severity}. {meaning}"
+    total = sum(scores) if len(scores) == 3 else None
+    non_testable_components = {
+        name: component["non_testable_reason"]
+        for name, component in components.items()
+        if component["non_testable_reason"] is not None
+    }
+    errors = []
+    if non_testable_components:
+        errors.append(
+            ClinicalError(
+                code="non_testable_component",
+                message="One or more GCS components are non-testable.",
+                details={"non_testable_components": non_testable_components},
+            )
+        )
+    notation_parts = []
+    for name, component in components.items():
+        displayed_score = component["score"]
+        if displayed_score is None:
+            displayed_score = "NT"
+        notation_parts.append(f"{name[0].upper()}{displayed_score}")
+    notation = " ".join(notation_parts)
+
+    if total is not None:
+        interpretation = f"GCS components: {notation}. Total GCS is {total}."
+    else:
+        interpretation = (
+            f"GCS components: {notation}. A total is not reported because at least "
+            "one component is non-testable."
+        )
+
+    status = (
+        ResultStatus.SUCCESS
+        if total is not None
+        else ResultStatus.INSUFFICIENT_DATA
     )
-
-    evidence = Evidence(
-        source_doi="10.1016/s0140-6736(74)91639-0",
-        level="Validation Study",
-        description="Assessment of coma and impaired consciousness. A practical scale. (Teasdale G, Jennett B, Lancet 1974)"
-    )
-
     return ClinicalResult(
-        value=float(total_score),
+        status=status,
+        errors=errors,
+        value=float(total) if total is not None else None,
+        component_breakdown=components,
         interpretation=interpretation,
-        evidence=evidence,
+        evidence=Evidence(
+            source_doi="10.1016/s0140-6736(74)91639-0",
+            level="Derivation Study",
+            description="Teasdale and Jennett Glasgow Coma Scale.",
+        ),
         fhir_code="9269-2",
         fhir_system="http://loinc.org",
-        fhir_display="Glasgow coma score total"
+        fhir_display="Glasgow coma score total",
     )

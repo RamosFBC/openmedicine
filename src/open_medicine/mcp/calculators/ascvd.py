@@ -1,7 +1,7 @@
 import math
 from typing import Literal
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 # Related guidelines: acc_aha_ascvd_2013 (risk_assessment, interpretation sections)
 # Related guidelines: acc_aha_cholesterol_2018 (risk_assessment, statin_therapy sections)
@@ -26,6 +26,8 @@ def calculate_ascvd(params: ASCVDParams) -> ClinicalResult:
     """
     if params.age < 40 or params.age > 79:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="age_out_of_range", message="Age is outside the validated ASCVD range.")],
             value=None,
             interpretation="ASCVD risk score is only validated for ages 40 through 79.",
             evidence=Evidence(

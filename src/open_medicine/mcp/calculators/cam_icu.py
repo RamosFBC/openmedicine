@@ -1,6 +1,6 @@
 # Related guidelines: sccm_padis_2018 (delirium assessment and management section)
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class CAMICUParams(BaseModel):
@@ -75,6 +75,8 @@ def calculate_cam_icu(params: CAMICUParams) -> ClinicalResult:
     # RASS -4 or -5 = unable to assess (too deeply sedated / unarousable)
     if params.rass <= -4:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="unable_to_assess", message="CAM-ICU cannot be assessed at RASS -4 or -5.")],
             value=None,
             interpretation=(
                 f"RASS is {params.rass} (deeply sedated/unarousable). "

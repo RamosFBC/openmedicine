@@ -1,3 +1,3 @@
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
-__all__ = ["ClinicalResult", "Evidence"]
+__all__ = ["ClinicalError", "ClinicalResult", "Evidence", "ResultStatus"]

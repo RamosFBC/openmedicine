@@ -5,6 +5,45 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.0] - 2026-08-26
+
+### Added
+- Typed `ClinicalResult` statuses and structured calculator errors.
+- Optional non-DOI provenance fields for source authority, URL, document ID,
+  version date, section, retrieval date, and content hash.
+- Package version and deterministic JSON Schema hashes in calculator discovery.
+- Non-testable Glasgow Coma Scale component representation and component
+  breakdowns for GCS and CHA₂DS₂-VASc.
+
+### Changed
+- Renal dose lookup now fails closed on CrCl/eGFR mismatch by default. Set
+  `strict_metric=false` only when intentionally reproducing the legacy warning-only behavior.
+- Cockcroft–Gault now requires an explicit `weight_type` and validates adult
+  clinical bounds; the current release supports actual body weight only.
+- CKD-EPI now requires callers to state whether renal function is stable and validates adult
+  clinical bounds.
+- CHA₂DS₂-VASc requires every clinical factor to be supplied explicitly; JSON
+  `null` represents unknown and produces `insufficient_data` rather than zero points.
+- GCS returns no total when any component is non-testable and no longer emits
+  traumatic brain injury severity or intubation advice.
+- Calculator interpretations are separated from treatment recommendations in
+  the hardened GCS, CHA₂DS₂-VASc, Cockcroft–Gault, and CKD-EPI paths.
+
+### Security
+- MCP execution errors no longer expose raw exception messages and instead
+  return stable machine-readable error codes with safe details.
+- Package metadata now constrains `mcp` to the compatible 1.x API so clean
+  installations cannot silently resolve to the breaking MCP 2.x server interface.
+
+### Migration
+- Consumers must supply all CHA₂DS₂-VASc boolean factors explicitly.
+- GCS consumers may provide either a component score or its corresponding
+  non-testable reason, but never both.
+- Consumers relying on renal metric substitution must opt into
+  `strict_metric=false`; the safe default returns `renal_metric_mismatch` with no dose.
+- Cockcroft–Gault consumers must supply `weight_type="actual"`, and CKD-EPI
+  consumers must supply `renal_function_stable` explicitly.
+
 ## [0.13.1] - 2026-07-29
 
 ### Changed

@@ -1,6 +1,6 @@
 import math
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 # Related guidelines: acc_aha_cholesterol_2018 (cardiovascular risk assessment and statin therapy)
 
@@ -62,6 +62,8 @@ def calculate_framingham(params: FraminghamParams) -> ClinicalResult:
     # Validate age range (score only validated 30-74)
     if params.age < 30 or params.age > 74:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="age_out_of_range", message="Age is outside the validated Framingham range.")],
             value=None,
             interpretation=(
                 "Framingham Risk Score is only validated for ages 30 through 74. "
