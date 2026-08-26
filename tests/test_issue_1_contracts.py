@@ -29,9 +29,9 @@ def test_hotfix_version_and_documentation_contracts():
     assert "error outcomes\n  explicitly may say no evidence available" in contributing
 
 
-def test_package_caps_mcp_before_breaking_v2():
+def test_package_declares_verified_mcp_compatibility_range():
     project_text = Path("pyproject.toml").read_text()
-    assert '"mcp>=1.0.0,<2.0.0"' in project_text
+    assert '"mcp>=1.26.0,<2.0.0"' in project_text
 
 
 def test_evidence_supports_document_provenance_without_a_doi():

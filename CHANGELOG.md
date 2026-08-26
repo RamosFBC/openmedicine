@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   renal inputs, and removed the unrelated lowest-tier fallback.
 - Returned MCP `CallToolResult` envelopes with structured content and correct
   transport error flags for validation, execution, and clinical failures.
+- Raised the minimum supported MCP version to 1.26.0, the oldest version
+  verified to preserve direct `CallToolResult` return semantics.
 - Made FHIR observations require coding, use type-correct `value[x]` fields,
   and fail closed for unsupported values; removed the incorrect renal-dose code.
 - Aligned GCS terms with the official structured assessment and restricted
