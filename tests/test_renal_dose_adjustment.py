@@ -1,9 +1,11 @@
 import pytest
+from pydantic import ValidationError
 from open_medicine.mcp.calculators.renal_dose_adjustment import (
     calculate_renal_dose_adjustment,
     RenalDoseAdjustmentParams,
     RenalMetric,
     _DRUG_DB,
+    _select_tier,
 )
 
 # --- Happy path: one test per seed drug ---
@@ -59,6 +61,93 @@ def test_boundary_just_above():
     params = RenalDoseAdjustmentParams(drug_name="vancomycin", renal_value=50.0, renal_metric=RenalMetric.CRCL)
     result = calculate_renal_dose_adjustment(params)
     assert result.value["adjustment_type"] == "no_adjustment"
+
+
+def _adjacent_tier_cases():
+    cases = []
+    for drug_name, drug in _DRUG_DB.items():
+        tiers = drug["tiers"]
+        for higher, lower in zip(tiers, tiers[1:]):
+            gap_midpoint = (lower["max"] + higher["min"]) / 2
+            cases.append(
+                pytest.param(
+                    drug_name,
+                    gap_midpoint,
+                    lower["min"],
+                    higher["min"],
+                    id=f"{drug_name}-{higher['min']}-{lower['min']}-fractional",
+                )
+            )
+    return cases
+
+
+@pytest.mark.parametrize(
+    "drug_name,renal_value,expected_min,expected_upper", _adjacent_tier_cases()
+)
+def test_all_adjacent_thresholds_use_descending_lower_bound_semantics(
+    drug_name, renal_value, expected_min, expected_upper
+):
+    drug = _DRUG_DB[drug_name]
+    metric = RenalMetric(drug["label_renal_metric"])
+    result = calculate_renal_dose_adjustment(
+        RenalDoseAdjustmentParams(
+            drug_name=drug_name, renal_value=renal_value, renal_metric=metric
+        )
+    )
+    metric_label = "CrCl" if metric is RenalMetric.CRCL else "eGFR"
+    assert result.value["renal_category"] == (
+        f"{expected_min} <= {metric_label} < {expected_upper}"
+    )
+
+
+@pytest.mark.parametrize("drug_name", list(_DRUG_DB))
+def test_exact_tier_thresholds_select_their_declared_tier(drug_name):
+    drug = _DRUG_DB[drug_name]
+    metric = RenalMetric(drug["label_renal_metric"])
+    metric_label = "CrCl" if metric is RenalMetric.CRCL else "eGFR"
+    for index, tier in enumerate(drug["tiers"]):
+        result = calculate_renal_dose_adjustment(
+            RenalDoseAdjustmentParams(
+                drug_name=drug_name,
+                renal_value=tier["min"],
+                renal_metric=metric,
+            )
+        )
+        expected = (
+            f"{metric_label} >= {tier['min']}"
+            if index == 0
+            else (
+                f"{tier['min']} <= "
+                f"{metric_label} "
+                f"< {drug['tiers'][index - 1]['min']}"
+            )
+        )
+        assert result.value["renal_category"] == expected
+
+
+@pytest.mark.parametrize("renal_value", [float("nan"), float("inf"), float("-inf")])
+def test_renal_value_rejects_nonfinite_numbers(renal_value):
+    with pytest.raises(ValidationError):
+        RenalDoseAdjustmentParams(
+            drug_name="vancomycin",
+            renal_value=renal_value,
+            renal_metric=RenalMetric.CRCL,
+        )
+
+
+@pytest.mark.parametrize(
+    "tiers",
+    [
+        [{"min": 1, "max": None}],
+        [{"min": 50, "max": None}, {"min": 10, "max": 49}],
+        [{"min": 50, "max": None}, {"min": 0, "max": 48}],
+        [{"min": 0, "max": 49}, {"min": 50, "max": None}],
+        [{"min": float("nan"), "max": None}, {"min": 0, "max": 49}],
+    ],
+)
+def test_tier_selection_rejects_invalid_configuration(tiers):
+    with pytest.raises(ValueError, match="Invalid renal tier configuration"):
+        _select_tier(tiers, 25)
 
 
 # --- Metric mismatch ---

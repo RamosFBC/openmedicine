@@ -257,6 +257,6 @@ class TestClinicalFrailtyFHIRExport:
         fhir = result.to_fhir(subject_reference="Patient/123")
         assert fhir["resourceType"] == "Observation"
         assert fhir["status"] == "final"
-        assert fhir["valueQuantity"]["value"] == 6
+        assert fhir["valueInteger"] == 6
         assert fhir["code"]["coding"][0]["code"] == "89013-7"
         assert fhir["code"]["coding"][0]["system"] == "http://loinc.org"

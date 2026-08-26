@@ -297,13 +297,11 @@ def test_rcri_interpretation_includes_score():
 
 
 def test_rcri_to_fhir():
-    """Verify FHIR export works correctly with None fhir_code."""
+    """Verify FHIR export fails closed with no code."""
     params = RCRIParams(high_risk_surgery=True, history_of_ischemic_heart_disease=True)
     result = calculate_rcri(params)
-    fhir = result.to_fhir(subject_reference="Patient/123")
-    assert fhir["resourceType"] == "Observation"
-    assert fhir["status"] == "final"
-    assert fhir["valueQuantity"]["value"] == 2
+    with pytest.raises(ValueError, match="FHIR code and system are required"):
+        result.to_fhir(subject_reference="Patient/123")
 
 
 # ---- Tier 2: Property-Based Fuzz Tests ----

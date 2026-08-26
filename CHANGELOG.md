@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.14.1] - 2026-08-26
+
+### Fixed
+- Made renal dose tiers continuous at fractional values, rejected non-finite
+  renal inputs, and removed the unrelated lowest-tier fallback.
+- Returned MCP `CallToolResult` envelopes with structured content and correct
+  transport error flags for validation, execution, and clinical failures.
+- Raised the minimum supported MCP version to 1.26.0, the oldest version
+  verified to preserve direct `CallToolResult` return semantics.
+- Made FHIR observations require coding, use type-correct `value[x]` fields,
+  and fail closed for unsupported values; removed the incorrect renal-dose code.
+- Aligned GCS terms with the official structured assessment and restricted
+  CHA₂DS₂-VASc to adults.
+- Corrected provenance language and the registry count of 93 calculators.
+
 ## [0.14.0] - 2026-08-26
 
 ### Added

@@ -1,4 +1,5 @@
 import json
+import math
 from enum import Enum
 from pathlib import Path
 
@@ -20,6 +21,7 @@ class RenalDoseAdjustmentParams(BaseModel):
     renal_value: float = Field(
         ...,
         ge=0,
+        allow_inf_nan=False,
         description="Renal function value (CrCl in mL/min or eGFR in mL/min/1.73m2)",
     )
     renal_metric: RenalMetric = Field(
@@ -49,6 +51,43 @@ def _build_mismatch_warning(input_metric: RenalMetric, label_metric: str) -> str
         f"{input_name} was provided. Values may diverge in elderly, obese, "
         f"or malnourished patients. Consider calculating {label_name} for this drug."
     )
+
+
+def _select_tier(tiers: list[dict], renal_value: float) -> dict:
+    """Select a continuous renal tier by its inclusive lower threshold."""
+    invalid = not tiers
+    if not invalid:
+        try:
+            mins = [tier["min"] for tier in tiers]
+            invalid = (
+                any(
+                    isinstance(value, bool)
+                    or not isinstance(value, (int, float))
+                    or not math.isfinite(value)
+                    or value < 0
+                    for value in mins
+                )
+                or mins != sorted(mins, reverse=True)
+                or len(set(mins)) != len(mins)
+                or mins[-1] != 0
+                or tiers[0]["max"] is not None
+                or any(
+                    isinstance(lower["max"], bool)
+                    or not isinstance(lower["max"], (int, float))
+                    or not math.isfinite(lower["max"])
+                    or lower["max"] != higher["min"] - 1
+                    for higher, lower in zip(tiers, tiers[1:])
+                )
+            )
+        except (KeyError, TypeError):
+            invalid = True
+    if invalid:
+        raise ValueError("Invalid renal tier configuration")
+
+    for tier in tiers:
+        if renal_value >= tier["min"]:
+            return tier
+    raise ValueError("Invalid renal tier configuration")
 
 
 def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> ClinicalResult:
@@ -107,21 +146,19 @@ def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> Clinic
         )
 
     # Find matching tier (tiers ordered descending by min, first match wins)
-    matched_tier = None
-    for tier in drug["tiers"]:
-        tier_max = tier["max"] if tier["max"] is not None else float("inf")
-        if tier["min"] <= params.renal_value <= tier_max:
-            matched_tier = tier
-            break
+    matched_tier = _select_tier(drug["tiers"], params.renal_value)
 
-    # Should not happen if tiers cover 0-infinity, but handle gracefully
-    if matched_tier is None:
-        matched_tier = drug["tiers"][-1]  # fallback to lowest tier
-
-    # Build renal category label
-    tier_max_label = str(matched_tier["max"]) if matched_tier["max"] is not None else "+"
+    # Express the continuous thresholds used for selection, rather than the
+    # legacy integer-only max labels stored in the source data.
     metric_label = "CrCl" if label_metric == "crcl" else "eGFR"
-    renal_category = f"{metric_label} {matched_tier['min']}-{tier_max_label}"
+    tier_index = drug["tiers"].index(matched_tier)
+    if tier_index == 0:
+        renal_category = f"{metric_label} >= {matched_tier['min']}"
+    else:
+        upper_threshold = drug["tiers"][tier_index - 1]["min"]
+        renal_category = (
+            f"{matched_tier['min']} <= {metric_label} < {upper_threshold}"
+        )
 
     value = {
         "drug_name": drug["drug_name"],
@@ -168,7 +205,4 @@ def calculate_renal_dose_adjustment(params: RenalDoseAdjustmentParams) -> Clinic
         value=value,
         interpretation=interpretation,
         evidence=evidence,
-        fhir_code="29463-7",
-        fhir_system="http://loinc.org",
-        fhir_display="Medication dose",
     )

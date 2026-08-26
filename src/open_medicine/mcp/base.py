@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
 from enum import Enum
+import json
+import math
 from typing import Any, Optional
 
 from pydantic import BaseModel, Field, model_validator
@@ -71,6 +73,8 @@ class ClinicalResult(BaseModel):
     def to_fhir(
         self, subject_reference: str, encounter_reference: Optional[str] = None
     ) -> dict:
+        if not self.fhir_code or not self.fhir_system:
+            raise ValueError("FHIR code and system are required")
         evidence_note = (
             f"Evidence: {self.evidence.description} | Level: {self.evidence.level}"
         )
@@ -86,10 +90,36 @@ class ClinicalResult(BaseModel):
             .replace("+00:00", "Z"),
             "interpretation": [{"text": self.interpretation}],
             "note": [{"text": evidence_note}],
+            "code": {
+                "coding": [
+                    {
+                        "system": self.fhir_system,
+                        "code": self.fhir_code,
+                        "display": self.fhir_display or self.fhir_code,
+                    }
+                ]
+            },
         }
 
         if self.status is ResultStatus.SUCCESS:
-            observation["valueQuantity"] = {"value": self.value}
+            if isinstance(self.value, bool):
+                observation["valueBoolean"] = self.value
+            elif isinstance(self.value, int):
+                observation["valueInteger"] = self.value
+            elif isinstance(self.value, float) and math.isfinite(self.value):
+                observation["valueQuantity"] = {"value": self.value}
+            elif isinstance(self.value, str):
+                observation["valueString"] = self.value
+            elif isinstance(self.value, (dict, list)):
+                try:
+                    observation["valueString"] = json.dumps(
+                        self.value, sort_keys=True, separators=(",", ":"),
+                        allow_nan=False,
+                    )
+                except (TypeError, ValueError) as exc:
+                    raise ValueError("Unsupported FHIR observation value") from exc
+            else:
+                raise ValueError("Unsupported FHIR observation value")
         else:
             absent_code = (
                 "not-performed"
@@ -111,16 +141,5 @@ class ClinicalResult(BaseModel):
 
         if encounter_reference:
             observation["encounter"] = {"reference": encounter_reference}
-
-        if self.fhir_code and self.fhir_system:
-            observation["code"] = {
-                "coding": [
-                    {
-                        "system": self.fhir_system,
-                        "code": self.fhir_code,
-                        "display": self.fhir_display or self.fhir_code,
-                    }
-                ]
-            }
 
         return observation

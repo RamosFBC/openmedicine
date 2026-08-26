@@ -11,7 +11,8 @@ class GCSParams(BaseModel):
         ge=1,
         le=4,
         description=(
-            "Eye response score (1-4), or null when the component is non-testable; "
+            "Eye response score: 1=none, 2=to pressure, 3=to sound, "
+            "4=spontaneous; or null when the component is non-testable; "
             "provide eye_non_testable_reason when null."
         ),
     )
@@ -27,7 +28,8 @@ class GCSParams(BaseModel):
         ge=1,
         le=5,
         description=(
-            "Verbal response score (1-5), or null when the component is non-testable; "
+            "Verbal response score: 1=none, 2=sounds, 3=words, 4=confused, "
+            "5=orientated; or null when the component is non-testable; "
             "provide verbal_non_testable_reason when null."
         ),
     )
@@ -43,7 +45,9 @@ class GCSParams(BaseModel):
         ge=1,
         le=6,
         description=(
-            "Motor response score (1-6), or null when the component is non-testable; "
+            "Motor response score: 1=none, 2=extension, 3=abnormal flexion, "
+            "4=normal flexion, 5=localising, 6=obey commands; or null when the "
+            "component is non-testable; "
             "provide motor_non_testable_reason when null."
         ),
     )
@@ -69,10 +73,10 @@ class GCSParams(BaseModel):
 
 _TERMS = {
     "eye": {4: "spontaneous", 3: "to sound", 2: "to pressure", 1: "none"},
-    "verbal": {5: "oriented", 4: "confused", 3: "words", 2: "sounds", 1: "none"},
+    "verbal": {5: "orientated", 4: "confused", 3: "words", 2: "sounds", 1: "none"},
     "motor": {
-        6: "obeys commands",
-        5: "localizing",
+        6: "obey commands",
+        5: "localising",
         4: "normal flexion",
         3: "abnormal flexion",
         2: "extension",
@@ -133,7 +137,7 @@ def calculate_gcs(params: GCSParams) -> ClinicalResult:
     return ClinicalResult(
         status=status,
         errors=errors,
-        value=float(total) if total is not None else None,
+        value=total,
         component_breakdown=components,
         interpretation=interpretation,
         evidence=Evidence(

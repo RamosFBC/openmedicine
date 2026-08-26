@@ -48,8 +48,9 @@ uv run python -m pytest -v
 - Successful results require a non-null value and an empty `errors` list.
 - Unsafe or impossible calculations should return `error` or `insufficient_data`
   with `value=None`, a stable error code, and actionable safe details.
-- Every `ClinicalResult` requires an `Evidence` object; only its `source_doi`
-  may be absent when other authoritative provenance is available.
+- Every `ClinicalResult` requires an `Evidence` object. Successful clinical
+  rules use a DOI or authoritative document provenance when available; error outcomes
+  explicitly may say no evidence available.
 - Do not use sentinel citations such as `"N/A"`. DOI absence is represented by
   `source_doi=None`; use authority, URL/document ID, version/section, retrieval
   date, and content hash when those fields apply.

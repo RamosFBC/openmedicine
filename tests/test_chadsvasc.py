@@ -1,4 +1,5 @@
 import pytest
+from pydantic import ValidationError
 from open_medicine.mcp.calculators.chadsvasc import calculate_chadsvasc, CHADSVAScParams
 
 def test_chadsvasc_zero_score_male():
@@ -15,6 +16,15 @@ def test_chadsvasc_zero_score_male():
     assert result.value == 0
     assert result.component_breakdown["age"] == 0
     assert "anticoagulation" not in result.interpretation.lower()
+
+
+def test_chadsvasc_rejects_pediatric_age():
+    with pytest.raises(ValidationError):
+        CHADSVAScParams(
+            female_sex=False, age=17, congestive_heart_failure=False,
+            hypertension=False, diabetes=False,
+            stroke_tia_thromboembolism=False, vascular_disease=False,
+        )
 
 def test_chadsvasc_one_score_female():
     params = CHADSVAScParams(
