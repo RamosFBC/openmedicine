@@ -196,7 +196,10 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         execute_function=calculate_ascvd
     ),
     "calculate_chadsvasc": RegisteredTool(
-        description="Calculates the CHA2DS2-VASc score for atrial fibrillation stroke risk.",
+        description=(
+            "Calculates CHA2DS2-VASc component contributions for atrial "
+            "fibrillation (AFib) stroke risk when every required input is known."
+        ),
         pydantic_model=CHADSVAScParams,
         execute_function=calculate_chadsvasc
     ),
@@ -206,12 +209,18 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         execute_function=calculate_sofa
     ),
     "calculate_ckd_epi": RegisteredTool(
-        description="Calculates the 2021 Race-Free CKD-EPI estimated Glomerular Filtration Rate (eGFR), marking Kidney function.",
+        description=(
+            "Calculates 2021 race-free CKD-EPI eGFR with renal-function "
+            "stability context."
+        ),
         pydantic_model=CKDEPIParams,
         execute_function=calculate_ckd_epi
     ),
     "calculate_cockcroft_gault": RegisteredTool(
-        description="Calculates the estimated Creatinine Clearance (CrCl) using the Cockcroft-Gault equation for kidney-dependent medication dosage adjustments.",
+        description=(
+            "Calculates Cockcroft-Gault estimated renal creatinine clearance "
+            "using explicitly identified actual body weight."
+        ),
         pydantic_model=CockcroftGaultParams,
         execute_function=calculate_cockcroft_gault
     ),
@@ -226,7 +235,10 @@ CALCULATOR_REGISTRY: Dict[str, RegisteredTool] = {
         execute_function=calculate_enoxaparin_dosing
     ),
     "calculate_gcs": RegisteredTool(
-        description="Calculates the Glasgow Coma Scale (GCS) score based on eye, verbal, and motor responses marking traumatic brain injury.",
+        description=(
+            "Reports Glasgow Coma Scale eye, verbal, and motor components, "
+            "including non-testable reasons."
+        ),
         pydantic_model=GCSParams,
         execute_function=calculate_gcs
     ),

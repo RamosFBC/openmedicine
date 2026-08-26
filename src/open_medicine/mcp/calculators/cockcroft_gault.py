@@ -1,13 +1,23 @@
 # Related guidelines: kdigo_aki_2012 (definition_and_staging section)
+from typing import Literal
+
 from pydantic import BaseModel, Field
+
 from open_medicine.mcp.base import ClinicalResult, Evidence
+
 
 class CockcroftGaultParams(BaseModel):
     """Parameters to calculate the Cockcroft-Gault Creatinine Clearance (CrCl)."""
-    age: int = Field(..., description="Age in years")
-    weight: float = Field(..., description="Weight in kg")
+    age: int = Field(..., description="Age in years", ge=18, le=120)
+    weight: float = Field(..., description="Weight in kg", gt=0, le=500)
+    weight_type: Literal["actual"] = Field(
+        ..., description="Weight basis; MVP supports actual body weight only"
+    )
     is_female: bool = Field(..., description="Is the patient female?")
-    serum_creatinine: float = Field(..., description="Serum creatinine in mg/dL")
+    serum_creatinine: float = Field(
+        ..., description="Serum creatinine in mg/dL", gt=0, le=100
+    )
+
 
 def calculate_cockcroft_gault(params: CockcroftGaultParams) -> ClinicalResult:
     """
@@ -25,22 +35,24 @@ def calculate_cockcroft_gault(params: CockcroftGaultParams) -> ClinicalResult:
         
     crcl_rounded = round(base_calc, 1)
 
-    # General Renal Dosing Bands
-    if crcl_rounded >= 50:
-        interpretation = f"Estimated CrCl is {crcl_rounded} mL/min. >50 mL/min typically requires NO dosage adjustment for renally cleared medications."
-    elif 10 <= crcl_rounded < 50:
-        interpretation = f"Estimated CrCl is {crcl_rounded} mL/min. 10-50 mL/min typically requires moderate dosage reduction or extended dosing intervals for renally cleared medications."
-    else:
-        interpretation = f"Estimated CrCl is {crcl_rounded} mL/min. <10 mL/min suggests severe renal impairment or dialysis dependency. Significant dosage adjustments or avoidance of nephrotoxic drugs are required."
+    interpretation = (
+        f"Estimated Cockcroft-Gault CrCl is {crcl_rounded} mL/min using actual body weight. "
+        "This estimate assumes stable serum creatinine, is not validated in acute kidney injury, "
+        "and may be inaccurate at extremes of body size or muscle mass."
+    )
 
     evidence = Evidence(
         source_doi="10.1159/000180580",
         level="Validation Study",
-        description="Prediction of Creatinine Clearance from Serum Creatinine (Cockcroft DW, Gault MH, 1976)"
+        description=(
+            "Prediction of Creatinine Clearance from Serum Creatinine "
+            "(Cockcroft DW, Gault MH, 1976)"
+        ),
     )
 
     return ClinicalResult(
         value=crcl_rounded,
+        component_breakdown={"weight_type": params.weight_type},
         interpretation=interpretation,
         evidence=evidence,
         fhir_code="2160-0",

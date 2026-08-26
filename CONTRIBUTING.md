@@ -21,7 +21,8 @@ Required steps:
 2. Define a Pydantic params model with descriptive fields.
 3. Implement a deterministic function returning `ClinicalResult`.
 4. Add tests in `tests/test_<name>.py` for boundary, edge, and representative cases.
-5. Verify `evidence.source_doi` is present when the source has a DOI.
+5. Add source provenance. Use `evidence.source_doi` when the source has a DOI;
+   otherwise record the authoritative document metadata available to the calculator.
 6. Register the calculator in `src/open_medicine/mcp/registry.py`.
 7. Run:
 
@@ -35,9 +36,24 @@ uv run python -m pytest -v
 - [ ] Existing tests pass.
 - [ ] New calculator has unit tests.
 - [ ] DOI/source citation is present and correct.
+- [ ] Missing clinical inputs are represented explicitly and never default silently to normal/false.
+- [ ] Error and insufficient-data paths have stable codes and regression tests.
+- [ ] Treatment recommendations are not embedded in a calculation unless the calculator's scoped contract explicitly requires them.
 - [ ] Registry entry is added.
 - [ ] Calculator execution is deterministic and has no network calls.
 - [ ] Input validation uses Pydantic.
+
+## Result and Evidence Contracts
+
+- Successful results require a non-null value and an empty `errors` list.
+- Unsafe or impossible calculations should return `error` or `insufficient_data`
+  with `value=None`, a stable error code, and actionable safe details.
+- Every `ClinicalResult` requires an `Evidence` object; only its `source_doi`
+  may be absent when other authoritative provenance is available.
+- Do not use sentinel citations such as `"N/A"`. DOI absence is represented by
+  `source_doi=None`; use authority, URL/document ID, version/section, retrieval
+  date, and content hash when those fields apply.
+- Never expose raw exception text through MCP error responses.
 
 ## Out of Scope for This Release Line
 

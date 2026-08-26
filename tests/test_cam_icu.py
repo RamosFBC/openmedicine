@@ -20,7 +20,9 @@ class TestCAMICUUnableToAssess:
             feature4_disorganized_thinking_errors=5,
         )
         result = calculate_cam_icu(params)
+        assert result.status.value == "insufficient_data"
         assert result.value is None
+        assert [error.code for error in result.errors] == ["unable_to_assess"]
         assert "unable to be assessed" in result.interpretation.lower()
         assert "RASS is -5" in result.interpretation
 

@@ -13,8 +13,8 @@ def test_chadsvasc_zero_score_male():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 0
-    assert "low stroke risk" in result.interpretation
-    assert "Oral anticoagulation is generally not recommended" in result.interpretation
+    assert result.component_breakdown["age"] == 0
+    assert "anticoagulation" not in result.interpretation.lower()
 
 def test_chadsvasc_one_score_female():
     params = CHADSVAScParams(
@@ -29,8 +29,7 @@ def test_chadsvasc_one_score_female():
     # 1 point from female sex alone
     result = calculate_chadsvasc(params)
     assert result.value == 1
-    assert "low stroke risk" in result.interpretation
-    assert "Oral anticoagulation is generally not recommended" in result.interpretation
+    assert result.component_breakdown["female_sex"] == 1
 
 def test_chadsvasc_moderate_risk_male():
     params = CHADSVAScParams(
@@ -44,7 +43,7 @@ def test_chadsvasc_moderate_risk_male():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 1
-    assert "moderate stroke risk" in result.interpretation
+    assert result.component_breakdown["age"] == 1
 
 def test_chadsvasc_moderate_risk_female():
     params = CHADSVAScParams(
@@ -58,7 +57,7 @@ def test_chadsvasc_moderate_risk_female():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 2
-    assert "moderate stroke risk" in result.interpretation
+    assert result.component_breakdown["hypertension"] == 1
 
 def test_chadsvasc_high_risk_male():
     params = CHADSVAScParams(
@@ -72,8 +71,7 @@ def test_chadsvasc_high_risk_male():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 2
-    assert "high stroke risk" in result.interpretation
-    assert "Oral anticoagulation is recommended" in result.interpretation
+    assert result.component_breakdown["age"] == 2
 
 def test_chadsvasc_high_risk_female():
     params = CHADSVAScParams(
@@ -87,8 +85,7 @@ def test_chadsvasc_high_risk_female():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 3
-    assert "high stroke risk" in result.interpretation
-    assert "Oral anticoagulation is recommended" in result.interpretation
+    assert result.component_breakdown["female_sex"] == 1
 
 def test_chadsvasc_max_score():
     params = CHADSVAScParams(
@@ -102,4 +99,4 @@ def test_chadsvasc_max_score():
     )
     result = calculate_chadsvasc(params)
     assert result.value == 9
-    assert result.evidence.source_doi == "10.1378/chest.09-1584"
+    assert result.evidence.source_doi == "10.1161/CIR.0000000000001193"

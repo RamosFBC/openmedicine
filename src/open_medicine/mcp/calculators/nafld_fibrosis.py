@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class NAFLDFibrosisParams(BaseModel):
@@ -20,6 +20,8 @@ def calculate_nafld_fibrosis(params: NAFLDFibrosisParams) -> ClinicalResult:
     """
     if params.alt <= 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_alt", message="ALT must be greater than 0.")],
             value=None,
             interpretation="NFS cannot be calculated: ALT must be > 0.",
             evidence=Evidence(

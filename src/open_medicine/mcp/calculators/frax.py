@@ -1,7 +1,7 @@
 import math
 from typing import Optional
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 # Related guidelines: endocrine_osteoporosis_2020 (risk_assessment_and_diagnosis, pharmacotherapy sections)
 # NOTE: The exact FRAX algorithm is proprietary. This implementation uses a
@@ -108,6 +108,8 @@ def calculate_frax(params: FRAXParams) -> ClinicalResult:
     # Validate age range
     if params.age < 40 or params.age > 90:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="age_out_of_range", message="Age is outside the validated FRAX range.")],
             value=None,
             interpretation=(
                 f"FRAX is only validated for ages 40 through 90. "
@@ -122,6 +124,8 @@ def calculate_frax(params: FRAXParams) -> ClinicalResult:
     # Validate weight/height
     if params.weight_kg <= 0 or params.height_cm <= 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_anthropometrics", message="Weight and height must be positive.")],
             value=None,
             interpretation="Weight and height must be positive values.",
             evidence=evidence,

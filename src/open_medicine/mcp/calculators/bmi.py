@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class BMIParams(BaseModel):
@@ -17,6 +17,8 @@ def calculate_bmi(params: BMIParams) -> ClinicalResult:
     height_m = params.height_cm / 100.0
     if height_m <= 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_height", message="Height must be greater than 0.")],
             value=None,
             interpretation="Invalid height. Height must be greater than 0.",
             evidence=Evidence(source_doi="10.1016/S0140-6736(03)15268-3", level="Guideline", description="WHO Expert Consultation. Appropriate body-mass index for Asian populations and its implications for policy and intervention strategies. Lancet. 2004;363(9403):157-163."),

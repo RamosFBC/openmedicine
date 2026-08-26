@@ -2,7 +2,7 @@ import math
 from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class QTcMethod(str, Enum):
@@ -31,6 +31,8 @@ def calculate_corrected_qtc(params: CorrectedQTcParams) -> ClinicalResult:
     elif params.heart_rate is not None:
         if params.heart_rate <= 0:
             return ClinicalResult(
+                status=ResultStatus.ERROR,
+                errors=[ClinicalError(code="invalid_heart_rate", message="Heart rate must be greater than 0.")],
                 value=None,
                 interpretation="Heart rate must be greater than 0.",
                 evidence=Evidence(source_doi="10.1136/hrt.7.4.353", level="Derivation Study", description="Bazett HC. An analysis of the time-relations of electrocardiograms. Heart 1920."),
@@ -39,6 +41,8 @@ def calculate_corrected_qtc(params: CorrectedQTcParams) -> ClinicalResult:
         rr = 60.0 / params.heart_rate
     else:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="missing_rate_input", message="Heart rate or RR interval is required.")],
             value=None,
             interpretation="Either heart_rate or rr_seconds must be provided.",
             evidence=Evidence(source_doi="10.1136/hrt.7.4.353", level="Derivation Study", description="Bazett HC. An analysis of the time-relations of electrocardiograms. Heart 1920."),
@@ -47,6 +51,8 @@ def calculate_corrected_qtc(params: CorrectedQTcParams) -> ClinicalResult:
 
     if rr <= 0:
         return ClinicalResult(
+            status=ResultStatus.ERROR,
+            errors=[ClinicalError(code="invalid_rr_interval", message="RR interval must be greater than 0.")],
             value=None,
             interpretation="RR interval must be greater than 0.",
             evidence=Evidence(source_doi="10.1136/hrt.7.4.353", level="Derivation Study", description="Bazett HC. An analysis of the time-relations of electrocardiograms. Heart 1920."),

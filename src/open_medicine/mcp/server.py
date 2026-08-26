@@ -1,14 +1,30 @@
 import asyncio
+import hashlib
 import json
 
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
 import mcp.types as types
+from pydantic import ValidationError
 
 from open_medicine import __version__
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.search_utils import tokenized_search
+
+
+def _schema_hash(schema: dict) -> str:
+    canonical = json.dumps(schema, sort_keys=True, separators=(",", ":"))
+    return "sha256:" + hashlib.sha256(canonical.encode()).hexdigest()
+
+
+def _error(code: str, message: str, details=None) -> str:
+    payload = {
+        "status": "error",
+        "errors": [{"code": code, "message": message, "details": details}],
+    }
+    return json.dumps(payload, indent=2)
+
 
 server = Server("open-medicine")
 
@@ -18,13 +34,19 @@ async def handle_list_tools() -> list[types.Tool]:
     return [
         types.Tool(
             name="search_clinical_calculators",
-            description="Searches the calculator registry by keyword and returns calculator IDs with their required JSON Schemas.",
+            description=(
+                "Searches the calculator registry by keyword and returns calculator "
+                "IDs with their required JSON Schemas."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "Keywords to match against clinical calculators (e.g. 'kidney function', 'stroke risk').",
+                        "description": (
+                            "Keywords to match against clinical calculators "
+                            "(e.g. 'kidney function', 'stroke risk')."
+                        ),
                     }
                 },
                 "required": ["query"],
@@ -32,13 +54,19 @@ async def handle_list_tools() -> list[types.Tool]:
         ),
         types.Tool(
             name="execute_clinical_calculator",
-            description="Executes a medical calculator by ID using a validated JSON parameter payload.",
+            description=(
+                "Executes a medical calculator by ID using a validated JSON parameter "
+                "payload."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
                     "calculator_id": {
                         "type": "string",
-                        "description": "The exact calculator ID returned by search_clinical_calculators.",
+                        "description": (
+                            "The exact calculator ID returned by "
+                            "search_clinical_calculators."
+                        ),
                     },
                     "parameters": {
                         "type": "object",
@@ -64,6 +92,12 @@ async def handle_call_tool(
                 "calculator_id": calc_id,
                 "description": tool_def.description,
                 "required_schema": tool_def.schema,
+                "schema_hash": _schema_hash(tool_def.schema),
+                "provenance": {
+                    "package": "open-medicine",
+                    "version": __version__,
+                    "calculator_id": calc_id,
+                },
                 "searchable_text": f"{calc_id} {tool_def.description}",
             }
             for calc_id, tool_def in CALCULATOR_REGISTRY.items()
@@ -71,7 +105,10 @@ async def handle_call_tool(
         results = tokenized_search(query, items)
         for result in results:
             result.pop("_score", None)
-        return [types.TextContent(type="text", text=json.dumps({"matches": results}, indent=2))]
+        payload = {"package_version": __version__, "matches": results}
+        return [
+            types.TextContent(type="text", text=json.dumps(payload, indent=2))
+        ]
 
     if name == "execute_clinical_calculator":
         calc_id = args.get("calculator_id")
@@ -80,7 +117,7 @@ async def handle_call_tool(
             return [
                 types.TextContent(
                     type="text",
-                    text=f"Error: Unknown calculator_id '{calc_id}'. Please use search_clinical_calculators first.",
+                    text=_error("unknown_calculator", f"Unknown calculator_id '{calc_id}'."),
                 )
             ]
 
@@ -88,9 +125,35 @@ async def handle_call_tool(
         try:
             model_instance = tool_def.pydantic_model(**params_dict)
             result = tool_def.execute_function(model_instance)
-            return [types.TextContent(type="text", text=result.model_dump_json(indent=2))]
+            return [
+                types.TextContent(type="text", text=result.model_dump_json(indent=2))
+            ]
+        except ValidationError as exc:
+            return [
+                types.TextContent(
+                    type="text",
+                    text=_error(
+                        "validation_error",
+                        "Calculator parameters failed validation.",
+                        exc.errors(
+                            include_url=False,
+                            include_context=False,
+                            include_input=False,
+                        ),
+                    ),
+                )
+            ]
         except Exception as exc:
-            return [types.TextContent(type="text", text=f"Error executing {calc_id}: {exc}")]
+            return [
+                types.TextContent(
+                    type="text",
+                    text=_error(
+                        "execution_error",
+                        "Calculator execution failed.",
+                        {"exception_type": type(exc).__name__},
+                    ),
+                )
+            ]
 
     raise ValueError(f"Unknown tool: {name}")
 

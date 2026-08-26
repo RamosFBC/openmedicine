@@ -1,6 +1,6 @@
 # Related guidelines: none
 from pydantic import BaseModel, Field
-from open_medicine.mcp.base import ClinicalResult, Evidence
+from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class CentorMcIsaacParams(BaseModel):
@@ -36,6 +36,8 @@ def calculate_centor_mcisaac(params: CentorMcIsaacParams) -> ClinicalResult:
     # 3-76 years; patients under 3 were explicitly excluded.
     if params.age < 3:
         return ClinicalResult(
+            status=ResultStatus.INSUFFICIENT_DATA,
+            errors=[ClinicalError(code="age_out_of_range", message="Age is outside the validated McIsaac range.")],
             value=None,
             interpretation=(
                 "Modified Centor (McIsaac) Score is only validated for ages >= 3. "

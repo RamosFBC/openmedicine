@@ -54,7 +54,9 @@ def test_fhir_code():
 
 def test_invalid_height():
     result = calculate_bmi(BMIParams(weight_kg=70, height_cm=0))
+    assert result.status.value == "error"
     assert result.value is None
+    assert [error.code for error in result.errors] == ["invalid_height"]
 
 
 @pytest.mark.slow
