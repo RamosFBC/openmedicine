@@ -31,6 +31,18 @@ class TestToolRegistration:
         names = [tool.name for tool in tools]
         assert names == ["search_clinical_calculators", "execute_clinical_calculator"]
 
+    def test_environment_allowlist_exposes_only_execution_tool(self, monkeypatch):
+        monkeypatch.setenv(
+            "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST", "execute_clinical_calculator")
+        names = [tool.name for tool in asyncio.run(handle_list_tools())]
+        assert names == ["execute_clinical_calculator"]
+
+    def test_unknown_or_empty_environment_allowlist_fails_closed(self, monkeypatch):
+        for value in ("", "future_tool", "execute_clinical_calculator,future_tool"):
+            monkeypatch.setenv("OPEN_MEDICINE_MCP_TOOL_ALLOWLIST", value)
+            with pytest.raises(ValueError, match="tool allowlist"):
+                asyncio.run(handle_list_tools())
+
     def test_non_calculator_tools_not_present(self, tools):
         names = [tool.name for tool in tools]
         removed_tools = {
@@ -60,6 +72,13 @@ class TestToolRegistration:
 
 
 class TestCalculatorToolExecution:
+    def test_environment_allowlist_rejects_hidden_tool_calls(self, monkeypatch):
+        monkeypatch.setenv(
+            "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST", "execute_clinical_calculator")
+        with pytest.raises(ValueError, match="not enabled"):
+            asyncio.run(handle_call_tool(
+                "search_clinical_calculators", {"query": "Glasgow"}))
+
     def test_search_calculators_returns_results(self):
         result = call_through_transport("search_clinical_calculators", {"query": "kidney"})
         assert isinstance(result, types.CallToolResult)

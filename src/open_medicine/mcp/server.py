@@ -1,6 +1,7 @@
 import asyncio
 import hashlib
 import json
+import os
 
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
@@ -34,11 +35,24 @@ def _result(payload: dict, *, is_error: bool = False) -> types.CallToolResult:
 
 
 server = Server("open-medicine")
+_TOOL_NAMES = frozenset({
+    "search_clinical_calculators", "execute_clinical_calculator"})
+
+
+def _enabled_tool_names() -> frozenset[str]:
+    raw = os.environ.get("OPEN_MEDICINE_MCP_TOOL_ALLOWLIST")
+    if raw is None:
+        return _TOOL_NAMES
+    values = raw.split(",")
+    if (any(not value or value != value.strip() for value in values)
+            or len(values) != len(set(values)) or not set(values) <= _TOOL_NAMES):
+        raise ValueError("invalid OpenMedicine MCP tool allowlist")
+    return frozenset(values)
 
 
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
-    return [
+    return [tool for tool in [
         types.Tool(
             name="search_clinical_calculators",
             description=(
@@ -83,13 +97,17 @@ async def handle_list_tools() -> list[types.Tool]:
                 "required": ["calculator_id", "parameters"],
             },
         ),
-    ]
+    ] if tool.name in _enabled_tool_names()]
 
 
 @server.call_tool()
 async def handle_call_tool(
     name: str, arguments: dict | None
 ) -> types.CallToolResult:
+    if name not in _TOOL_NAMES:
+        raise ValueError(f"Unknown tool: {name}")
+    if name not in _enabled_tool_names():
+        raise ValueError(f"Tool is not enabled: {name}")
     args = arguments or {}
 
     if name == "search_clinical_calculators":
