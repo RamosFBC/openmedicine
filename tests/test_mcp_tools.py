@@ -57,16 +57,19 @@ class TestToolRegistration:
         assert "calculate_gcs" in schema["properties"]["calculator_id"]["description"]
         assert schema["properties"]["calculator_id"]["examples"] == ["calculate_gcs"]
         parameters = schema["properties"]["parameters"]
-        assert parameters["required"] == [
+        assert parameters["anyOf"][1] == {}
+        object_contract = parameters["anyOf"][0]
+        assert object_contract["type"] == "object"
+        assert object_contract["required"] == [
             "eye_response", "eye_non_testable_reason",
             "verbal_response", "verbal_non_testable_reason",
             "motor_response", "motor_non_testable_reason",
         ]
-        assert set(parameters["properties"]) == set(parameters["required"])
+        assert set(object_contract["properties"]) == set(object_contract["required"])
         assert all(set(value) == {"description"}
-                   for value in parameters["properties"].values())
-        assert "1=none" in parameters["properties"]["eye_response"]["description"]
-        assert "6=obey commands" in parameters["properties"]["motor_response"]["description"]
+                   for value in object_contract["properties"].values())
+        assert "1=none" in object_contract["properties"]["eye_response"]["description"]
+        assert "6=obey commands" in object_contract["properties"]["motor_response"]["description"]
 
     def test_invalid_calculator_scope_fails_closed(self, monkeypatch):
         for value in ("", "calculate_gcs,calculate_bmi", " calculate_gcs", "future"):

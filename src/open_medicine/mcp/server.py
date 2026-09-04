@@ -113,8 +113,14 @@ def _execution_contract() -> tuple[str, dict]:
                         "MUST be an object containing exactly the six advertised "
                         "GCS fields. Values are validated strictly by the server."
                     ),
-                    "properties": parameter_properties,
-                    "required": fields,
+                    "anyOf": [
+                        {
+                            "type": "object",
+                            "properties": parameter_properties,
+                            "required": fields,
+                        },
+                        {},
+                    ],
                 },
             },
             "required": ["calculator_id", "parameters"],
