@@ -1,7 +1,7 @@
 import json
 import math
 from enum import Enum
-from pathlib import Path
+from importlib.resources import files
 
 from pydantic import BaseModel, Field
 
@@ -34,9 +34,10 @@ class RenalDoseAdjustmentParams(BaseModel):
 
 
 # Load drug database once at module level
-_DATA_PATH = Path(__file__).parent / "data" / "renal_dose_adjustments.json"
-with open(_DATA_PATH) as f:
-    _DRUG_DB: dict = json.load(f)
+_DATA_RESOURCE = files("open_medicine.mcp.calculators").joinpath(
+    "data/renal_dose_adjustments.json"
+)
+_DRUG_DB: dict = json.loads(_DATA_RESOURCE.read_text(encoding="utf-8"))
 
 
 def _get_unit(metric: RenalMetric) -> str:
