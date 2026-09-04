@@ -43,6 +43,40 @@ class TestToolRegistration:
             with pytest.raises(ValueError, match="tool allowlist"):
                 asyncio.run(handle_list_tools())
 
+    def test_calculator_scope_exposes_exact_gcs_execution_schema(self, monkeypatch):
+        monkeypatch.setenv(
+            "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST", "execute_clinical_calculator")
+        monkeypatch.setenv(
+            "OPEN_MEDICINE_MCP_CALCULATOR_ID", "calculate_gcs")
+
+        [tool] = asyncio.run(handle_list_tools())
+        schema = tool.inputSchema
+        assert tool.name == "execute_clinical_calculator"
+        assert "calculate_gcs" in tool.description
+        assert schema["additionalProperties"] is False
+        assert schema["required"] == ["calculator_id", "parameters"]
+        assert schema["properties"]["calculator_id"] == {
+            "const": "calculate_gcs",
+            "description": "Exact enabled calculator ID; do not substitute a synonym.",
+            "type": "string",
+        }
+        parameters = schema["properties"]["parameters"]
+        assert parameters["additionalProperties"] is False
+        assert parameters["required"] == [
+            "eye_response", "eye_non_testable_reason",
+            "verbal_response", "verbal_non_testable_reason",
+            "motor_response", "motor_non_testable_reason",
+        ]
+        assert set(parameters["properties"]) == set(parameters["required"])
+        assert "1=none" in parameters["properties"]["eye_response"]["description"]
+        assert "6=obey commands" in parameters["properties"]["motor_response"]["description"]
+
+    def test_invalid_calculator_scope_fails_closed(self, monkeypatch):
+        for value in ("", "calculate_gcs,calculate_bmi", " calculate_gcs", "future"):
+            monkeypatch.setenv("OPEN_MEDICINE_MCP_CALCULATOR_ID", value)
+            with pytest.raises(ValueError, match="calculator scope"):
+                asyncio.run(handle_list_tools())
+
     def test_non_calculator_tools_not_present(self, tools):
         names = [tool.name for tool in tools]
         removed_tools = {
@@ -78,6 +112,46 @@ class TestCalculatorToolExecution:
         with pytest.raises(ValueError, match="not enabled"):
             asyncio.run(handle_call_tool(
                 "search_clinical_calculators", {"query": "Glasgow"}))
+
+    def test_calculator_scope_rejects_other_calculator(self, monkeypatch):
+        monkeypatch.setenv("OPEN_MEDICINE_MCP_CALCULATOR_ID", "calculate_gcs")
+        result = asyncio.run(handle_call_tool(
+            "execute_clinical_calculator",
+            {"calculator_id": "calculate_bmi", "parameters": {
+                "weight_kg": 70, "height_cm": 175,
+            }},
+        ))
+        assert result.isError is True
+        assert result.structuredContent["errors"][0]["code"] == "calculator_not_enabled"
+
+    def test_calculator_scope_requires_explicit_complete_payload(self, monkeypatch):
+        monkeypatch.setenv("OPEN_MEDICINE_MCP_CALCULATOR_ID", "calculate_gcs")
+        result = asyncio.run(handle_call_tool(
+            "execute_clinical_calculator",
+            {"calculator_id": "calculate_gcs", "parameters": {
+                "eye_response": 4,
+                "verbal_response": 5,
+                "motor_response": 6,
+            }},
+        ))
+        assert result.isError is True
+        assert result.structuredContent["errors"][0]["code"] == "validation_error"
+
+    def test_calculator_scope_executes_complete_gcs_payload(self, monkeypatch):
+        monkeypatch.setenv("OPEN_MEDICINE_MCP_CALCULATOR_ID", "calculate_gcs")
+        result = asyncio.run(handle_call_tool(
+            "execute_clinical_calculator",
+            {"calculator_id": "calculate_gcs", "parameters": {
+                "eye_response": 4,
+                "eye_non_testable_reason": None,
+                "verbal_response": 5,
+                "verbal_non_testable_reason": None,
+                "motor_response": 6,
+                "motor_non_testable_reason": None,
+            }},
+        ))
+        assert result.isError is False
+        assert result.structuredContent["value"] == 15
 
     def test_search_calculators_returns_results(self):
         result = call_through_transport("search_clinical_calculators", {"query": "kidney"})
