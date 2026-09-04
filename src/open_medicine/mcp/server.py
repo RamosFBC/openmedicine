@@ -86,28 +86,36 @@ def _execution_contract() -> tuple[str, dict]:
             },
         )
     tool_def = CALCULATOR_REGISTRY[calculator_id]
-    parameters = json.loads(json.dumps(tool_def.schema))
+    strict_parameters = json.loads(json.dumps(tool_def.schema))
     fields = list(tool_def.pydantic_model.model_fields)
-    parameters["additionalProperties"] = False
-    parameters["required"] = fields
-    for field_schema in parameters.get("properties", {}).values():
-        field_schema.pop("default", None)
+    parameter_properties = {
+        field: {
+            "description": strict_parameters["properties"][field]["description"],
+        }
+        for field in fields
+    }
     return (
         f"Executes the exact enabled calculator {calculator_id}. "
-        "Use the advertised point-valued parameter schema; provide every field, "
-        "using null only where the schema permits it.",
+        "Use the advertised point-valued parameter contract; provide every field, "
+        "using null only where its description permits it. Inputs are validated "
+        "strictly by the server without echoing rejected values.",
         {
             "type": "object",
-            "additionalProperties": False,
             "properties": {
                 "calculator_id": {
-                    "const": calculator_id,
                     "description": (
-                        "Exact enabled calculator ID; do not substitute a synonym."
+                        f"MUST be exactly {calculator_id}; do not substitute a synonym."
                     ),
-                    "type": "string",
+                    "examples": [calculator_id],
                 },
-                "parameters": parameters,
+                "parameters": {
+                    "description": (
+                        "MUST be an object containing exactly the six advertised "
+                        "GCS fields. Values are validated strictly by the server."
+                    ),
+                    "properties": parameter_properties,
+                    "required": fields,
+                },
             },
             "required": ["calculator_id", "parameters"],
         },

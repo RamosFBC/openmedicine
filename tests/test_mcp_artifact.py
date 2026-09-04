@@ -41,7 +41,10 @@ def test_zipapp_live_stdio_lists_only_allowlisted_tool_and_executes_gcs(tmp_path
     async def exercise():
         params = StdioServerParameters(
             command=str(artifact),
-            env={"OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator"},
+            env={
+                "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator",
+                "OPEN_MEDICINE_MCP_CALCULATOR_ID": "calculate_gcs",
+            },
         )
         async with stdio_client(params) as streams:
             async with ClientSession(*streams) as session:
@@ -64,3 +67,38 @@ def test_zipapp_live_stdio_lists_only_allowlisted_tool_and_executes_gcs(tmp_path
     assert names == ["execute_clinical_calculator"]
     assert result.isError is False
     assert result.structuredContent["value"] == 15
+
+
+def test_scoped_zipapp_never_reflects_rejected_values(tmp_path):
+    artifact = tmp_path / "open-medicine-mcp.pyz"
+    build_deterministic_zipapp(SOURCE, PYTHON, artifact)
+    sentinel = "SENTINEL_SECRET_f93c"
+
+    async def exercise():
+        params = StdioServerParameters(
+            command=str(artifact),
+            env={
+                "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator",
+                "OPEN_MEDICINE_MCP_CALCULATOR_ID": "calculate_gcs",
+            },
+        )
+        async with stdio_client(params) as streams:
+            async with ClientSession(*streams) as session:
+                await session.initialize()
+                return await session.call_tool("execute_clinical_calculator", {
+                    "calculator_id": "calculate_gcs",
+                    "parameters": {
+                        "eye_response": sentinel,
+                        "eye_non_testable_reason": None,
+                        "verbal_response": 5,
+                        "verbal_non_testable_reason": None,
+                        "motor_response": 6,
+                        "motor_non_testable_reason": None,
+                    },
+                })
+
+    result = asyncio.run(exercise())
+    persisted_surface = repr(result)
+    assert result.isError is True
+    assert sentinel not in persisted_surface
+    assert "calculator parameters failed validation" in persisted_surface.lower()

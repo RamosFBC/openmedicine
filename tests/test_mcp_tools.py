@@ -53,21 +53,18 @@ class TestToolRegistration:
         schema = tool.inputSchema
         assert tool.name == "execute_clinical_calculator"
         assert "calculate_gcs" in tool.description
-        assert schema["additionalProperties"] is False
         assert schema["required"] == ["calculator_id", "parameters"]
-        assert schema["properties"]["calculator_id"] == {
-            "const": "calculate_gcs",
-            "description": "Exact enabled calculator ID; do not substitute a synonym.",
-            "type": "string",
-        }
+        assert "calculate_gcs" in schema["properties"]["calculator_id"]["description"]
+        assert schema["properties"]["calculator_id"]["examples"] == ["calculate_gcs"]
         parameters = schema["properties"]["parameters"]
-        assert parameters["additionalProperties"] is False
         assert parameters["required"] == [
             "eye_response", "eye_non_testable_reason",
             "verbal_response", "verbal_non_testable_reason",
             "motor_response", "motor_non_testable_reason",
         ]
         assert set(parameters["properties"]) == set(parameters["required"])
+        assert all(set(value) == {"description"}
+                   for value in parameters["properties"].values())
         assert "1=none" in parameters["properties"]["eye_response"]["description"]
         assert "6=obey commands" in parameters["properties"]["motor_response"]["description"]
 
