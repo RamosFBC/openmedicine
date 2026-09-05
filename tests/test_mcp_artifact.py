@@ -2,7 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import hashlib
+import json
+import os
 from pathlib import Path
+import stat
+import subprocess
+import time
 
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -36,6 +41,7 @@ def test_deterministic_zipapp_is_byte_reproducible_and_source_bound(tmp_path):
 
 def test_zipapp_live_stdio_lists_only_allowlisted_tool_and_executes_gcs(tmp_path):
     artifact = tmp_path / "open-medicine-mcp.pyz"
+    audit_log = tmp_path / "synthetic-gcs-audit.jsonl"
     build_deterministic_zipapp(SOURCE, PYTHON, artifact)
 
     async def exercise():
@@ -44,6 +50,8 @@ def test_zipapp_live_stdio_lists_only_allowlisted_tool_and_executes_gcs(tmp_path
             env={
                 "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator",
                 "OPEN_MEDICINE_MCP_CALCULATOR_ID": "calculate_gcs",
+                "OPEN_MEDICINE_MCP_AUDIT_LOG_PATH": str(audit_log),
+                "OPEN_MEDICINE_MCP_AUDIT_LOG_ALLOWLIST": str(audit_log),
             },
         )
         async with stdio_client(params) as streams:
@@ -67,6 +75,18 @@ def test_zipapp_live_stdio_lists_only_allowlisted_tool_and_executes_gcs(tmp_path
     assert names == ["execute_clinical_calculator"]
     assert result.isError is False
     assert result.structuredContent["value"] == 15
+    assert stat.S_IMODE(audit_log.stat().st_mode) == 0o600
+    events = [json.loads(line) for line in audit_log.read_text().splitlines()]
+    event_names = [event["event"] for event in events]
+    assert event_names[0] == "startup"
+    assert "list_tools" in event_names
+    assert "call_received" in event_names
+    assert "call_completed" in event_names
+    assert event_names[-1] == "shutdown"
+    received = next(event for event in events if event["event"] == "call_received")
+    completed = next(event for event in events if event["event"] == "call_completed")
+    assert received["request"]["arguments"]["parameters"]["eye_response"] == 4
+    assert completed["result"]["structuredContent"]["value"] == 15
 
 
 def test_scoped_zipapp_never_reflects_rejected_values(tmp_path):
@@ -102,3 +122,47 @@ def test_scoped_zipapp_never_reflects_rejected_values(tmp_path):
     assert result.isError is True
     assert sentinel not in persisted_surface
     assert "calculator parameters failed validation" in persisted_surface.lower()
+
+
+def test_abrupt_termination_is_observable_as_missing_shutdown(tmp_path):
+    artifact = tmp_path / "open-medicine-mcp.pyz"
+    audit_log = tmp_path / "interrupted-gcs-audit.jsonl"
+    build_deterministic_zipapp(SOURCE, PYTHON, artifact)
+    env = {
+        **os.environ,
+        "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator",
+        "OPEN_MEDICINE_MCP_CALCULATOR_ID": "calculate_gcs",
+        "OPEN_MEDICINE_MCP_AUDIT_LOG_PATH": str(audit_log),
+        "OPEN_MEDICINE_MCP_AUDIT_LOG_ALLOWLIST": str(audit_log),
+    }
+    process = subprocess.Popen(
+        [str(artifact)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+    )
+    try:
+        deadline = time.monotonic() + 5
+        startup_observed = False
+        while time.monotonic() < deadline:
+            try:
+                startup_observed = any(
+                    json.loads(line)["event"] == "startup"
+                    for line in audit_log.read_text().splitlines()
+                )
+            except (FileNotFoundError, json.JSONDecodeError):
+                startup_observed = False
+            if startup_observed:
+                break
+            time.sleep(0.01)
+        assert startup_observed, "server did not emit startup telemetry"
+        process.terminate()
+        assert process.wait(timeout=5) == -15
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+
+    events = [json.loads(line) for line in audit_log.read_text().splitlines()]
+    assert [event["event"] for event in events] == ["startup"]
