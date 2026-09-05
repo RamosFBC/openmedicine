@@ -1,11 +1,13 @@
-from typing import Optional
+from typing import Annotated, Optional
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 from open_medicine.mcp.base import ClinicalError, ClinicalResult, Evidence, ResultStatus
 
 
 class GCSParams(BaseModel):
+    model_config = ConfigDict(strict=True, extra="forbid")
+
     eye_response: Optional[int] = Field(
         None,
         ge=1,
@@ -16,7 +18,9 @@ class GCSParams(BaseModel):
             "provide eye_non_testable_reason when null."
         ),
     )
-    eye_non_testable_reason: Optional[str] = Field(
+    eye_non_testable_reason: Optional[
+        Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=256)]
+    ] = Field(
         None,
         description=(
             "Reason the eye component is non-testable (for example, orbital swelling); "
@@ -33,7 +37,9 @@ class GCSParams(BaseModel):
             "provide verbal_non_testable_reason when null."
         ),
     )
-    verbal_non_testable_reason: Optional[str] = Field(
+    verbal_non_testable_reason: Optional[
+        Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=256)]
+    ] = Field(
         None,
         description=(
             "Reason the verbal component is non-testable (for example, intubation); "
@@ -51,7 +57,9 @@ class GCSParams(BaseModel):
             "provide motor_non_testable_reason when null."
         ),
     )
-    motor_non_testable_reason: Optional[str] = Field(
+    motor_non_testable_reason: Optional[
+        Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=256)]
+    ] = Field(
         None,
         description=(
             "Reason the motor component is non-testable (for example, paralysis); "

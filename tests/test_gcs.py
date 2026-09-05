@@ -1,3 +1,6 @@
+import pytest
+from pydantic import ValidationError
+
 from open_medicine.mcp.calculators.gcs import calculate_gcs, GCSParams
 
 
@@ -45,3 +48,34 @@ def test_gcs_severe_injury():
     assert "Total GCS is 3" in res.interpretation
     assert "Intubation" not in res.interpretation
     assert res.evidence.source_doi == "10.1016/s0140-6736(74)91639-0"
+
+
+@pytest.mark.parametrize("invalid_score", ["4", 4.0, True])
+def test_gcs_params_reject_coercible_scores(invalid_score):
+    with pytest.raises(ValidationError):
+        GCSParams(
+            eye_response=invalid_score,
+            verbal_response=5,
+            motor_response=6,
+        )
+
+
+@pytest.mark.parametrize("reason", ["", "   ", "x" * 257])
+def test_gcs_params_reject_empty_or_oversized_reasons(reason):
+    with pytest.raises(ValidationError):
+        GCSParams(
+            eye_response=None,
+            eye_non_testable_reason=reason,
+            verbal_response=5,
+            motor_response=6,
+        )
+
+
+def test_gcs_params_reject_unknown_fields():
+    with pytest.raises(ValidationError):
+        GCSParams(
+            eye_response=4,
+            verbal_response=5,
+            motor_response=6,
+            unexpected="value",
+        )

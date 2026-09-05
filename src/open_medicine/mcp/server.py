@@ -1,4 +1,5 @@
 import asyncio
+from datetime import datetime, timezone
 import hashlib
 import json
 import os
@@ -12,6 +13,89 @@ from pydantic import ValidationError
 from open_medicine import __version__
 from open_medicine.mcp.registry import CALCULATOR_REGISTRY
 from open_medicine.mcp.search_utils import tokenized_search
+
+
+_AUDIT_PATH_ENV = "OPEN_MEDICINE_MCP_AUDIT_LOG_PATH"
+_AUDIT_ALLOWLIST_ENV = "OPEN_MEDICINE_MCP_AUDIT_LOG_ALLOWLIST"
+_SENSITIVE_KEYS = ("authorization", "cookie", "credential", "password", "secret", "token", "api_key")
+
+
+def _audit_path() -> str | None:
+    raw_path = os.environ.get(_AUDIT_PATH_ENV)
+    raw_allowlist = os.environ.get(_AUDIT_ALLOWLIST_ENV)
+    if raw_path is None and raw_allowlist is None:
+        return None
+    if not raw_path or not raw_allowlist:
+        raise ValueError("audit log path requires an explicit allowlist")
+    if (os.environ.get("OPEN_MEDICINE_MCP_CALCULATOR_ID") != "calculate_gcs"
+            or os.environ.get("OPEN_MEDICINE_MCP_TOOL_ALLOWLIST")
+            != "execute_clinical_calculator"):
+        raise ValueError("audit log requires the exact GCS benchmark scope")
+    path = os.path.abspath(raw_path)
+    allowed = raw_allowlist.split(os.pathsep)
+    if (not os.path.isabs(raw_path) or not path.endswith(".jsonl")
+            or any(not item or not os.path.isabs(item) for item in allowed)
+            or path not in {os.path.abspath(item) for item in allowed}):
+        raise ValueError("audit log path is not allowlisted")
+    return path
+
+
+def _bounded_audit_value(value, *, depth: int = 0):
+    if depth >= 8:
+        return "[MAX_DEPTH]"
+    if isinstance(value, dict):
+        bounded = {}
+        for index, (key, item) in enumerate(value.items()):
+            if index >= 64:
+                bounded["[TRUNCATED]"] = len(value) - 64
+                break
+            key_string = str(key)[:128]
+            if any(marker in key_string.lower() for marker in _SENSITIVE_KEYS):
+                bounded[key_string] = "[REDACTED]"
+            else:
+                bounded[key_string] = _bounded_audit_value(item, depth=depth + 1)
+        return bounded
+    if isinstance(value, (list, tuple)):
+        return [
+            _bounded_audit_value(item, depth=depth + 1)
+            for item in value[:64]
+        ]
+    if isinstance(value, str):
+        return value if len(value) <= 512 else value[:512] + "[TRUNCATED]"
+    if value is None or isinstance(value, (bool, int, float)):
+        return value
+    return f"[{type(value).__name__}]"
+
+
+def _audit_event(event: str, **data) -> None:
+    path = _audit_path()
+    if path is None:
+        return
+    bounded_data = _bounded_audit_value(data)
+    if not isinstance(bounded_data, dict):  # pragma: no cover - kwargs are a dict
+        raise TypeError("audit event data must be an object")
+    record = {
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "event": event,
+        **bounded_data,
+    }
+    encoded = (json.dumps(
+        record, sort_keys=True, separators=(",", ":"), allow_nan=False,
+    ) + "\n").encode()
+    flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
+    flags |= getattr(os, "O_NOFOLLOW", 0)
+    fd = os.open(path, flags, 0o600)
+    try:
+        os.fchmod(fd, 0o600)
+        remaining = memoryview(encoded)
+        while remaining:
+            written = os.write(fd, remaining)
+            if written <= 0:  # pragma: no cover - defensive OS contract check
+                raise OSError("audit log write made no progress")
+            remaining = remaining[written:]
+        os.fsync(fd)
+    finally:
+        os.close(fd)
 
 
 def _schema_hash(schema: dict) -> str:
@@ -32,6 +116,120 @@ def _result(payload: dict, *, is_error: bool = False) -> types.CallToolResult:
         structuredContent=payload,
         isError=is_error,
     )
+
+
+_GCS_TERMS = {
+    "eye": ("none", "to pressure", "to sound", "spontaneous"),
+    "verbal": ("none", "sounds", "words", "confused", "orientated"),
+    "motor": (
+        "none", "extension", "abnormal flexion", "normal flexion",
+        "localising", "obey commands",
+    ),
+}
+
+
+def _nullable(schema: dict) -> dict:
+    return {"anyOf": [schema, {"type": "null"}]}
+
+
+def _gcs_output_schema() -> dict:
+    nullable_string = _nullable({"type": "string"})
+
+    def component_schema(maximum: int, terms: tuple[str, ...]) -> dict:
+        return {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "score": _nullable({
+                    "type": "integer", "minimum": 1, "maximum": maximum,
+                }),
+                "term": _nullable({"type": "string", "enum": list(terms)}),
+                "non_testable_reason": _nullable({
+                    "type": "string", "minLength": 1, "maxLength": 256,
+                }),
+            },
+            "required": ["score", "term", "non_testable_reason"],
+        }
+
+    evidence_properties = {
+        key: nullable_string
+        for key in (
+            "source_doi", "authority", "url", "document_id", "version_date",
+            "section", "retrieved_at", "content_hash",
+        )
+    }
+    evidence_properties.update({
+        "level": {"type": "string"},
+        "description": {"type": "string"},
+    })
+    non_testable_components = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            name: {"type": "string", "minLength": 1, "maxLength": 256}
+            for name in ("eye", "verbal", "motor")
+        },
+        "minProperties": 1,
+    }
+    error_schema = {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {
+            "code": {"const": "non_testable_component", "type": "string"},
+            "message": {"type": "string"},
+            "details": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "non_testable_components": non_testable_components,
+                },
+                "required": ["non_testable_components"],
+            },
+        },
+        "required": ["code", "message", "details"],
+    }
+    properties = {
+        "status": {"type": "string", "enum": ["success", "insufficient_data"]},
+        "errors": {"type": "array", "items": error_schema, "maxItems": 1},
+        "value": _nullable({"type": "integer", "minimum": 3, "maximum": 15}),
+        "component_breakdown": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "eye": component_schema(4, _GCS_TERMS["eye"]),
+                "verbal": component_schema(5, _GCS_TERMS["verbal"]),
+                "motor": component_schema(6, _GCS_TERMS["motor"]),
+            },
+            "required": ["eye", "verbal", "motor"],
+        },
+        "interpretation": {"type": "string"},
+        "evidence": {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": evidence_properties,
+            "required": list(evidence_properties),
+        },
+        "fhir_code": nullable_string,
+        "fhir_system": nullable_string,
+        "fhir_display": nullable_string,
+    }
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "properties": properties,
+        "required": list(properties),
+        "allOf": [{
+            "if": {"properties": {"status": {"const": "success"}}},
+            "then": {"properties": {
+                "errors": {"maxItems": 0},
+                "value": {"type": "integer", "minimum": 3, "maximum": 15},
+            }},
+            "else": {"properties": {
+                "errors": {"minItems": 1},
+                "value": {"type": "null"},
+            }},
+        }],
+    }
 
 
 server = Server("open-medicine")
@@ -88,12 +286,12 @@ def _execution_contract() -> tuple[str, dict]:
     tool_def = CALCULATOR_REGISTRY[calculator_id]
     strict_parameters = json.loads(json.dumps(tool_def.schema))
     fields = list(tool_def.pydantic_model.model_fields)
-    parameter_properties = {
-        field: {
-            "description": strict_parameters["properties"][field]["description"],
-        }
-        for field in fields
-    }
+    strict_parameters["additionalProperties"] = False
+    strict_parameters["required"] = fields
+    strict_parameters.pop("title", None)
+    for field_schema in strict_parameters["properties"].values():
+        field_schema.pop("default", None)
+        field_schema.pop("title", None)
     return (
         f"Executes the exact enabled calculator {calculator_id}. "
         "Use the advertised point-valued parameter contract; provide every field, "
@@ -101,26 +299,22 @@ def _execution_contract() -> tuple[str, dict]:
         "strictly by the server without echoing rejected values.",
         {
             "type": "object",
+            "additionalProperties": False,
             "properties": {
                 "calculator_id": {
+                    "type": "string",
+                    "const": calculator_id,
                     "description": (
                         f"MUST be exactly {calculator_id}; do not substitute a synonym."
                     ),
-                    "examples": [calculator_id],
                 },
                 "parameters": {
+                    **strict_parameters,
                     "description": (
-                        "MUST be an object containing exactly the six advertised "
-                        "GCS fields. Values are validated strictly by the server."
+                        f"MUST contain exactly {len(fields)} advertised fields for "
+                        f"{calculator_id}. "
+                        "Values are validated strictly by the server."
                     ),
-                    "anyOf": [
-                        {
-                            "type": "object",
-                            "properties": parameter_properties,
-                            "required": fields,
-                        },
-                        {},
-                    ],
                 },
             },
             "required": ["calculator_id", "parameters"],
@@ -131,7 +325,8 @@ def _execution_contract() -> tuple[str, dict]:
 @server.list_tools()
 async def handle_list_tools() -> list[types.Tool]:
     execution_description, execution_schema = _execution_contract()
-    return [tool for tool in [
+    scoped_calculator = _scoped_calculator_id()
+    tools = [tool for tool in [
         types.Tool(
             name="search_clinical_calculators",
             description=(
@@ -156,8 +351,15 @@ async def handle_list_tools() -> list[types.Tool]:
             name="execute_clinical_calculator",
             description=execution_description,
             inputSchema=execution_schema,
+            outputSchema=(
+                _gcs_output_schema()
+                if scoped_calculator == "calculate_gcs"
+                else None
+            ),
         ),
     ] if tool.name in _enabled_tool_names()]
+    _audit_event("list_tools", tools=[tool.model_dump(mode="json") for tool in tools])
+    return tools
 
 
 @server.call_tool()
@@ -194,9 +396,23 @@ async def handle_call_tool(
         return _result(payload)
 
     if name == "execute_clinical_calculator":
+        scoped_calculator = _scoped_calculator_id()
+        if (scoped_calculator is not None
+                and set(args) != {"calculator_id", "parameters"}):
+            return _result(
+                _error(
+                    "validation_error",
+                    "Calculator parameters failed validation.",
+                    [{
+                        "type": "field_set_mismatch",
+                        "loc": [],
+                        "msg": "Payload must contain exactly the advertised fields.",
+                    }],
+                ),
+                is_error=True,
+            )
         calc_id = args.get("calculator_id")
         params_dict = args.get("parameters", {})
-        scoped_calculator = _scoped_calculator_id()
         if scoped_calculator is not None and calc_id != scoped_calculator:
             return _result(
                 _error(
@@ -233,7 +449,7 @@ async def handle_call_tool(
             payload = result.model_dump(mode="json")
             return _result(
                 payload,
-                is_error=payload.get("status") in {"error", "insufficient_data"},
+                is_error=payload.get("status") == "error",
             )
         except ValidationError as exc:
             safe_details = [
@@ -264,20 +480,67 @@ async def handle_call_tool(
     raise ValueError(f"Unknown tool: {name}")
 
 
-async def main_async():
-    async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
-        await server.run(
-            read_stream,
-            write_stream,
-            InitializationOptions(
-                server_name="open-medicine",
-                server_version=__version__,
-                capabilities=server.get_capabilities(
-                    notification_options=NotificationOptions(),
-                    experimental_capabilities={},
-                ),
+_call_tool_request_handler = server.request_handlers[types.CallToolRequest]
+
+
+async def _audited_call_tool_request(request: types.CallToolRequest):
+    _audit_event(
+        "call_received",
+        request={
+            "name": request.params.name,
+            "arguments": request.params.arguments or {},
+        },
+    )
+    response = await _call_tool_request_handler(request)
+    result = response.root
+    if (isinstance(result, types.CallToolResult) and result.isError
+            and result.structuredContent is None
+            and result.content and isinstance(result.content[0], types.TextContent)
+            and result.content[0].text.startswith("Input validation error:")):
+        result = _result(
+            _error(
+                "validation_error",
+                "Calculator parameters failed validation.",
             ),
+            is_error=True,
         )
+        response = types.ServerResult(result)
+    audit_result = result.model_dump(
+        mode="json", by_alias=True, exclude_none=True,
+    )
+    if isinstance(result, types.CallToolResult) and result.isError:
+        _audit_event("error", result=audit_result)
+    _audit_event("call_completed", result=audit_result)
+    return response
+
+
+server.request_handlers[types.CallToolRequest] = _audited_call_tool_request
+
+
+async def main_async():
+    _audit_event(
+        "startup",
+        server={"name": "open-medicine", "version": __version__},
+    )
+    try:
+        async with mcp.server.stdio.stdio_server() as (read_stream, write_stream):
+            await server.run(
+                read_stream,
+                write_stream,
+                InitializationOptions(
+                    server_name="open-medicine",
+                    server_version=__version__,
+                    capabilities=server.get_capabilities(
+                        notification_options=NotificationOptions(),
+                        experimental_capabilities={},
+                    ),
+                ),
+            )
+    except Exception as exc:
+        _audit_event("error", error={"exception_type": type(exc).__name__})
+        raise
+    finally:
+        _audit_event("shutdown")
 
 
 def main():
