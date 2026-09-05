@@ -3,8 +3,11 @@ from __future__ import annotations
 import asyncio
 import hashlib
 import json
+import os
 from pathlib import Path
 import stat
+import subprocess
+import time
 
 from mcp import ClientSession
 from mcp.client.stdio import StdioServerParameters, stdio_client
@@ -119,3 +122,47 @@ def test_scoped_zipapp_never_reflects_rejected_values(tmp_path):
     assert result.isError is True
     assert sentinel not in persisted_surface
     assert "calculator parameters failed validation" in persisted_surface.lower()
+
+
+def test_abrupt_termination_is_observable_as_missing_shutdown(tmp_path):
+    artifact = tmp_path / "open-medicine-mcp.pyz"
+    audit_log = tmp_path / "interrupted-gcs-audit.jsonl"
+    build_deterministic_zipapp(SOURCE, PYTHON, artifact)
+    env = {
+        **os.environ,
+        "OPEN_MEDICINE_MCP_TOOL_ALLOWLIST": "execute_clinical_calculator",
+        "OPEN_MEDICINE_MCP_CALCULATOR_ID": "calculate_gcs",
+        "OPEN_MEDICINE_MCP_AUDIT_LOG_PATH": str(audit_log),
+        "OPEN_MEDICINE_MCP_AUDIT_LOG_ALLOWLIST": str(audit_log),
+    }
+    process = subprocess.Popen(
+        [str(artifact)],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        env=env,
+    )
+    try:
+        deadline = time.monotonic() + 5
+        startup_observed = False
+        while time.monotonic() < deadline:
+            try:
+                startup_observed = any(
+                    json.loads(line)["event"] == "startup"
+                    for line in audit_log.read_text().splitlines()
+                )
+            except (FileNotFoundError, json.JSONDecodeError):
+                startup_observed = False
+            if startup_observed:
+                break
+            time.sleep(0.01)
+        assert startup_observed, "server did not emit startup telemetry"
+        process.terminate()
+        assert process.wait(timeout=5) == -15
+    finally:
+        if process.poll() is None:
+            process.kill()
+            process.wait(timeout=5)
+
+    events = [json.loads(line) for line in audit_log.read_text().splitlines()]
+    assert [event["event"] for event in events] == ["startup"]

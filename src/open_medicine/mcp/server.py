@@ -4,6 +4,7 @@ import hashlib
 import json
 import os
 
+import jsonschema
 from mcp.server import NotificationOptions, Server
 from mcp.server.models import InitializationOptions
 import mcp.server.stdio
@@ -136,6 +137,16 @@ def _gcs_output_schema() -> dict:
     nullable_string = _nullable({"type": "string"})
 
     def component_schema(maximum: int, terms: tuple[str, ...]) -> dict:
+        scored_variants = [
+            {
+                "properties": {
+                    "score": {"const": score},
+                    "term": {"const": term},
+                    "non_testable_reason": {"type": "null"},
+                },
+            }
+            for score, term in zip(range(1, maximum + 1), terms)
+        ]
         return {
             "type": "object",
             "additionalProperties": False,
@@ -149,6 +160,18 @@ def _gcs_output_schema() -> dict:
                 }),
             },
             "required": ["score", "term", "non_testable_reason"],
+            "oneOf": [
+                *scored_variants,
+                {
+                    "properties": {
+                        "score": {"type": "null"},
+                        "term": {"type": "null"},
+                        "non_testable_reason": {
+                            "type": "string", "minLength": 1, "maxLength": 256,
+                        },
+                    },
+                },
+            ],
         }
 
     evidence_properties = {
@@ -223,13 +246,44 @@ def _gcs_output_schema() -> dict:
             "then": {"properties": {
                 "errors": {"maxItems": 0},
                 "value": {"type": "integer", "minimum": 3, "maximum": 15},
+                "component_breakdown": {"properties": {
+                    name: {"properties": {
+                        "score": {"type": "integer"},
+                        "non_testable_reason": {"type": "null"},
+                    }}
+                    for name in ("eye", "verbal", "motor")
+                }},
             }},
             "else": {"properties": {
                 "errors": {"minItems": 1},
                 "value": {"type": "null"},
+                "component_breakdown": {"anyOf": [
+                    {"properties": {
+                        name: {"properties": {"score": {"type": "null"}}},
+                    }}
+                    for name in ("eye", "verbal", "motor")
+                ]},
             }},
         }],
     }
+
+
+def _validate_gcs_output(payload: dict) -> None:
+    jsonschema.validate(instance=payload, schema=_gcs_output_schema())
+    components = payload["component_breakdown"]
+    non_testable = {
+        name: component["non_testable_reason"]
+        for name, component in components.items()
+        if component["score"] is None
+    }
+    if payload["status"] == "success":
+        total = sum(component["score"] for component in components.values())
+        if payload["value"] != total:
+            raise ValueError("GCS total does not match component scores")
+    else:
+        reported = payload["errors"][0]["details"]["non_testable_components"]
+        if reported != non_testable:
+            raise ValueError("GCS non-testable details do not match components")
 
 
 server = Server("open-medicine")
@@ -447,6 +501,17 @@ async def handle_call_tool(
             model_instance = tool_def.pydantic_model(**params_dict)
             result = tool_def.execute_function(model_instance)
             payload = result.model_dump(mode="json")
+            if scoped_calculator == "calculate_gcs":
+                try:
+                    _validate_gcs_output(payload)
+                except (jsonschema.ValidationError, ValueError):
+                    return _result(
+                        _error(
+                            "output_validation_error",
+                            "Calculator output failed server validation.",
+                        ),
+                        is_error=True,
+                    )
             return _result(
                 payload,
                 is_error=payload.get("status") == "error",
@@ -484,6 +549,11 @@ _call_tool_request_handler = server.request_handlers[types.CallToolRequest]
 
 
 async def _audited_call_tool_request(request: types.CallToolRequest):
+    if request.params.name == "execute_clinical_calculator":
+        cached_tool = server._tool_cache.get(request.params.name)
+        expected_schema = _execution_contract()[1]
+        if cached_tool is not None and cached_tool.inputSchema != expected_schema:
+            server._tool_cache.pop(request.params.name, None)
     _audit_event(
         "call_received",
         request={
